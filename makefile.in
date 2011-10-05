@@ -1,0 +1,290 @@
+############################################################## COMMON MAKEFILE
+
+.SUFFIXES :
+.SUFFIXES : .a .o .i .s .S .c .cc .h
+
+all: talos
+keyfiles = ../../makefile.in makefile config
+
+
+
+############################################################### BUILDING TOOLS
+NLD := $(LD)
+NAS := $(AS)
+NCC := $(CC)
+
+CC = $(prefix)gcc
+CPP = $(prefix)cpp
+AS = $(prefix)as
+AR = $(prefix)ar
+LD = $(prefix)ld
+OC = $(prefix)objcopy
+LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/
+
+
+
+###################################################################### OPTIONS
+incs =  -I../../include -I../../cpu/$(cpu)/include -I../../arch/$(arch)/include
+base_ccopts = -pipe -O2 -fomit-frame-pointer -Wall -Werror -g \
+	-nostdinc -nostdlib -fno-common -iquote. $(incs)
+copts = $(base_ccopts) -ffreestanding
+ccopts = $(base_ccopts) -Wa,-W -nostdinc++ -fno-enforce-eh-specs \
+	-fno-rtti -fno-exceptions -fno-unwind-tables -ffunction-sections \
+	-fcheck-new
+aopts = $(incs)
+ldopts = -N --cref -nostdlib -T ../../arch/$(arch)/talos.lds
+
+
+
+################################################################# SOURCE PATHs
+VPATH =
+VPATH += ../../arch/$(arch)/machine ../../arch/$(arch)/drivers
+VPATH += ../../cpu/$(cpu)/machine
+VPATH += ../../core ../../display ../../net ../../terminal ../../fs
+VPATH += ../../userlib
+
+
+
+###################################################################### MODULES
+
+# kernel modules
+ksrcs = $(wildcard ../../core/*)
+ksrcs += $(wildcard ../../arch/$(arch)/machine/*)
+ksrcs += $(wildcard ../../cpu/$(cpu)/machine/*)
+kmods = $(basename $(notdir $(ksrcs)))
+kobjs = $(addsuffix .o, $(kmods))
+
+# user library modules
+ulsrcs = $(wildcard ../../userlib/*)
+ulmods = $(basename $(notdir $(ulsrcs)))
+ulobjs = $(addsuffix .o, $(ulmods))
+
+# user modules
+usrcs = $(wildcard ../../servers/*/*)
+umods = $(basename $(notdir $(usrcs)))
+uobjs = $(addsuffix .o, $(umods))
+
+
+
+############################################################### IMPLICIT RULES
+ifneq ($(MAKECMDGOALS),gnutools)
+-include $(addsuffix .d, $(kmods) $(umods))
+%.o : %.cc $(keyfiles)
+	@echo $@
+	@$(CC) $(ccopts) -c -o $@ $<
+
+%.o : %.c $(keyfiles)
+	@echo $@
+	@$(CC) $(copts) -c -o $@ $<
+
+%.o : %.S $(keyfiles)
+	@echo $@
+	@$(CC) $(copts) -c -o $@ $<
+
+%.d : %.cc $(keyfiles)
+	@echo $@
+	@$(CPP) $(ccopts) -M -MG $< > $@
+
+%.d : %.c $(keyfiles)
+	@echo $@
+	@$(CPP) $(copts) -M -MG $< > $@
+
+%.d : %.S $(keyfiles)
+	@echo $@
+	@$(CPP) $(copts) -M -MG $< > $@
+endif
+
+
+
+############################################################### EXPLICIT RULES
+kernel.ko : $(kobjs) $(keyfiles) ../../kernel.lds
+	@echo $@
+	@$(LD) -N --cref -nostdlib -r -T ../../kernel.lds -o $@ -Map kernel.map $(kobjs) $(LIBPATH)libgcc.a
+	@$(prefix)objdump -xdS kernel.ko > kernel.dis
+
+ulib.o : $(ulobjs) $(keyfiles) ../../userlib.lds
+	@echo $@
+	@$(LD) -N --cref -nostdlib -r -T ../../userlib.lds -o $@ -Map ulib.map $(ulobjs) $(LIBPATH)libgcc.a
+	@$(prefix)objdump -xdS ulib.o > ulib.dis
+
+libuser.a : $(uobjs) $(keyfiles)
+	@echo $@
+	@$(AR) -rc $@ $(uobjs)
+
+talos : kernel.ko ulib.o libuser.a ../../arch/$(arch)/talos.lds $(keyfiles)
+	@echo $@
+	@$(LD) $(ldopts) -o talos.elf -Map talos.map $(LIBPATH)libgcc.a
+	@$(OC) -O binary talos.elf talos
+	@$(prefix)objdump -xdS talos.elf > talos.dis
+
+
+
+############################################################### APPENDIX FILES
+ifneq ($(MAKECMDGOALS),gnutools)
+font.o : fonts.inc
+fonts.inc : cnvfonts $(wildcard ../../misc/fonts/*.bdf)
+	@echo $@
+	@./cnvfonts $(wildcard ../../misc/fonts/*.bdf) > fonts.inc
+cnvfonts : ../../misc/utils/cnvfonts.cc ../../include/charsets.h
+	g++ -Wall -Werror -O3 -o $@ $<
+
+embededs.o : images.inc
+images.inc : cnvimage $(wildcard ../../misc/images/*)
+	@./cnvimage $(basename $(notdir $(wildcard ../../misc/images/*.ppm))) > images.inc
+cnvimage : ../../misc/utils/cnvimage.cc
+	g++ -Wall -Werror -O3 -o $@ $<
+
+event.o : keymaps.inc
+keymaps.inc : cnvkeymap $(wildcard ../../misc/keymaps/*.km)
+	@./cnvkeymap ../../misc/keymaps $(notdir $(wildcard ../../misc/keymaps/*.km)) > $@
+cnvkeymap : ../../misc/utils/cnvkeymap.cc
+	g++ -Wall -Werror -O3 -I. -o $@ $<
+endif
+
+
+
+############################################################### MAINTAIN RULES
+.PHONY : clean reconf indent count todo backup-repository conf
+
+config : ../../arch/$(arch)/talos.conf
+	@echo $@
+	@cp ../../arch/$(arch)/talos.conf $@
+
+reconf :
+	cp ../../arch/$(arch)/makefile .
+	cp ../../arch/$(arch)/talos.conf $@
+
+indent :
+
+count:
+	@cat $(ksrcs) $(ulsrcs) $(srcs) $(drvSrcs) \
+		$(wildcard ../../include/*.h) \
+		$(wildcard ../../include/*/*.h) \
+		$(wildcard ../../cpu/$(cpu)/include/cpu/*) \
+		$(wildcard ../../cpu/$(cpu)/include/*.h) \
+		$(wildcard ../../arch/$(arch)/include/arch/*) \
+		$(wildcard ../../arch/$(arch)/include/*.h) | wc -l
+
+todo:
+	@find ../.. ! -path '*/.svn/*' ! -path '*/objs/*' ! -path '*/docs/*' | xargs grep -n 'TODO:' | grep -v '@find'
+
+backup-repository:
+	ssh tarosuke.net svnadmin dump /var/svn > ../.repository
+#	if ! [ -d ~/talos-repos ]; then mkdir ~/talos-repos; fi
+#	rsync -av talos-kernel.svn.sourceforge.net::svn/talos-kernel/* ~/talos-repos
+
+clean :
+	rm -rf *.o *.ko *.d *.i *.s *.c *.bdf *.inc talos* *image *.a *loader* cnvfonts cnvimage cnvkeymap
+
+conf: talos.conf
+	@$(EDITOR) talos.conf
+
+
+
+###################################################### DOCUMENT MAINTAIN RULES
+contents = ../../docs/htdocs/.htaccess $(wildcard ../../docs/htdocs/*)
+expath = $(USER)@shell.sf.net:/home/groups/t/ta/talos-kernel/htdocs
+datecode := $(shell date +%g%m%d%H)
+
+.PHONY: doxygen upload uploadBinaries upload-drafts
+
+doxygen:
+	doxygen ../../doxyfile
+
+upload:
+	chmod 644 $(contents)
+	rsync --progress --exclude='.svn' -avzhe ssh $(contents) $(expath)
+
+uploadBinaries:
+	cp talos.fd /var/www/talos.tarosuke.net/binaries/$(datecode).fd
+	cp talos.iso /var/www/talos.tarosuke.net/binaries/$(datecode).iso
+	chmod 644 /var/www/talos.tarosuke.net/binaries/$(datecode).fd
+	chmod 644 /var/www/talos.tarosuke.net/binaries/$(datecode).iso
+
+upload-drafts:
+	rsync --progress --delete --exclude=".svn" -av $(wildcard ../../docs/htdocs/*) /var/www/talos.tarosuke.net/
+
+
+
+################################################### ENVIRONMENT BUILDING RULES
+.PHONY: gnutools gnutools-clean
+
+gccVer = 4.2.1
+binutilsVer = 2.17
+gnuArch = $(subst ia32,i686,$(cpu))
+toolPath = $(shell pwd)/../tools
+buildDir = $(toolPath)/$(gnuArch)
+
+binutilsOptions = --target=$(gnuArch)-talos-elf --prefix=$(toolPath)\
+ --with-included-gettext --without-libintl-prefix\
+ --disable-shared --disable-nls --disable-werror
+gccOptions = --target=$(gnuArch)-talos-elf --prefix=$(toolPath)\
+ --enable-languages=c,c++\
+ --with-gnu-as=$(toolPath)/bin/$(gnuArch)-talos-elf-as\
+ --with-gnu-ld=$(toolPath)/bin/$(gnuArch)-talos-elf-ld\
+ --without-header --disable-shared --disable-nls --disable-__cxa_atexit\
+ --disable-thread --disable-clocale
+
+binutilsName = binutils-$(binutilsVer)
+gccName = gcc-$(gccVer)
+
+prefix = $(toolPath)/bin/$(gnuArch)-talos-elf-
+
+gnutools: $(prefix)as $(prefix)gcc
+
+
+##### maintain
+gnutools-clean:
+	if [ -f $(buildDir)/binutils/Makefile ]; then rm $(buildDir)/binutils/Makefile fi
+	if [ -f $(buildDir)/gcc/Makefile ]; then rm $(buildDir)/gcc/Makefile fi
+
+##### getting file
+
+fileGetter = ../../misc/tools/getFile
+mirrorList = ../../misc/gnuToolsMirrors
+../$(binutilsName).tar.bz2:
+	sh $(fileGetter) $(mirrorList) binutils $(notdir $@) ..
+
+../gcc-core-$(gccVer).tar.bz2:
+	sh $(fileGetter) $(mirrorList) gcc/gcc-$(gccVer) $(notdir $@) ..
+
+../gcc-g++-$(gccVer).tar.bz2:
+	sh $(fileGetter) $(mirrorList) gcc/gcc-$(gccVer) $(notdir $@) ..
+
+
+##### configure
+
+../$(binutilsName)/configure: ../$(binutilsName).tar.bz2
+	cd ..; tar -jxvf $(binutilsName).tar.bz2
+	touch $@
+
+../$(gccName)/configure: ../gcc-core-$(gccVer).tar.bz2
+../$(gccName)/configure: ../gcc-g++-$(gccVer).tar.bz2
+	cd ..; tar -jxvf gcc-core-$(gccVer).tar.bz2
+	cd ..; tar -jxvf gcc-g++-$(gccVer).tar.bz2
+	touch $@
+
+
+##### build & install
+
+$(buildDir)/binutils/Makefile: ../$(binutilsName)/configure
+$(buildDir)/binutils/Makefile: ../../makefile.in
+	if ! [ -d $(toolPath) ]; then mkdir $(toolPath); fi
+	if ! [ -d $(buildDir) ]; then mkdir $(buildDir); fi
+	if ! [ -d $(dir $@) ]; then mkdir $(dir $@); fi
+	cd $(dir $@); ../../../$(binutilsName)/configure $(binutilsOptions)
+
+$(prefix)as: $(buildDir)/binutils/Makefile
+	make -C $(buildDir)/binutils -j2
+	make -C $(buildDir)/binutils -j2 install
+
+
+$(buildDir)/gcc/Makefile: ../$(gccName)/configure $(prefix)as
+$(buildDir)/gcc/Makefile: ../../makefile.in
+	if ! [ -d $(dir $@) ]; then mkdir $(dir $@); fi
+	cd $(dir $@); ../../../$(gccName)/configure $(gccOptions)
+
+$(prefix)gcc: $(buildDir)/gcc/Makefile
+	make -C $(buildDir)/gcc -j2 all-gcc
+	make -C $(buildDir)/gcc -j2 install-gcc
+
