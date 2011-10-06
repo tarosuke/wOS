@@ -5,7 +5,6 @@ cpu = ia32
 
 include ../../makefile.in
 
-include ../../arch/$(arch)/loader/makefile.in
 
 ##### EXTRA RULES
 

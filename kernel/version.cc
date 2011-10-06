@@ -6,8 +6,8 @@
 
 // NOTE: EUC-JP
 
-#include <version.h>
-#include <config.h>
+// #include <version.h>
+// #include <config.h>
 
 
 const char __version[] =

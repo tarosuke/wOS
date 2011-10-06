@@ -1,0 +1,11 @@
+#! /bin/sh
+
+# params: $1:mirrorlistfile $2:sourcepath $3:file to get $4:path to store
+for m in $(< $1); do
+	if wget -t 1 -T 5 -O $4/$3 $m/$2/$3; then
+		# success to get the file
+		exit 0
+	fi
+done
+rm $4$3
+exit -1
