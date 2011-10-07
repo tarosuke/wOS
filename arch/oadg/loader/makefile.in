@@ -1,0 +1,22 @@
+########################################################## MAKEFILE FOR OADG-LOADERS
+
+%.o : ../../arch/$(arch)/loader/%.s
+	$(CPP) $(copts) -o- $< | $(AS) -o $@
+
+
+# LOADER TARGETS
+fdloader.o : ../../arch/$(arch)/loader/fdloader.s
+hdloader.o : ../../arch/$(arch)/loader/hdloader.s
+fdloader : fdloader.o  ../../arch/$(arch)/loader/loader.lds
+	$(LD) -nostdlib --cref -o $@.elf -Map $@.map -T ../../arch/$(arch)/loader/loader.lds $<
+	$(prefix)objcopy --pad-to=0x7e00 -O binary $@.elf $@
+hdloader : hdloader.o  ../../arch/$(arch)/loader/loader.lds
+	$(LD) -nostdlib --cref -o $@.elf -Map $@.map -T ../../arch/$(arch)/loader/loader.lds $<
+	$(prefix)objcopy --pad-to=0x7e00 -O binary $@.elf $@
+
+talosMBR : mbr
+
+mbr.o : ../../arch/$(arch)/loader/mbr.s
+mbr : mbr.o ../../arch/$(arch)/loader/mbr.lds
+	$(LD) -nostdlib --cref -o $@.elf -Map $@.map -T ../../arch/$(arch)/loader/mbr.lds $<
+	$(prefix)objcopy -O binary $@.elf $@
