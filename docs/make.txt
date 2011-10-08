@@ -1,6 +1,9 @@
 ターゲット説明
 	all: 全ターゲットをビルド
+	emu: 全ターゲットを順に「make emu」で実行(予めqemuがインストールされている必要がある)
 	clean: 全ターゲットの生成ファイルを消去
 	tools: 全ターゲットのためのgcc、g++やbinutilsを取得してビルド
 	configure: ARCHなアーキテクチャのターゲットをTARGETの名前で作成
-*エミュレータやディスクイメージなどはターゲット固有のターゲットで。
+	confall: arch以下のディレクトリをターゲット名にしてでconfigureと同等の動作
+
+	基本的にはツリーを用意したら「make confall」、「make tools」でビルド準備が整う。

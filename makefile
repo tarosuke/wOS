@@ -1,12 +1,15 @@
 ################################################### MAKEFILE FOR WHOLE TARGETs
 
-.PHONY: help all clean configure tools
+.PHONY: help all clean configure tools emu confall
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
 
 help:
 	@cat docs/make.txt
+
+emu:
+	@for t in $(targets); do make -C $$t emu || exit -1; done
 
 all:
 	@for t in $(targets); do make -C $$t || exit -1; done
@@ -24,3 +27,7 @@ configure:
 	@if ! [ -d objs/$(TARGET) ]; then mkdir objs/$(TARGET); fi
 	@cp arch/$(ARCH)/makefile arch/$(ARCH)/talos.conf objs/$(TARGET)
 
+confall:
+	@echo -n 'prepareing...'
+	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/makefile arch/$$t/talos.conf objs/$$t; echo -n $$t; fi; done
+	@echo '...done.'
