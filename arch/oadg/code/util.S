@@ -13,7 +13,7 @@
 .section .init
 
 /*********************************************** CONVERT VMA(in EBX) TO LMA */
-.L_GetUserLMA:
+/*.L_GetUserLMA:
 	sub	$__user_VMA, %ebx
 	add	$__user_LMA, %ebx
 	ret
@@ -26,7 +26,7 @@
 	add	$__user_LMA, %ebx
 	sub	$__kernel_LMA, %ebx
 	add	$__kernel_VMA, %ebx
-	ret
+	ret*/
 
 
 
@@ -109,7 +109,7 @@ __ARCH_SayHello: //端末の初期化と初期メッセージの出力。もし�
 	outb	%al, %dx
 #endif
 	//初期メッセージの出力
-	lea	(1f), %si
+	mov	$1f, %esi
 	call	__puts16
 	ret
 1:	.asciz	"welcome to talos.\n"

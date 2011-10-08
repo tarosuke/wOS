@@ -38,9 +38,8 @@ ldopts = -N --cref -nostdlib -T ../../arch/$(arch)/talos.lds
 
 ################################################################# SOURCE PATHs
 VPATH =
-VPATH += ../../arch/$(arch)/machine ../../arch/$(arch)/drivers
-VPATH += ../../cpu/$(cpu)/machine
-VPATH += ../../core ../../display ../../net ../../terminal ../../fs
+VPATH += ../../arch/$(arch)/code
+VPATH += ../../cpu/$(cpu)/code ../../kernel/code
 VPATH += ../../userlib
 
 
@@ -48,14 +47,17 @@ VPATH += ../../userlib
 ###################################################################### MODULES
 
 # kernel modules
-ksrcs = $(wildcard ../../core/*)
-ksrcs += $(wildcard ../../arch/$(arch)/machine/*)
-ksrcs += $(wildcard ../../cpu/$(cpu)/machine/*)
+ksrcs = $(wildcard ../../kernel/code/*) $(wildcard ../../cpu/$(cpu)/code/*)
 kmods = $(basename $(notdir $(ksrcs)))
 kobjs = $(addsuffix .o, $(kmods))
 
+# kernel servers
+kpsrcs = $(wildcard ../../arch/$(arch)/code/*)
+kpmods = $(basename $(notdir $(kpsrcs)))
+kpobjs = $(addsuffix .o, $(kpmods))
+
 # user library modules
-ulsrcs = $(wildcard ../../userlib/*)
+ulsrcs = $(wildcard ../../userlib/code/*)
 ulmods = $(basename $(notdir $(ulsrcs)))
 ulobjs = $(addsuffix .o, $(ulmods))
 
@@ -97,21 +99,26 @@ endif
 
 
 ############################################################### EXPLICIT RULES
-kernel.ko : $(kobjs) $(keyfiles) ../../kernel.lds
+kernel.o : $(kobjs) $(keyfiles) ../../kernel/kernel.lds
 	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../kernel.lds -o $@ -Map kernel.map $(kobjs) $(LIBPATH)libgcc.a
-	@$(prefix)objdump -xdS kernel.ko > kernel.dis
+	@$(LD) -N --cref -nostdlib -r -T ../../kernel/kernel.lds -o $@ -Map kernel.map $(kobjs) $(LIBPATH)libgcc.a
+	@$(prefix)objdump -xdS kernel.o > kernel.dis
 
-ulib.o : $(ulobjs) $(keyfiles) ../../userlib.lds
+kproc.o : $(kpobjs) $(keyfiles) ../../arch/$(arch)/kproc.lds
 	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../userlib.lds -o $@ -Map ulib.map $(ulobjs) $(LIBPATH)libgcc.a
+	@$(LD) -N --cref -nostdlib -r -T ../../arch/$(arch)/kproc.lds -o $@ -Map kproc.map $(kpobjs) $(LIBPATH)libgcc.a
+	@$(prefix)objdump -xdS kproc.o > kproc.dis
+
+ulib.o : $(ulobjs) $(keyfiles) ../../userlib/userlib.lds
+	@echo $@
+	@$(LD) -N --cref -nostdlib -r -T ../../userlib/userlib.lds -o $@ -Map ulib.map $(ulobjs) $(LIBPATH)libgcc.a
 	@$(prefix)objdump -xdS ulib.o > ulib.dis
 
 libuser.a : $(uobjs) $(keyfiles)
 	@echo $@
 	@$(AR) -rc $@ $(uobjs)
 
-talos : kernel.ko ulib.o libuser.a ../../arch/$(arch)/talos.lds $(keyfiles)
+talos : kproc.o kernel.o ulib.o libuser.a ../../arch/$(arch)/talos.lds $(keyfiles)
 	@echo $@
 	@$(LD) $(ldopts) -o talos.elf -Map talos.map $(LIBPATH)libgcc.a
 	@$(OC) -O binary talos.elf talos

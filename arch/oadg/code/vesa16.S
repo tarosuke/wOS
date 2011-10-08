@@ -15,7 +15,7 @@
 	mov	%cs, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
-	lea	(__VESA_InfoBlock), %di
+	mov	$__VESA_InfoBlock, %edi
 	mov	$0x4f00, %ax
 	int	$0x10
 	cmp	$0x4f00, %ax
@@ -23,8 +23,9 @@
 
 	// 画面情報を取得して有効モードの最大値をbxに取得
 	push	%ds
-	mov	(.L_videoModes), %ax
-	mov	(.L_videoModes+2), %si
+	mov	$.L_videoModes, %ebx
+	mov	(%bx), %ax
+	mov	2(%bx), %si
 	mov	%ax, %ds
 	xor	%bx, %bx
 1:	lodsw
@@ -47,7 +48,7 @@
 	// 画面データを取得
 	mov	$0x4f01, %ax
 	mov	%bx, %cx
-	lea	(__VESA_displayInfo), %di
+	mov	$__VESA_displayInfo, %edi
 	int	$0x10
 	cmp	$0x4f00, %ax
 	jne	.L_failed

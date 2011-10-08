@@ -43,7 +43,7 @@ __init16:
 
 	/***** get memorybanks */
 #define SMAP 0x534d4150
-	lea	(__ARCH_Memoryblocks), %di
+	mov	$__ARCH_Memoryblocks, %edi
 	xor	%ebx, %ebx
 1:	mov	$0xe820, %eax
 	mov	$SMAP, %edx
@@ -64,7 +64,7 @@ __init16:
 	mov	%ax, %dx
 	shl	$10, %edx
 	push	%edx
-	lea	(__ARCH_Memoryblocks), %bx
+	mov	$__ARCH_Memoryblocks, %ebx
 	pop	%eax
 	movl	$0x100000, (%bx)
 	add	$4, %bx
@@ -78,7 +78,7 @@ __init16:
 2:
 
 	/***** initialize other 16-bits code pointed from __kernelProcessDefs16 array */
-	lea	(__kernelProcessDefs16), %si
+	mov	$__kernelProcessDefs16, %esi
 1:	lodsl
 	test	%eax, %eax
 	jz	1f
@@ -90,7 +90,7 @@ __init16:
 /********************************************************** GET 32bits MODE */
 
 	/***** SETUP GDT */
-	lea	($.L_GDTPT), %bx
+	mov	$.L_GDTPT, %ebx
 	lgdt	(%bx)
 
 	/***** ENABLE 32bits MODE */
@@ -135,5 +135,6 @@ __LMA32:
 	mov	%ax, %es
 	mov	%ax, %fs
 	mov	%ax, %gs
-	ljmp	$KCSel, $__Init32
-
+	mov	%ax, %ss
+//	ljmp	$KCSel, $__Init32
+	hlt

@@ -7,7 +7,7 @@
 
 OUTPUT_FORMAT("elf32-i386")
 EXTERN(__init16)
-GROUP(kernel.ko ulib.o libuser.a)
+GROUP(kproc.o kernel.o ulib.o libuser.a)
 
 MEMORY {
 	IMAGE (wxi) : ORIGIN = 0x10000, LENGTH = 0x80000
@@ -31,7 +31,7 @@ SECTIONS {
 	__ulib_size = SIZEOF(.ulib);
 	__kernel_size = SIZEOF(.kernel);
 
-	__LMA32_16 = ABSOLUTE(LMA32) & 0xffff;
+	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
