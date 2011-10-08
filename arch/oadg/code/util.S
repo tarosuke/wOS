@@ -8,7 +8,7 @@
 
 .code16
 
-.global __ARCH_SayHello, __puts16, __hex16
+.global __ARCH_SayHello, __putc16, __puts16, __hex16
 
 .section .init
 
@@ -52,7 +52,7 @@
 	int	$0x10
 	ret
 
-.L_putc16:
+__putc16:
 	cmp	$'\n', %al
 	jne	1f
 	mov	$'\r', %al
@@ -64,23 +64,20 @@ __puts16:
 1:	lodsb
 	testb	%al, %al
 	jz	2f
-	call	.L_putc16
+	call	__putc16
 	jmp	1b
 2:	ret
 __hex16:
 	mov	%eax, %edx
 	mov	$8, %cx
-1:	rol	%edx
-	rol	%edx
-	rol	%edx
-	rol	%edx
+1:	rol	$4, %edx
 	mov	%dl, %al
 	and	$0x0f, %al
 	add	$0x30, %al
 	cmp	$0x39, %al
 	jbe	2f
 	add	$7, %al
-2:	call	.L_putc16
+2:	call	__putc16
 	loop	1b
 	ret
 __ARCH_SayHello: //端末の初期化と初期メッセージの出力。もしデバグモードなら両方に出力
