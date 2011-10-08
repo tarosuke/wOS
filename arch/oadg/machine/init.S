@@ -6,19 +6,13 @@
 
 #include <config.h>
 
-.global __init16, __archInitialPageTable, SUNKDOWN_ENTRY, SUNKED_DOWN, LMA32
-.extern __archMemBanks, __archAPMInfo
+.global __init16, __LMA32, __ARCH_Memoryblocks
+.extern __kernelProcessDefs16, __InitConsole16, __Init32
 
 
 /******************************************************** SEGMENT SELECTORS */
-#define TSSSel	8
-#define KCSel	(CF_MAX_PROCESSORs * 8 + 8)
-#define KDSel	(KCSel + 8)
-#define UCSel	(KDSel + 8)
-#define UDSel	(UCSel + 8)
-#define	TCSel	(UDSel + 8)
-#define TSCSel	(TCSel + 8)
-#define APMSel	(TSCSel + 8)
+#define KCSel	8
+#define	TCSel	(KCSel + 8)
 
 
 
@@ -43,54 +37,11 @@ __init16:
 	call	.L_initConsole
 
 	/***** enable A20 */
-	call	.L_ENABLE_A20
+	mov	$0x2401, %ax
+	int	$0x15
 
 	/***** say 'hello' */
 	call	.L_hello
-
-
-#if CF_APM
-	/***** get APM server */
-	mov	$0x5300, %ax
-	xor	%bx, %bx
-	int	$0x15
-	jnc	1f
-	/* no APM / failed */
-8:	mov	$2f, %ebx
-	call	.L_getpos
-	mov	%bx, %si
-	call	.L_puts16
-	xor	%eax, %eax
-	jmp	9f
-2:	.asciz	"Failed to initialize APM.\n"
-1:	/* connect */
-	mov	$0x5303, %ax
-	xor	%bx, %bx
-	int	$0x15
-	jc	8b
-9:	/* record it */
-	push	%ebx
-	mov	$.L_APM, %ebx
-	call	.L_getpos
-	and	$0x0000ffff, %eax
-	shl	$4, %eax
-	mov	%si, (%bx)
-	or	%eax, 2(%bx)
-	shr	$16, %esi
-	and	$0x0000ffff, %ecx
-	shl	$4, %ecx
-	mov	%si, 8(%bx)
-	or	%ecx, 10(%bx)
-	and	$0x0000ffff, %edx
-	shl	$4, %edx
-	mov	%di, 16(%bx)
-	or	%edx, 18(%bx)
-	mov	$__archAPMInfo, %ebx
-	call	.L_GetKernelLMA
-	call	.L_getpos
-	popl	(%bx)
-	movw	$APMSel, 4(%bx)
-#endif
 
 	/***** get memorybanks */
 	call	.L_GET_MEMORYBANKS
@@ -98,13 +49,12 @@ __init16:
 
 
 /********************************************************** GET 32bits MODE */
-	cli
-	/* SETUP GDT */
-	mov	$.L_GDTPT, %ebx
-	call	.L_getpos
+
+	/***** SETUP GDT */
+	lea	($.L_GDTPT), %bx
 	lgdt	(%bx)
 
-	/* ENABLE 32bits MODE */
+	/***** ENABLE 32bits MODE */
 	mov	%cr0, %eax
 	or	$1, %eax
 	mov	%eax, %cr0
@@ -112,34 +62,59 @@ __init16:
 	.short	__LMA32_16
 	.short	TCSel
 
-	/***** GDT */
+	/***** TEMPORARY GDT */
 .align 8
 .L_GDT:	.quad	0
-.L_TSSS: .rept	CF_MAX_PROCESSORs	// PLACEHOLDER FOR TSSs
-	.quad	0x000089000000006c
-	.endr
 	.quad	0x00cf9a000000ffff	// CS(kernel)
-	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
-	.quad	0x00cffa000000ffff	// CS(user)
-	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
-	.quad	0x00cf9a010000ffff	// TEMPORARY CS INTO 0x10000
-.L_APM:	.quad	0xfe409a0000000000	// 32bits CS for APM(check __kernel_base)
-	.quad	0xfe009a0000000000	// 16bits CS for APM
-	.quad	0xfe00920000000000	// 16bits DS for APM
 
 	/***** GDT POINTER */
-.L_GDTPT:	.word	103 + CF_MAX_PROCESSORs * 8 // LIMIT OF GDT
-.L_GDTPTV:	.long	.L_GDT			// GDT
-
-#include <arch/util.inc>
+.L_GDTPT:	.word	8 * 3		// LIMIT OF GDT
+.L_GDTPTV:	.long	.L_GDT		// GDT
 
 
 
-/************************************************** 32BITS MODE INITIALIZER */
+	/***** MEMORYBANKs */
+__ARCH_Memoryblocks:
+	.rept	CF_MAX_MEMORYBLOCKs + 1
+	.quad	0xffffffffffffffff
+	.quad	0xffffffffffffffff
+	.long	0xffffffff
+	.endr
+
+
+
+
+
+
+/********************************************** GET 32BITS MODE INITIALIZER */
 .code32
-LMA32:
-	ljmp	$KCSel, $.L_init32
+__LMA32:
+	ljmp	$KCSel, $Init32
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** これ以降は別のファイルで */
+#if 0
 .L_init32:
 	/* SETUP SEGMENTS */
 	mov	$KDSel, %ax
@@ -447,4 +422,6 @@ jmp 1b
 
 SYSENTER_ENTRY:
 	jmp	1b
+#endif
+
 #endif
