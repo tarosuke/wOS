@@ -7,6 +7,9 @@
 #include <config.h>
 
 .code16
+
+.global __ARCH_SayHello, __puts16, __hex16
+
 .section .init
 
 /*********************************************** CONVERT VMA(in EBX) TO LMA */
@@ -27,74 +30,62 @@
 
 
 
-/********************************************************* GET MEMORY BANKS */
-.L_GET_MEMORYBANKS:
-#define SMAP 0x534d4150
-	mov	$__archMemBanks, %ebx // __archMemBanks is in .kernel_rw
-	call	.L_GetKernelLMA
-	call	.L_getpos
-	mov	%bx, %di
-	mov	%ds, %ax
-	mov	%ax, %es
-	xor	%ebx, %ebx
-1:	mov	$0xe820, %eax
-	mov	$SMAP, %edx
-	mov	$20, %ecx
-	int	$0x15
-	jc	3f
-	cmp	$SMAP, %eax
-	jne	3f
-
-	add	$20, %di
-	and	%ebx, %ebx
-	jnz	1b
-	jmp	2f
-3:
-	mov	$0x88, %ah
-	int	$0x15
-	jc	2f
-	xor	%edx, %edx
-	mov	%ax, %dx
-	shl	$10, %edx
-	push	%edx
-	mov	$__archMemBanks, %ebx
-	call	.L_getpos
-	pop	%eax
-	movl	$0x100000, (%bx)
-	add	$4, %bx
-	movl	$0, (%bx)
-	add	$4, %bx
-	mov	%eax, (%bx)
-	add	$4, %bx
-	movl	$1, (%bx)
-	add	$4, %bx
-	movl	$0, (%bx)
-2:
-	mov	%cs, %ax
-	movw	%ax, %ds
-	movw	%ax, %es
-	ret
-
-
-
-/********************************************************* 16BITS UTILITIES */
-.L_getpos:	push	%bx	/* ebx -> ds:bx */
-	shr	$4, %ebx
-	mov	%bx, %ds
-	pop	%bx
-	and	$0x000f, %bx
-	ret
 
 
 
 /*********************************************************** 16BITS CONSOLE */
-#if CF_NULL_CONSOLE
-.L_initConsole:
 .L_putc16_:
-	ret;
-#else
-#if CF_SERIAL_CONSOLE
-.L_initConsole:
+#if CF_DEBUG_LEVEL
+	push	%dx
+	push	%ax
+	mov	$0x03fd, %dx
+2:	inb	%dx, %al
+	test	$0x20, %al
+	je	2b
+	pop	%ax
+	mov	$0x03f8, %dx
+	outb	%al, %dx
+	pop	%dx
+#endif
+	movb	$0x0e, %ah
+	movb	$0x0f, %bl
+	int	$0x10
+	ret
+
+.L_putc16:
+	cmp	$'\n', %al
+	jne	1f
+	mov	$'\r', %al
+	call	.L_putc16_
+	mov	$'\n', %al
+1:	jmp	.L_putc16_
+__puts16:
+	cld
+1:	lodsb
+	testb	%al, %al
+	jz	2f
+	call	.L_putc16
+	jmp	1b
+2:	ret
+__hex16:
+	mov	%eax, %edx
+	mov	$8, %cx
+1:	rol	%edx
+	rol	%edx
+	rol	%edx
+	rol	%edx
+	mov	%dl, %al
+	and	$0x0f, %al
+	add	$0x30, %al
+	cmp	$0x39, %al
+	jbe	2f
+	add	$7, %al
+2:	call	.L_putc16
+	loop	1b
+	ret
+__ARCH_SayHello: //端末の初期化と初期メッセージの出力。もしデバグモードなら両方に出力
+	//初期化
+#if CF_DEBUG_LEVEL
 	mov	$0x03fa, %dx
 	mov	$0x07, %al
 	outb	%al, %dx
@@ -116,73 +107,10 @@
 	mov	$0xf9, %dl
 	mov	$0x00, %al
 	outb	%al, %dx
-	ret
-.L_putc16_:
-	push	%dx
-	push	%ax
-	mov	$0x03fd, %dx
-2:	inb	%dx, %al
-	test	$0x20, %al
-	je	2b
-	pop	%ax
-	mov	$0x03f8, %dx
-	outb	%al, %dx
-	pop	%dx
-	ret
 #endif
-
-#if CF_CGA_CONSOLE
-.L_initConsole:
+	//初期メッセージの出力
+	lea	(1f), %si
+	call	__puts16
 	ret
-.L_putc16_:
-	movb	$0x0e, %ah
-	movb	$0x0f, %bl
-	int	$0x10
-	ret
-#endif
-#endif
-
-.L_putc16:
-	cmp	$'\n', %al
-	jne	1f
-	mov	$'\r', %al
-	call	.L_putc16_
-	mov	$'\n', %al
-1:	jmp	.L_putc16_
-.L_puts16:
-	cld
-1:	lodsb
-	testb	%al, %al
-	jz	2f
-	call	.L_putc16
-	jmp	1b
-2:	ret
-.L_hello:
-	mov	$'\n', %al
-	call	.L_putc16
-	mov	$__version, %ebx
-	call	.L_GetKernelLMA
-	call	.L_getpos
-	mov	%bx, %si
-	call	.L_puts16
-	mov	$'\n', %al
-	call	.L_putc16
-	ret
-.L_hex16:
-	mov	%eax, %edx
-	mov	$8, %cx
-1:	rol	%edx
-	rol	%edx
-	rol	%edx
-	rol	%edx
-	mov	%dl, %al
-	and	$0x0f, %al
-	add	$0x30, %al
-	cmp	$0x39, %al
-	jbe	2f
-	add	$7, %al
-2:	call	.L_putc16
-	loop	1b
-	ret
-
+1:	.asciz	"welcome to talos.\n"
 
