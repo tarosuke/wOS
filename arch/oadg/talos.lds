@@ -32,13 +32,11 @@ SECTIONS {
 	__kernel_size = SIZEOF(.kernel);
 
 	__LMA32_16 = ABSOLUTE(LMA32) & 0xffff;
-	__SUNKED_DOWN16 = ABSOLUTE(SUNKED_DOWN) & 0xffff;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 
 	/* VARIANT of ADDRESSSPACE */
-	__arch_initlock_kernel = ABSOLUTE(__arch_initlock) + __kernel_base;
 	__arch_LOMEM = __init_LMA +
 		SIZEOF(.init) +
 		SIZEOF(.user) +
@@ -48,18 +46,10 @@ SECTIONS {
 	.init 0x10000 : {
 		LONG(ABSOLUTE(__init16));
 		LONG(__arch_LOMEM);
-		*(.init)
-		__arch_initlock = .;
-		LONG(0);
-		. = ALIGN(4096);
-		*(.inittable)
-		. = ALIGN(4096);
-		__archMasterPageDirectory = .;
-		LONG(ABSOLUTE(__archInitialPageTable) + 0x00000103);
-		. = __archMasterPageDirectory + (__kernel_base >> 20);
-		LONG(ABSOLUTE(__archInitialPageTable) + 0x00000103);
-		. = ALIGN(4096) - 4;
-		LONG(ABSOLUTE(__archMasterPageDirectory) + 0x00000103);
+		*(.kp_init)
+		*(.kp_ro)
+		*(.kp_rw)
+		*(.kp_def)
 	} AT > IMAGE
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {

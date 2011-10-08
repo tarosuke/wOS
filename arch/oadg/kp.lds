@@ -7,13 +7,8 @@
 SECTIONS {
 	.kp_init : {
 		*(.init)
-	}
-	.kp_def : {
 		__kernelProcessDefs16 = .; /* 16bitsモードの初期化後にエントリが順にcallされる */
-		*(.kpdef16)
-		LONG(0);
-		__kernelProcessDefs32 = .; /* 32bitsモードの初期化後にエントリがサーバとして登録される */
-		*(.kpdef32)
+		*(.pdef16)
 		LONG(0);
 	}
 	.kp_ro : {
@@ -25,5 +20,8 @@ SECTIONS {
 		*(.eh_frame)
 		*(.gnu*)
 		*(.bss*)
+	}
+	.kp_def : {
+		*(.pdef32)
 	}
 }
