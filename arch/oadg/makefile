@@ -4,6 +4,7 @@ arch = oadg
 cpu = ia32
 
 include ../../makefile.in
+include ../../arch/oadg/loader/makefile.in
 
 
 ##### EXTRA RULES
@@ -13,7 +14,7 @@ qemuOptFiles = .qemu-netopt .qemu-nicopt
 qemuOpts = -vga std -serial stdio -smp 8 $(shell cat $(qemuOptFiles))
 
 
-emu : emucd
+emu : emufd
 
 emufd : talos.fd hddImage $(qemuOptFiles)
 	qemu $(qemuOpts) -fda talos.fd -hda hddImage -boot a
