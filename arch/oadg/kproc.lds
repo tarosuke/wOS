@@ -13,7 +13,7 @@ SECTIONS {
 	}
 	.kp_ro : {
 		*(.text*)
-		*(.rodata*)
+		. = ALIGN(4);
 		__ArchCons = .;
 		*(.ctors)
 		*(SORT(.ctors.*))
@@ -22,6 +22,7 @@ SECTIONS {
 		*(.dtors)
 		*(SORT(.dtors.*))
 		LONG(0);
+		*(.rodata*)
 	}
 	.kp_rw : {
 		*(.data*)

@@ -27,14 +27,6 @@ namespace TIME{
 typedef u32 tchar;
 
 
-/// version
-typedef struct{
-	u16 major;	/** 互換性がなくなった時にインクリメント(ただし旧verをサポートすること) */
-	u16 minor;	/** 修正、要素の追加などでインクリメント */
-	u32 release;	/** 実装のリリースでインクリメント */
-}VERSION;
-
-
 
 
 

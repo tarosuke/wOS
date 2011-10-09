@@ -5,18 +5,20 @@
  */
 
 #include <types.h>
+#include <debug.h>
+
 
 /// ARCH(プラットフォーム依存)コードの入り口
 extern "C"{
 	void __Init32(void)__attribute__((noreturn));
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
-	extern const void* __kernel_base;
+	extern const uchar __kernel_base[];
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
 	void __Init32(void){
-		//  初期ページテーブルを初期化、設定、ページング開始
+		// 初期ページテーブルを初期化、設定、ページング開始
 		for(uint i(0); i < 256; i++){
 			loPageTable[i] = 0x0000003 | (i << 12);
 			kernelPageTable[i] = 0x0000103 | (i << 12);
@@ -41,21 +43,21 @@ extern "C"{
 		for(const void (**dest)(void)(__ArchDest); *dest; dest++){
 			(*dest)();
 		}
+		asm volatile(
+			"mov $0x3f8, %%dx;"
+			"mov $'*', %%al;"
+			"outb %%al, %%dx;"
+			::: "al", "dx");
 		asm volatile("cli; hlt");
 		for(;;);
 	};
 }
 
-
 ///
 static class ARCH{
  public:
 	ARCH(){
-		asm volatile(
-			"mov $0x3f8, %%dx;"
-			"mov $'*', %%al;"
-			"outb %%al, %%dx;"
-			"hlt" ::: "al", "dx");
+		dputs(" get 32bits mode with paging.\n");
 	};
 }arch;
 

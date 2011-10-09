@@ -5,15 +5,8 @@
 */
 
 SECTIONS {
-	.kernel_rw : {
-		*(.data*)
-		*(.eh_frame)
-		*(.gnu*)
-		*(.bss*)
-	}
 	.kernel_ro : {
 		*(.text*)
-		*(.rodata*)
 		. = ALIGN(4);
 		__KernelConstructor = .;
 		*(.ctors)
@@ -23,5 +16,12 @@ SECTIONS {
 		*(.dtors)
 		*(SORT(.dtors.*))
 		LONG(0);
+		*(.rodata*)
+	}
+	.kernel_rw : {
+		*(.data*)
+		*(.eh_frame)
+		*(.gnu*)
+		*(.bss*)
 	}
 }

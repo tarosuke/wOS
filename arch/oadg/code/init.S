@@ -136,4 +136,8 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
+	mov	$1f, %esp
 	ljmp	$KCSel, $__Init32
+	.space	4096, 0
+1:
+
