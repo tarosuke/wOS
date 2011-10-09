@@ -24,7 +24,7 @@ LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/
 
 
 ###################################################################### OPTIONS
-incs =  -I../../include -I../../cpu/$(cpu)/include -I../../arch/$(arch)/include
+incs =  -I../../include -I../../kernel/include -I../../cpu/$(cpu)/include -I../../arch/$(arch)/include
 base_ccopts = -pipe -O2 -fomit-frame-pointer -Wall -Werror -g \
 	-nostdinc -nostdlib -fno-common -iquote. $(incs)
 copts = $(base_ccopts) -ffreestanding
