@@ -17,8 +17,8 @@ typedef long i32;
 typedef unsigned long u32;
 typedef long long i64;
 typedef unsigned long long u64;
-typedef __int128 i128;
-typedef unsigned __int128 u128;
+typedef struct{ u64 content[2]; } i128;
+typedef struct{ u64 content[2]; } u128;
 
 
 /// position & size of virtual memory
