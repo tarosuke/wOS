@@ -14,6 +14,7 @@ extern "C"{
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
 	extern const uchar __kernel_base[];
+	extern const u32 __VMA_GDTPT;
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
@@ -34,6 +35,8 @@ extern "C"{
 			"mov %%cr0, %%eax;"
 			"or $0x80000000, %%eax;"
 			"mov %%eax, %%cr0" :: "a"(kernelPageDir));
+		// GDTを上位メモリのミラーに更新
+		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
 
 		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
@@ -53,11 +56,13 @@ extern "C"{
 	};
 }
 
+extern void VESA_Check();
 ///
 static class ARCH{
  public:
 	ARCH(){
 		dputs(" get 32bits mode with paging.\n");
+		VESA_Check();
 	};
 }arch;
 

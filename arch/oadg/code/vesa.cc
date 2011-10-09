@@ -74,6 +74,29 @@ extern "C"{
 
 
 
+static void* Get16(u32 p){
+	return (void*)(((p & 0xffff0000) >> 12) | (p & 0xffff));
+}
+
+void VESA_Check(){
+	dputs("enumlating supported display modes...\n");
+	for(u16* m((u16*)Get16(__VESA_InfoBlock.videoModes)); *m != 0xffff; m++){
+		if(0x10d <= (*m & 0x1ff)){
+			dprintf(" %04x\n", *m & 0x1ff);
+		}
+	}
+	dputs((char*)Get16(__VESA_InfoBlock.oemString));
+	dputs((char*)Get16(__VESA_InfoBlock.venderName));
+	dputs((char*)Get16(__VESA_InfoBlock.productName));
+	dputs((char*)Get16(__VESA_InfoBlock.productRevision));
+}
+
+
+
+
+
+
+
 #if 0
 static u32 Mask(int size, int pos){
 	return (~0UL << pos) & ~(~0UL << (pos + size));

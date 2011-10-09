@@ -6,14 +6,18 @@
 
 #include <config.h>
 
-.global __init16, __LMA32, __ARCH_Memoryblocks
-.extern __kernelProcessDefs16, __InitConsole16, __Init32
+.global __init16, __LMA32, __ARCH_Memoryblocks, __LMA_GDT, __LMA_GDTPT
+.extern __kernelProcessDefs16, __InitConsole16, __Init32, __LMA32_16, __VMA_GDT
 
 
 /******************************************************** SEGMENT SELECTORS */
 #define KCSel	8
 #define KDSel	(KCSel + 8)
-#define	TCSel	(KDSel + 8)
+#define UCSel	(KDSel + 8)
+#define UDSel	(UCSel + 8)
+#define	TCSel	(UDSel + 8)
+#define	TSSSel	(TCSel + 8)
+#define GDTLIMIT (TSSSel + 8)
 
 
 
@@ -103,15 +107,22 @@ __init16:
 
 	/***** TEMPORARY GDT */
 .align 8
-.L_GDT:	.quad	0
+__LMA_GDT:
+	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
 	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
+	.quad	0x00c3f8000000ffff	// CS(user:0-1G)
+	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
+	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
 
 	/***** GDT POINTER */
-.L_GDTPT:	.word	8 * 4		// LIMIT OF GDT
-.L_GDTPTV:	.long	.L_GDT		// GDT
-
+.L_GDTPT:
+	.word	GDTLIMIT	// LIMIT OF GDT
+	.long	__LMA_GDT	// GDT
+__LMA_GDTPT:
+	.word	GDTLIMIT	// LIMIT OF GDT
+	.long	__VMA_GDT	// GDT(upper mirror)
 
 
 	/***** MEMORYBANKs */
@@ -140,4 +151,5 @@ __LMA32:
 	ljmp	$KCSel, $__Init32
 	.space	4096, 0
 1:
+
 

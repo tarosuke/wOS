@@ -32,6 +32,8 @@ SECTIONS {
 	__kernel_size = SIZEOF(.kernel);
 
 	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
+	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
+	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
