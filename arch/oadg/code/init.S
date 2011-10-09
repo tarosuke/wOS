@@ -136,8 +136,4 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-//	ljmp	$KCSel, $__Init32
-mov $0x3f8, %dx
-mov $'*', %al
-outb %al, %dx
-	hlt
+	ljmp	$KCSel, $__Init32
