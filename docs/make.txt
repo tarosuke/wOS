@@ -5,5 +5,6 @@
 	tools: 全ターゲットのためのgcc、g++やbinutilsを取得してビルド
 	configure: ARCHなアーキテクチャのターゲットをTARGETの名前で作成
 	confall: arch以下のディレクトリをターゲット名にしてでconfigureと同等の動作
+	todo: "TODO:"をソースツリーから探して表示
 
 	基本的にはツリーを用意したら「make confall」、「make tools」でビルド準備が整う。

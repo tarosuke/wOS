@@ -1,6 +1,6 @@
 ################################################### MAKEFILE FOR WHOLE TARGETs
 
-.PHONY: help all clean configure tools emu confall
+.PHONY: help all clean configure tools emu confall todo
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
@@ -31,3 +31,6 @@ confall:
 	@echo -n 'prepareing...'
 	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/makefile arch/$$t/talos.conf objs/$$t; echo -n $$t; fi; done
 	@echo '...done.'
+
+todo:
+	@grep -nrI --exclude-dir objs --exclude-dir .git --exclude-dir docs --exclude makefile 'TODO:' .

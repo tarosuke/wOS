@@ -172,14 +172,6 @@ count:
 		$(wildcard ../../arch/$(arch)/include/arch/*) \
 		$(wildcard ../../arch/$(arch)/include/*.h) | wc -l
 
-todo:
-	@find ../.. ! -path '*/.svn/*' ! -path '*/objs/*' ! -path '*/docs/*' | xargs grep -n 'TODO:' | grep -v '@find'
-
-backup-repository:
-	ssh tarosuke.net svnadmin dump /var/svn > ../.repository
-#	if ! [ -d ~/talos-repos ]; then mkdir ~/talos-repos; fi
-#	rsync -av talos-kernel.svn.sourceforge.net::svn/talos-kernel/* ~/talos-repos
-
 clean :
 	rm -rf *.o *.ko *.d *.i *.s *.c *.bdf *.inc talos* *image *.a *loader* cnvfonts cnvimage cnvkeymap
 
