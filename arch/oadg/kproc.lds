@@ -33,4 +33,10 @@ SECTIONS {
 	.kp_def : {
 		*(.pdef32)
 	}
+	.kernel_rw : {
+		*(.k_rw)
+	}
+	.kernel_ro : {
+		*(.k_ro)
+	}
 }
