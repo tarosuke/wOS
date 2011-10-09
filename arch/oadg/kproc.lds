@@ -14,6 +14,14 @@ SECTIONS {
 	.kp_ro : {
 		*(.text*)
 		*(.rodata*)
+		__ArchCons = .;
+		*(.ctors)
+		*(SORT(.ctors.*))
+		LONG(0);
+		__ArchDest = .;
+		*(.dtors)
+		*(SORT(.dtors.*))
+		LONG(0);
 	}
 	.kp_rw : {
 		*(.data*)
