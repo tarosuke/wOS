@@ -42,9 +42,12 @@ class CPU{
 		u32 ldtss;
 		u32 iobase;
 	}__attribute__((packed));
+	const uint cpuid;
+	const TSS& mytss;
 	static TSS tss[];
  public:
 	static void SetupTSSDescriptor(u64*);
+	CPU(uint id);
 };
 
 

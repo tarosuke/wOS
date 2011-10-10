@@ -5,19 +5,10 @@
 */
 
 #include <config.h>
+#include <arch/segments.h>
 
 .global __init16, __LMA32, __ARCH_Memoryblocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, __Init32, __LMA32_16, __VMA_GDT
-
-
-/******************************************************** SEGMENT SELECTORS */
-#define KCSel	8
-#define KDSel	(KCSel + 8)
-#define UCSel	(KDSel + 8)
-#define UDSel	(UCSel + 8)
-#define	TCSel	(UDSel + 8)
-#define	TSSSel	(TCSel + 8)
-#define GDTLIMIT (TSSSel + 8 * CF_MAX_PROCESSORs)
 
 
 
