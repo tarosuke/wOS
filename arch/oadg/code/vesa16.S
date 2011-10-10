@@ -68,7 +68,7 @@
 /// VbeInfoBlock@VESA-VBE3.0
 .align 4
 __VESA_InfoBlock:
-.L_sighneture:	.ascii	"VBE2"
+.L_signature:	.ascii	"VBE2"
 .L_version:	.word	0x0300
 .L_oemString:	.long	0
 .L_capabilities: .rep	4

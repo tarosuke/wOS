@@ -10,7 +10,7 @@
 
 extern "C"{
 	extern struct __attribute__ ((packed)){
-		uchar	signeture[4];
+		uchar	signature[4];
 		u16	version;
 		u32	oemString;
 		u32	capabilities[4];
@@ -85,6 +85,8 @@ void VESA_Check(){
 			dprintf(" %04x\n", *m & 0x1ff);
 		}
 	}
+	dprintf(" VESA signature:%04s\n", __VESA_InfoBlock.signature);
+	dprintf("        version:%04x\n", __VESA_InfoBlock.version);
 	dprintf("     OEM string:%s\n", Get16(__VESA_InfoBlock.oemString));
 	dprintf("     venderName:%s\n", Get16(__VESA_InfoBlock.venderName));
 	dprintf("    productName:%s\n", Get16(__VESA_InfoBlock.productName));
