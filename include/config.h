@@ -18,8 +18,11 @@
 #	define CF_HZ 20
 #endif
 
-#ifndef CF_SMP
-#	define CF_SMP 0
+#ifndef CF_MAX_PROCESSORs
+#	define CF_MAX_PROCESSORs 1
+#endif
+#if !CF_MAX_PROCESSORs
+#error "CF_MAX_PROCESSORs must be least 1."
 #endif
 
 #ifndef CF_TASKROTATE_CYCLE
