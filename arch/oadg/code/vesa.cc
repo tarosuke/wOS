@@ -85,10 +85,14 @@ void VESA_Check(){
 			dprintf(" %04x\n", *m & 0x1ff);
 		}
 	}
-	dputs((char*)Get16(__VESA_InfoBlock.oemString));
-	dputs((char*)Get16(__VESA_InfoBlock.venderName));
-	dputs((char*)Get16(__VESA_InfoBlock.productName));
-	dputs((char*)Get16(__VESA_InfoBlock.productRevision));
+	dprintf("     OEM string:%s\n", Get16(__VESA_InfoBlock.oemString));
+	dprintf("     venderName:%s\n", Get16(__VESA_InfoBlock.venderName));
+	dprintf("    productName:%s\n", Get16(__VESA_InfoBlock.productName));
+	dprintf("productRevision:%s\n", Get16(__VESA_InfoBlock.productRevision));
+	dprintf("          width:%u.\n", __VESA_displayInfo.xResolution);
+	dprintf("         height:%u.\n", __VESA_displayInfo.yResolution);
+	dprintf("            bpp:%u.\n", __VESA_displayInfo.bitPerPixel);
+	dprintf("       BaseAddr:%08lx.\n", __VESA_displayInfo.physBasePtr);
 }
 
 
