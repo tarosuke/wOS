@@ -34,6 +34,7 @@ SECTIONS {
 	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
 	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
 	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
+	__TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
@@ -55,10 +56,7 @@ SECTIONS {
 	} AT > IMAGE
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {
-		. = . + 8192;
-		__kernel_stack = .;
 		*(.kernel_rw*)
-		. = ALIGN(4096);
 		__core_base = ABSOLUTE(.);
 		*(.kernel_ro*)
 		LONG(0);

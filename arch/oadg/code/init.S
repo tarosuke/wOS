@@ -6,7 +6,7 @@
 
 #include <config.h>
 
-.global __init16, __LMA32, __ARCH_Memoryblocks, __LMA_GDT, __LMA_GDTPT
+.global __init16, __LMA32, __ARCH_Memoryblocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, __Init32, __LMA32_16, __VMA_GDT
 
 
@@ -17,7 +17,7 @@
 #define UDSel	(UCSel + 8)
 #define	TCSel	(UDSel + 8)
 #define	TSSSel	(TCSel + 8)
-#define GDTLIMIT (TSSSel + 8)
+#define GDTLIMIT (TSSSel + 8 * CF_MAX_PROCESSORs)
 
 
 
@@ -114,7 +114,10 @@ __LMA_GDT:
 	.quad	0x00c3f8000000ffff	// CS(user:0-1G)
 	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
+__LMA_TSSPH:
+	.rept	CF_MAX_PROCESSORs
 	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
+	.endr
 
 	/***** GDT POINTER */
 .L_GDTPT:

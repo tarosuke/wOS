@@ -6,6 +6,7 @@
 
 #include <types.h>
 #include <debug.h>
+#include <cpu/cpu.h>
 
 
 /// ARCH(プラットフォーム依存)コードの入り口
@@ -15,6 +16,7 @@ extern "C"{
 	extern const void (*__ArchDest[])(void);
 	extern const uchar __kernel_base[];
 	extern const u32 __VMA_GDTPT;
+	extern u64 __TSSPH[];
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
@@ -38,6 +40,9 @@ extern "C"{
 		// GDTを上位メモリのミラーに更新
 		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
 
+		// TODO:TSSを設定する
+		CPU::SetupTSSDescriptor(__TSSPH);
+
 		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
 			(*cons)();
@@ -46,11 +51,8 @@ extern "C"{
 		for(const void (**dest)(void)(__ArchDest); *dest; dest++){
 			(*dest)();
 		}
-		asm volatile(
-			"mov $0x3f8, %%dx;"
-			"mov $'*', %%al;"
-			"outb %%al, %%dx;"
-			::: "al", "dx");
+		//到達マーカー
+		assert(true);
 		asm volatile("cli; hlt");
 		for(;;);
 	};
