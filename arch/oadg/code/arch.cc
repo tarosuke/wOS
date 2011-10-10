@@ -7,6 +7,7 @@
 #include <types.h>
 #include <debug.h>
 #include <cpu/cpu.h>
+#include <core.h>
 
 
 /// ARCH(プラットフォーム依存)コードの入り口
@@ -47,6 +48,11 @@ extern "C"{
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
 			(*cons)();
 		}
+
+		// カーネルコアを起動
+		CORE::Entry(0); // TODO:SMPの時はプロセッサ番号を渡す
+
+
 		// 呼ばれるはずはないけれど、デストラクタ呼び出し
 		for(const void (**dest)(void)(__ArchDest); *dest; dest++){
 			(*dest)();

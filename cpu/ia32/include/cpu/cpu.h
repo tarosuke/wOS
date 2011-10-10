@@ -47,6 +47,9 @@ class CPU{
 	static TSS tss[];
  public:
 	static void SetupTSSDescriptor(u64*);
+	static inline void SetStack(void* stackTop){
+		asm volatile("mov %0, %%esp" :: "r"(stackTop));
+	};
 	CPU(uint id);
 };
 
