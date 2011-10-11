@@ -24,4 +24,10 @@ SECTIONS {
 		*(.gnu*)
 		*(.bss*)
 	}
+	.kp_ro : {
+		*(.kproc_ro)
+	}
+	.kp_rw : {
+		*(.kproc_rw)
+	}
 }

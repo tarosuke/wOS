@@ -13,8 +13,8 @@
 
 
 
-void CORE::Init(){
-}
+
+
 
 
 

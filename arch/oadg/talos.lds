@@ -77,7 +77,7 @@ SECTIONS {
 		*(.data*)
 		*(.eh_frame)
 		*(.gnu*)
-		__GlobalConstructor = .;
+/*		__GlobalConstructor = .;
 		*(.ctors)
 		*(SORT(.ctors.*))
 		LONG(0);
@@ -85,7 +85,7 @@ SECTIONS {
 		*(.dtors)
 		*(SORT(.dtors.*))
 		LONG(0);
-		*(.bss)
+*/		*(.bss)
 	} AT > IMAGE
 
 	/DISCARD/ : {

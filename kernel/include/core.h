@@ -12,13 +12,12 @@
 #include <types.h>
 
 
-class CORE{
-	CORE();
-	CORE(CORE&);
-private:
-public:
-	static void Init();
-};
+// class CORE{
+// 	CORE();
+// 	CORE(CORE&);
+// private:
+// public:
+// };
 
 
 

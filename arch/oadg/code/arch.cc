@@ -15,6 +15,7 @@ extern "C"{
 	void __Init32(void)__attribute__((noreturn));
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
+	extern const void (*__KernelConstructor[])(void);
 	extern const uchar __kernel_base[];
 	extern const u32 __VMA_GDTPT;
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
@@ -44,7 +45,9 @@ extern "C"{
 		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
 
 		// カーネルを初期化
-		CORE::Init();
+		for(const void (**cons)(void)(__KernelConstructor); *cons; cons++){
+			(*cons)();
+		}
 
 		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
@@ -66,7 +69,6 @@ extern void VESA_Check();
 static class ARCH{
  public:
 	ARCH(){
-		dputs(" get 32bits mode with paging.\n");
 		VESA_Check();
 	};
 }arch;
