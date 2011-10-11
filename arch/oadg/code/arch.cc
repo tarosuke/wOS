@@ -17,7 +17,6 @@ extern "C"{
 	extern const void (*__ArchDest[])(void);
 	extern const uchar __kernel_base[];
 	extern const u32 __VMA_GDTPT;
-	extern u64 __TSSPH[];
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
@@ -38,27 +37,25 @@ extern "C"{
 			"mov %%cr0, %%eax;"
 			"or $0x80000000, %%eax;"
 			"mov %%eax, %%cr0" :: "a"(kernelPageDir));
+
+		/// これ以降はカーネルコードを使用可能
+
 		// GDTを上位メモリのミラーに更新
 		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
 
-		// TSSを設定する
-		CPU::SetupTSSDescriptor(__TSSPH);
+		// カーネルを初期化
+		CORE::Init();
 
 		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
 			(*cons)();
 		}
 
-		// カーネルコアを起動
-		CORE::Entry(0); // TODO:SMPの時はプロセッサ番号を渡す
+		// プロセッサを起動
+		new(0) CPU(0); // TODO:SMPの時は初期化しないルートからプロセッサ番号を渡す
 
-
-		// 呼ばれるはずはないけれど、デストラクタ呼び出し
-		for(const void (**dest)(void)(__ArchDest); *dest; dest++){
-			(*dest)();
-		}
-		//到達マーカー
-		assert(true);
+		//ここには到達しないはず
+		assert(false);
 		asm volatile("cli; hlt");
 		for(;;);
 	};

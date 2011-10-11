@@ -45,11 +45,9 @@ class CPU{
 	const uint cpuid;
 	const TSS& mytss;
 	static TSS tss[];
+	static uchar kernelStacks[][4096];
  public:
-	static void SetupTSSDescriptor(u64*);
-	static inline void SetStack(void* stackTop){
-		asm volatile("mov %0, %%esp" :: "r"(stackTop));
-	};
+	static void* operator new(munit size, uint cpuid);
 	CPU(uint id);
 };
 
