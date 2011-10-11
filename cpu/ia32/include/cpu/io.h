@@ -13,56 +13,56 @@
 // RAW I/O
 uchar in8(u16 port){
 	uchar r;
-	asm volatile("inb %1, %0" : "=a"(r) : "d"(port));
+	asm volatile("inb %%dx, %%al" : "=a"(r) : "d"(port));
 	return r;
 }
 u16 in16(u16 port){
 	u16 r;
-	asm volatile("inw %1, %0" : "=a"(r) : "d"(port));
+	asm volatile("inw %%dx, %%ax" : "=a"(r) : "d"(port));
 	return r;
 }
 u32 in32(u16 port){
 	u32 r;
-	asm volatile("inl %1, %0" : "=a"(r) : "d"(port));
+	asm volatile("inl %%dx, %%eax" : "=a"(r) : "d"(port));
 	return r;
 }
 void out8(u16 port, uchar val){
-	asm volatile("outb %0, %1" :: "a"(val), "d"(port));
+	asm volatile("outb %%al, %%dx" :: "a"(val), "d"(port));
 }
 void out16(u16 port, u16 val){
-	asm volatile("outw %0, %1" :: "a"(val), "d"(port));
+	asm volatile("outw %%ax, %%dx" :: "a"(val), "d"(port));
 }
 void out32(u16 port, u32 val){
-	asm volatile("outl %0, %1" :: "a"(val), "d"(port));
+	asm volatile("outl %%eax, %%dx" :: "a"(val), "d"(port));
 }
 
 
 // STATIC BASED I/O
 template<u16 basePort> class SBIO{
  public:
-	uchar in8(u16 port){
+	uchar in8(u16 offset){
 		uchar r;
-		asm volatile("inb %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inb %%dx, %%al" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	u16 in16(u16 port){
+	u16 in16(u16 offset){
 		u16 r;
-		asm volatile("inw %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inw %%dx, %%ax" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	u32 in32(u16 port){
+	u32 in32(u16 offset){
 		u32 r;
-		asm volatile("inl %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inl %%dx, %%eax" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	void out8(u16 port, uchar val){
-		asm volatile("outb %0, %1" :: "a"(val), "d"(basePort + port));
+	void out8(u16 offset, uchar val){
+		asm volatile("outb %%al, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
-	void out16(u16 port, u16 val){
-		asm volatile("outw %0, %1" :: "a"(val), "d"(basePort + port));
+	void out16(u16 offset, u16 val){
+		asm volatile("outw %%ax, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
-	void out32(u16 port, u32 val){
-		asm volatile("outl %0, %1" :: "a"(val), "d"(basePort + port));
+	void out32(u16 offset, u32 val){
+		asm volatile("outl %%eax, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
 };
 
@@ -73,29 +73,29 @@ class DBIO{
 	const u16 basePort;
  public:
 	DBIO(u16 base) : basePort(base){};
-	uchar in8(u16 port){
+	uchar in8(u16 offset){
 		uchar r;
-		asm volatile("inb %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inb %%dx, %%al" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	u16 in16(u16 port){
+	u16 in16(u16 offset){
 		u16 r;
-		asm volatile("inw %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inw %%dx, %%ax" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	u32 in32(u16 port){
+	u32 in32(u16 offset){
 		u32 r;
-		asm volatile("inl %1, %0" : "=a"(r) : "d"(basePort + port));
+		asm volatile("inl %%dx, %%eax" : "=a"(r) : "d"(basePort + offset));
 		return r;
 	};
-	void out8(u16 port, uchar val){
-		asm volatile("outb %0, %1" :: "a"(val), "d"(basePort + port));
+	void out8(u16 offset, uchar val){
+		asm volatile("outb %%al, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
-	void out16(u16 port, u16 val){
-		asm volatile("outw %0, %1" :: "a"(val), "d"(basePort + port));
+	void out16(u16 offset, u16 val){
+		asm volatile("outw %%ax, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
-	void out32(u16 port, u32 val){
-		asm volatile("outl %0, %1" :: "a"(val), "d"(basePort + port));
+	void out32(u16 offset, u32 val){
+		asm volatile("outl %%eax, %%dx" :: "a"(val), "d"(basePort + offset));
 	};
 };
 
