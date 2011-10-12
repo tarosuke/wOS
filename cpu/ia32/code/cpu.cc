@@ -31,6 +31,8 @@ CPU::CPU(uint id) : cpuid(id), mytss(tss[id]){
 	const u64 p((munit)&tss[cpuid]);
 	__TSSPH[cpuid] |= ((p & 0x00ffffff) << 16) | ((p & 0xff000000) << 32);
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
+
+	// TODO:スケジューラを呼ぶ
 assert(false);
 }
 
