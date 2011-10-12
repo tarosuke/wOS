@@ -7,7 +7,6 @@
 #ifndef _CPU_IO_
 #define _CPU_IO_
 
-// TODO:ストリングI/Oを追加すること
 #include <types.h>
 
 // RAW I/O
