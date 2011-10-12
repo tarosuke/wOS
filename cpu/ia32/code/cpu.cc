@@ -39,6 +39,8 @@ CPU::CPU(uint id) : cpuid(id), tss(tsss[id]){
 
 	// TODO:スケジューラを呼ぶ
 assert(false);
+asm volatile("cli; hlt");
+for(;;);
 }
 
 

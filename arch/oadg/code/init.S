@@ -97,7 +97,7 @@ __init16:
 	.short	TCSel
 
 	/***** TEMPORARY GDT */
-.align 8
+.align 256
 __LMA_GDT:
 	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
