@@ -8,24 +8,46 @@
 #include <version.h>
 
 #if CF_DEBUG_LEVEL
+static uint indentLevel(0);
 static void _putc(char c){
-	asm volatile(
-		"mov	$0x03fd, %%dx;"
-		"2: inb	%%dx, %%al;"
-		"test	$0x20, %%al;"
-		"je	2b;"
-		"mov	%%cl, %%al;"
-		"mov	$0x03f8, %%dx;"
-		"outb	%%al, %%dx"
-		:: "c"(c) : "ax", "dx");
+	if(indentLevel < CF_DEBUG_LEVEL){
+		asm volatile(
+			"mov	$0x03fd, %%dx;"
+			"2: inb	%%dx, %%al;"
+			"test	$0x20, %%al;"
+			"je	2b;"
+			"mov	%%cl, %%al;"
+			"mov	$0x03f8, %%dx;"
+			"outb	%%al, %%dx"
+			:: "c"(c) : "ax", "dx");
+	}
 }
 
-
 void dputc(char c){
-	if(c == '\n'){
+	static char p;
+
+	switch(c){
+	case '\n' :
 		_putc('\r');
+		_putc(c);
+		break;
+	case 1 :
+		indentLevel++;
+		break;
+	case 2 :
+		if(0 < indentLevel){ indentLevel--; }
+		break;
+	default :
+		if(p == 1 && c != 2){
+			_putc('\r');
+			_putc('\n');
+		}
+		if(p == '\n' || p == 1){
+			for(uint i(0); i < indentLevel; _putc(' '), i++);
+		}
+		_putc(c);
 	}
-	_putc(c);
+	p = c;
 }
 
 void dputs(const char* s){

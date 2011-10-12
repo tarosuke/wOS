@@ -11,6 +11,9 @@
 #include <config.h>
 
 
+#define INDENT "\001"
+#define UNINDENT "\002"
+
 #if CF_DEBUG_LEVEL
 void __AssertionFailed(const char* file, const unsigned line);
 #if 5 <= CF_DEBUG_LEVEL

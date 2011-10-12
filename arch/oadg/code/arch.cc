@@ -45,14 +45,18 @@ extern "C"{
 		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
 
 		// カーネルを初期化
+		dputs("Initializing kernel..." INDENT);
 		for(const void (**cons)(void)(__KernelConstructor); *cons; cons++){
 			(*cons)();
 		}
+		dputs(UNINDENT "OK.\n");
 
 		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
+		dputs("Initializing arch module..." INDENT);
 		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
 			(*cons)();
 		}
+		dputs(UNINDENT "OK.\n");
 
 		// プロセッサを起動
 		new(0) CPU(0); // TODO:SMPの時は初期化しないルートからプロセッサ番号を渡す

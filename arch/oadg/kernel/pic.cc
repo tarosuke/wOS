@@ -11,7 +11,7 @@
 
 
 static PIC pic;
-
+void (*PIC::vector[irqBaseVector + numOfIrq])();
 
 
 PIC::PIC() : irqMask(0xfffb){
