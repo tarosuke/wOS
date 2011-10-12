@@ -6,3 +6,19 @@
 
 #include <cpu/exception.h>
 
+
+u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs];
+static EXCEPTION exeptionHandler;
+
+EXCEPTION::EXCEPTION(){
+	dputs("exception..." INDENT);
+	dputs(UNINDENT "OK.\n");
+}
+
+void RegisterIRQ(uint irq, void (*handler)()){
+	//TODO:Registerするんじゃなくて、irq番号を作ってINTERRUPT::Handlerを呼ぶ
+}
+
+void RegisterFault(uint num, void (*handler)(u32)){
+}
+

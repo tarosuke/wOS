@@ -13,6 +13,16 @@
 #include <debug.h>
 
 
+class EXCEPTION{
+private:
+	static const uint systemExceptions = 32;
+	static u64 vector[];
+public:
+	EXCEPTION();
+	void RegisterIRQ(uint irq, void (*handler)());
+	void RegisterFault(uint num, void (*handler)(u32));
+};
+
 
 #endif
 

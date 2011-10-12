@@ -43,8 +43,8 @@ class CPU{
 		u32 iobase;
 	}__attribute__((packed));
 	const uint cpuid;
-	const TSS& mytss;
-	static TSS tss[];
+	TSS& tss;
+	static TSS tsss[];
 	static uchar kernelStacks[][4096];
  public:
 	static void* operator new(munit size, uint cpuid);

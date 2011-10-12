@@ -15,11 +15,15 @@
 
 class INTERRUPT{
 private:
-	static PIC pic;
 public:
 	INTERRUPT(){
-		dputs("INTERRUPT..." INDENT);
+		dputs("interrupt..." INDENT);
 		dputs(UNINDENT "OK.\n");
+	};
+	static void Handleer(uint irq){
+		PIC::Start(irq);
+		// TODO:タイマ割り込みだったら直接カーネル内のTick(たぶんCORE::Tick)を呼ぶ
+		// TODO:割り込み処理終了のマークが全部付いたらPIC::Finishを呼ぶ
 	};
 };
 

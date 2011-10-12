@@ -15,20 +15,25 @@ extern "C"{
 };
 
 
-CPU::TSS CPU::tss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
+CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 uchar CPU::kernelStacks[CF_MAX_PROCESSORs][4096]__attribute__((aligned(sizeof(int))));
 
 
 
 
-CPU::CPU(uint id) : cpuid(id), mytss(tss[id]){
+CPU::CPU(uint id) : cpuid(id), tss(tsss[id]){
 	assert(cpuid < CF_MAX_PROCESSORs);
 
-	//ここより下位がカーネルスタック
+	// ここより下位がカーネルスタック
 	asm volatile("mov %0, %%esp" :: "r"(this));
 
+	// TSS設定
+	tss.ss2 = UDSel;
+	tss.ss0 = KDSel;
+	tss.esp0 = (u32)this;
+
 	// そのプロセッサ用のTSSを設定
-	const u64 p((munit)&tss[cpuid]);
+	const u64 p((munit)&tss);
 	__TSSPH[cpuid] |= ((p & 0x00ffffff) << 16) | ((p & 0xff000000) << 32);
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
 

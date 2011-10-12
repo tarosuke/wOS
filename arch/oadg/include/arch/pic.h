@@ -14,14 +14,29 @@
 //TODO:APIC対応
 class PIC{
 private:
-	SBIO<0x20> mpic;
-	SBIO<0xa0> spic;
-	uint irqMask;
+	static SBIO<0x20> mpic;
+	static SBIO<0xa0> spic;
+	static uint irqMask;
+	static uint levels;
 	static const uint irqBaseVector = 0x20;
 	static const uint numOfIrq = 9;
+	static inline void UpdateMask(uint irq){
+		if(irq < 8){
+			mpic.out8(1, irqMask & 255);
+		}else{
+			spic.out8(1, irqMask >> 8);
+		}
+	};
+	static inline void EOI(uint irq){
+		if(irq < 8){
+			mpic.out8(0, 0x20);
+		}else{
+			spic.out8(0, 0x20);
+		}
+	};
 public:
-	PIC() : irqMask(0xfffb){
-		dputs("PICs...");
+	PIC(){
+		dputs("pics...");
 
 		/* MASTER EDGE-TRIGER, BUFFER, 0x20-0x27 */
 		mpic.out8(0, 0x11);
@@ -41,8 +56,26 @@ public:
 
 		dputs("OK.\n");
 	};
-	static void Start(uint irq); // 対象割り込みマスク、割り込み許可、エッジトリガならEOI発行
-	static void Finish(uint irq); // 対象割り込みマスク解除、レベルトリガならEOI発行
+	// 対象割り込みマスク、割り込み許可、エッジトリガならEOI発行
+	static void Start(uint irq){
+		const uint bit(1U << irq);
+		if(~levels & bit){
+			// エッジトリガなので処理前EOI発行
+			EOI(irq);
+		}
+		irqMask |= bit;
+		UpdateMask(irq);
+	};
+	// 対象割り込みマスク解除、レベルトリガならEOI発行
+	static void Finish(uint irq){
+		const uint bit(1U << irq);
+		irqMask &= ~bit;
+		UpdateMask(irq);
+		if(~levels & bit){
+			// レベルトリガなので処理終了後EOI発行
+			EOI(irq);
+		}
+	};
 };
 
 

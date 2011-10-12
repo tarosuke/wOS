@@ -4,7 +4,9 @@
  *	$Id$
  */
 
-#include <interrupt.h>
+#include <arch/pic.h>
 
 
-static INTERRUPT interruptHandler;
+uint PIC::irqMask(0xfffb);
+uint PIC::levels(0); //関数呼び出しか何かで設定すればconstにできる。
+static PIC pic;
