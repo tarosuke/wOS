@@ -10,4 +10,4 @@
 static INTERRUPT interruptManipulator;
 void (*INTERRUPT::handlers[CF_MAX_IRQs])();
 
-extern "C"{ void __INTERRUPT_Handler(uint irq){ dputc('*'); INTERRUPT::Handler(irq); } }
+extern "C"{ void __INTERRUPT_Handler(uint irq){ INTERRUPT::Handler(irq); } }

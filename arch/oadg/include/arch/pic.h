@@ -76,6 +76,14 @@ public:
 			spic.out8(0, 0x20);
 		}
 	};
+	static void Mask(uint irq){
+		irqMask &= ~(1U << irq);
+		UpdateMask(irq);
+	};
+	static void Unmask(uint irq){
+		irqMask |= (1U << irq);
+		UpdateMask(irq);
+	};
 };
 
 

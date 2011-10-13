@@ -39,6 +39,7 @@
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
+	sub	$ARCH_BASE_VECTOR, %eax
 	push	%eax
 	/***** ハンドラ実行 */
 	call	__INTERRUPT_Handler

@@ -1,7 +1,7 @@
 /************************************************************ CONFIGURE KERNEL
 	Copyright (C) 2010- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: 4fb8004d2a2073a1d865c64aae03e15c8227cd9f $
+	$Id$
 
 	ビルド位置にあるtalos.confのwrapper。
 	デフォルト設定を作ったり、問題があればコンパイルエラーにする。
@@ -30,7 +30,7 @@
 #endif
 
 #ifndef CF_MAX_IRQs
-#	define CF_MAX_IRQs 16
+#	define CF_MAX_IRQs 17
 #endif
 
 #ifndef CF_MAX_IRQ_SHAREs
