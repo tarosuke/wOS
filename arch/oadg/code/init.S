@@ -75,7 +75,7 @@ __init16:
 	/***** initialize other 16-bits code pointed from __kernelProcessDefs16 array */
 	mov	$__kernelProcessDefs16, %esi
 1:	lodsl
-	test	%eax, %eax
+	test	%ax, %ax
 	jz	1f
 	call	*%ax
 	jmp	1b
