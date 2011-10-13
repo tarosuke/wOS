@@ -24,11 +24,11 @@ extern "C"{
 	void __Init32(void){
 		// 初期ページテーブルを初期化、設定、ページング開始
 		for(uint i(0); i < 256; i++){
-			loPageTable[i] = 0x0000003 | (i << 12);
+			loPageTable[i] = 0x0000007 | (i << 12);
 			kernelPageTable[i] = 0x0000103 | (i << 12);
 		}
 		kernelPageDir[1023] = ((u32)kernelPageDir & 0xfffff000) | 0x0000103;
-		kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x0000003;
+		kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x0000007;
 		kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x0000103;
 		asm volatile(
 			"mov %%eax, %%cr3;"
