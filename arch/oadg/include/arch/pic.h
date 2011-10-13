@@ -27,13 +27,6 @@ private:
 			spic.out8(1, irqMask >> 8);
 		}
 	};
-	static inline void EOI(uint irq){
-		if(irq < 8){
-			mpic.out8(0, 0x20);
-		}else{
-			spic.out8(0, 0x20);
-		}
-	};
 public:
 	PIC(){
 		dputs("pics...");
@@ -74,6 +67,13 @@ public:
 		if(~levels & bit){
 			// レベルトリガなので処理終了後EOI発行
 			EOI(irq);
+		}
+	};
+	static inline void EOI(uint irq){
+		if(irq < 8){
+			mpic.out8(0, 0x20);
+		}else{
+			spic.out8(0, 0x20);
 		}
 	};
 };

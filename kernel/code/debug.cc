@@ -4,8 +4,9 @@
  *	$Id$
  */
 
+#include <config.h>
+#include <types.h>
 #include <debug.h>
-#include <version.h>
 
 #if CF_DEBUG_LEVEL
 static uint indentLevel(0);

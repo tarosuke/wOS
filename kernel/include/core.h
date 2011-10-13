@@ -10,14 +10,33 @@
 
 
 #include <types.h>
+#include <config.h>
+#include <interrupt.h>
+#include <debug.h>
 
-
-// class CORE{
-// 	CORE();
-// 	CORE(CORE&);
-// private:
-// public:
-// };
+class CORE{
+	CORE(CORE&);
+private:
+	static const tunit tickTime = 1000000ULL / CF_HZ;
+	static const uint systemCallIRQ = 16;
+	static tunit uptime;
+	static void SystemCall(){
+	};
+public:
+	CORE(){
+		dputs("core..." INDENT);
+		INTERRUPT::RegisterHandler(systemCallIRQ, SystemCall);
+		dputs(UNINDENT "OK.\n");
+	};
+	static void Tick(){
+		uptime += tickTime;
+	};
+	static tunit GetUptime(){
+		tunit now(uptime);
+		while(now != uptime);
+		return now;
+	};
+};
 
 
 

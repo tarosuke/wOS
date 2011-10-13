@@ -4,18 +4,11 @@
  *	$Id$
  */
 
-
-
 #include <core.h>
 #include <cpu/cpu.h>
 #include <config.h>
 #include <debug.h>
 
 
-
-
-
-
-
-
+tunit CORE::uptime(0);
 

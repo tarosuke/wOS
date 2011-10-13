@@ -1,0 +1,72 @@
+/**************************************************** PRIMER EXCEPTION HANDLER
+ *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	check LICENSE.txt. If you don't have the file, mail us.
+ *	$Id$
+ */
+
+#include <config.h>
+#include <arch/segments.h>
+
+.global __ExceptionTable
+.extern __INTERRUPT_Handler, __FAULT_Handler
+
+#define ARCH_BASE_VECTOR 32
+
+.text
+/***** フォルト専用ハンドラ(フラグを引数に) */
+.L_faultPad:
+	mov	%esp, %ebp
+	push	%ds
+	push	%es
+	mov	$KDSel, %dx
+	mov	%dx, %ds
+	mov	%dx, %es
+	push	40(%ebp)
+	push	%eax
+	call	__FAULT_Handler
+	add	$8, %esp
+	/****** 終了 */
+	pop	%es
+	pop	%ds
+	popal
+	add	$4, %esp
+	iret
+
+/***** 割り込みハンドラ(共通部) */
+.L_jumpPad:
+	push	%ds
+	push	%es
+	mov	$KDSel, %dx
+	mov	%dx, %ds
+	mov	%dx, %es
+	push	%eax
+	/***** ハンドラ実行 */
+	call	__INTERRUPT_Handler
+	pop	%eax
+	/***** 終了 */
+3:	pop	%es
+	pop	%ds
+	popal
+	iret
+
+/***** 割り込みハンドラ(個別部) */
+	.align	16
+__ExceptionTable:
+	.macro	jumpers f t
+	.align	16, 0x90
+	pushal
+	mov	$\f, %eax
+	.if	(ARCH_BASE_VECTOR <= \f)
+	/***** NORMAL HANDLER */
+	jmp	.L_jumpPad
+	.else
+	/***** FAULT HANDLER */
+	jmp	.L_faultPad
+	.endif
+	.if	\t - \f
+	jumpers	"(\f+1)", \t
+	.endif
+	.endm
+
+	jumpers	0, (ARCH_BASE_VECTOR + CF_MAX_IRQs)
+

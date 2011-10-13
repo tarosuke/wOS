@@ -38,9 +38,9 @@ CPU::CPU(uint id) : cpuid(id), tss(tsss[id]){
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
 
 	// TODO:スケジューラを呼ぶ
-assert(false);
-asm volatile("cli; hlt");
-for(;;);
+assert(true);
+//asm volatile("sti; int $0x30");
+for(;;){ dputc('.'); asm volatile("hlt"); };
 }
 
 

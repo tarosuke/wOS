@@ -17,9 +17,9 @@ class EXCEPTION{
 private:
 	static const uint systemExceptions = 32;
 	static u64 vector[];
+	static const struct IDTP{ u16 limit; u64* table; } idtp;
 public:
 	EXCEPTION();
-	void RegisterIRQ(uint irq, void (*handler)());
 	void RegisterFault(uint num, void (*handler)(u32));
 };
 

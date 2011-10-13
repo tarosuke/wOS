@@ -7,4 +7,7 @@
 #include <interrupt.h>
 
 
-static INTERRUPT interruptHandler;
+static INTERRUPT interruptManipulator;
+void (*INTERRUPT::handlers[CF_MAX_IRQs])();
+
+extern "C"{ void __INTERRUPT_Handler(uint irq){ dputc('*'); INTERRUPT::Handler(irq); } }

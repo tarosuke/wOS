@@ -1,7 +1,7 @@
 /*********************************************************************** TYPES
 	Copyright (C) 2009- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: e76d06cdf231d2e582596215c8b39e99e191017a $
+	$Id$
 */
 
 
@@ -17,10 +17,10 @@ typedef u64 funit;
 
 
 /// time(unit:microseconds)
-typedef u64 time;
+typedef u64 tunit;
 namespace TIME{
-	static const time infinite = (time)-1LL;
-	static const time continuous = (time)-2LL;
+	static const tunit infinite = (tunit)-1LL;
+	static const tunit continuous = (tunit)-2LL;
 };
 
 /// talos charactor

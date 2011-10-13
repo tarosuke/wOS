@@ -15,15 +15,27 @@
 
 class INTERRUPT{
 private:
+	static void (*handlers[])();
 public:
 	INTERRUPT(){
 		dputs("interrupt..." INDENT);
 		dputs(UNINDENT "OK.\n");
 	};
-	static void Handleer(uint irq){
-		PIC::Start(irq);
-		// TODO:タイマ割り込みだったら直接カーネル内のTick(たぶんCORE::Tick)を呼ぶ
-		// TODO:割り込み処理終了のマークが全部付いたらPIC::Finishを呼ぶ
+	static inline void Handler(uint irq){
+		if(handlers[irq]){
+			handlers[irq](); //EOIはハンドラが出す
+		}else{
+			PIC::Start(irq);
+			// TODO:タスクが登録されてたら起動する。全く登録されてなかったらFinish
+		}
+	};
+	static void Finish(uint irq){
+		//TODO:Handlerで起動した割り込み処理が全部終わったら呼ばれる
+		PIC::Finish(irq);
+	};
+	static void RegisterHandler(uint irq, void (*handler)()){
+		// ハンドラの登録(タイマとシステムコールしか使わないけどなw)
+		handlers[irq] = handler;
 	};
 };
 
