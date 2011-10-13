@@ -37,6 +37,9 @@ void dputc(char c){
 		break;
 	case 2 :
 		if(0 < indentLevel){ indentLevel--; }
+		if(p == '\n'){
+			for(uint i(0); i < indentLevel; _putc(' '), i++);
+		}
 		break;
 	default :
 		if(p == 1 && c != 2){
@@ -208,7 +211,7 @@ void Panic(const char* message){
 
 
 void __AssertionFailed(const char* file, const unsigned line){
-	dprintf("Assertion fAILED at %s:%u", file, line);
+	dprintf("\033[1;31mAssertion FAILED at %s:%u\033[0m", file, line);
 	Panic("");
 }
 #if 5 <= CF_DEBUG_LEVEL
