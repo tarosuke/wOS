@@ -19,10 +19,7 @@ private:
 	static const u16 counterP = 0;
 	static const u16 controlP = 3;
 	static SBIO<0x40> io;
-	static void Tick(){
-		CORE::Tick();
-		PIC::EOI(timerIRQ);
-	};
+	static void Tick();
 public:
 	TIMER(){
 		dputs("timer..." INDENT);
@@ -39,3 +36,8 @@ public:
 	};
 }timer;
 
+void TIMER::Tick(){
+	assert(true);
+	CORE::Tick();
+	PIC::EOI(timerIRQ);
+};
