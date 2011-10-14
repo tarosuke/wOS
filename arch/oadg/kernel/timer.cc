@@ -23,6 +23,7 @@ private:
 public:
 	TIMER(){
 		dputs("timer..." INDENT);
+		dprintf("timer cycle %d[Hz]/%d count.\n", CF_HZ, timerCount);
 
 		///// re-initialize timer
 		io.out8(controlP, 0x34);
@@ -37,7 +38,6 @@ public:
 }timer;
 
 void TIMER::Tick(){
-	assert(true);
 	CORE::Tick();
 	PIC::EOI(timerIRQ);
 };

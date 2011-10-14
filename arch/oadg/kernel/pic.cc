@@ -8,5 +8,5 @@
 
 
 uint PIC::irqMask(0xfffb);
-uint PIC::levels(0); //関数呼び出しか何かで設定すればconstにできる。
+const uint PIC::levels(elcr.in16(0));
 static PIC pic;

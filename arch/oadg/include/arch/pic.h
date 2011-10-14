@@ -16,8 +16,9 @@ class PIC{
 private:
 	static SBIO<0x20> mpic;
 	static SBIO<0xa0> spic;
+	static SBIO<0x4d0> elcr;
 	static uint irqMask;
-	static uint levels;
+	static const uint levels;
 	static const uint irqBaseVector = 0x20;
 	static const uint numOfIrq = 9;
 	static inline void UpdateMask(uint irq){
@@ -64,7 +65,7 @@ public:
 		const uint bit(1U << irq);
 		irqMask &= ~bit;
 		UpdateMask(irq);
-		if(~levels & bit){
+		if(levels & bit){
 			// レベルトリガなので処理終了後EOI発行
 			EOI(irq);
 		}
@@ -77,11 +78,11 @@ public:
 		}
 	};
 	static void Mask(uint irq){
-		irqMask &= ~(1U << irq);
+		irqMask |= (1U << irq);
 		UpdateMask(irq);
 	};
 	static void Unmask(uint irq){
-		irqMask |= (1U << irq);
+		irqMask &= ~(1U << irq);
 		UpdateMask(irq);
 	};
 };

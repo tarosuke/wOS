@@ -21,11 +21,9 @@ public:
 		dputs("interrupt..." INDENT);
 		dputs(UNINDENT "OK.\n");
 	};
-	static void Handler(uint irq){
+	static inline void Handler(uint irq){
 		if(handlers[irq]){
-			dprintf("INTERRUPT::Handler to be run handler:%08x by irq%d.\n", handlers[irq], irq);
 			handlers[irq](); //EOIはハンドラが出す
-			assert(true);
 		}else{
 			PIC::Start(irq);
 			// TODO:タスクが登録されてたら起動する。全く登録されてなかったらFinish
@@ -37,7 +35,6 @@ public:
 	};
 	static void RegisterHandler(uint irq, void (*handler)()){
 		// ハンドラの登録(タイマとシステムコールしか使わないけどなw)
-		eprintf("INTERRUPT::Registering handler %08x at irq%d.\n", handler, irq);
 		handlers[irq] = handler;
 		PIC::Unmask(irq);
 	};
