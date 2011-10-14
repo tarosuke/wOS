@@ -52,6 +52,10 @@ public:
 	};
 	// 対象割り込みマスク、割り込み許可、エッジトリガならEOI発行
 	static void Start(uint irq){
+		if(16 <= irq){
+			assert(false);
+			return;
+		}
 		const uint bit(1U << irq);
 		if(~levels & bit){
 			// エッジトリガなので処理前EOI発行
@@ -62,6 +66,10 @@ public:
 	};
 	// 対象割り込みマスク解除、レベルトリガならEOI発行
 	static void Finish(uint irq){
+		if(16 <= irq){
+			assert(false);
+			return;
+		}
 		const uint bit(1U << irq);
 		irqMask &= ~bit;
 		UpdateMask(irq);
@@ -71,6 +79,9 @@ public:
 		}
 	};
 	static inline void EOI(uint irq){
+		if(16 <= irq){
+			return;
+		}
 		if(irq < 8){
 			mpic.out8(0, 0x20);
 		}else{
@@ -78,10 +89,16 @@ public:
 		}
 	};
 	static void Mask(uint irq){
+		if(16 <= irq){
+			return;
+		}
 		irqMask |= (1U << irq);
 		UpdateMask(irq);
 	};
 	static void Unmask(uint irq){
+		if(16 <= irq){
+			return;
+		}
 		irqMask &= ~(1U << irq);
 		UpdateMask(irq);
 	};

@@ -22,12 +22,17 @@ public:
 		dputs(UNINDENT "OK.\n");
 	};
 	static inline void Handler(uint irq){
+		if(CF_MAX_IRQs <= irq){
+			assert(false);
+			return;
+		}
 		if(handlers[irq]){
 			handlers[irq](); //EOIはハンドラが出す
 		}else{
 			PIC::Start(irq);
 			// TODO:タスクが登録されてたら起動する。全く登録されてなかったらFinish
 		}
+		//TODO:何も登録されていなかったらMaskしてFinish
 	};
 	static void Finish(uint irq){
 		//TODO:Handlerで起動した割り込み処理が全部終わったら呼ばれる

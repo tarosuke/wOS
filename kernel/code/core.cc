@@ -11,4 +11,10 @@
 
 
 tunit CORE::uptime(0);
+static CORE core;
+
+void CORE::SystemCall(){
+	assert(true);
+	//TODO:パラメタの受け取りとか
+};
 

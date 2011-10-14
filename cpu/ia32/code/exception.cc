@@ -9,7 +9,7 @@
 
 
 extern "C"{
-	void __FAULT_Handler(uint num, uint err){ /*INTERRUPT::Handler(irq);*/ dprintf("EXCEPTION cought(%d:%08x).\n", num, err); assert(false); }
+	void __FAULT_Handler(uint num, uint err){ /*INTERRUPT::Handler(irq);*/ dprintf("EXCEPTION(%d:%08x).\n", num, err); assert(false); }
 	extern u32 __ExceptionTable[CF_MAX_IRQs][4];
 }
 

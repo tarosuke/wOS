@@ -42,6 +42,8 @@ CPU::CPU(uint id) : cpuid(id), tss(tsss[id]){
 
 	// TODO:スケジューラを呼ぶ
 assert(true);
+asm volatile("int $0x30");
+assert(true);
 asm volatile("sti");
 assert(true);
 for(;;){ asm volatile("hlt"); dprintf("uptime:%llu\r", CORE::GetUptime()); };

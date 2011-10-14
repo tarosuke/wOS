@@ -1,7 +1,7 @@
 /****************************************** LDSCRIPT TO CONVERT KERNEL OBJECTS
 	Copyright (C) 2009- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: e881070b72bda47c58026e678deef2ab91c98fba $
+	$Id$
 */
 
 SECTIONS {
@@ -24,10 +24,6 @@ SECTIONS {
 		*(.gnu*)
 		*(.bss*)
 	}
-	.kp_ro : {
-		*(.kproc_ro)
-	}
-	.kp_rw : {
-		*(.kproc_rw)
-	}
+	.stab : { *(.stab) }
+	.stabstr : { *(.stabstr) }
 }
