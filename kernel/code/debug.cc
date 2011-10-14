@@ -211,7 +211,7 @@ void Panic(const char* message){
 
 
 void __AssertionFailed(const char* file, const unsigned line){
-	dprintf("\033[1;31mAssertion FAILED at %s:%u\033[0m", file, line);
+	dprintf(LIGHTRED "Assertion FAILED at %s:%u" ORIGIN, file, line);
 	Panic("");
 }
 #if 5 <= CF_DEBUG_LEVEL
