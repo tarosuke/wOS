@@ -31,8 +31,8 @@ public:
 		uptime += tickTime;
 	};
 	static tunit GetUptime(){
-		tunit now(uptime);
-		while(now != uptime);
+		tunit now;
+		do{ now = uptime; }while(now != uptime);
 		return now;
 	};
 };
