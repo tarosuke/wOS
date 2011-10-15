@@ -40,7 +40,7 @@ ldopts = -N --cref -nostdlib
 VPATH =
 VPATH += ../../arch/$(arch)/code ../../arch/$(arch)/kernel
 VPATH += ../../cpu/$(cpu)/code ../../kernel/code
-VPATH += ../../userlib
+VPATH += ../../userlib/code
 
 
 

@@ -102,7 +102,7 @@ __LMA_GDT:
 	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
 	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
-	.quad	0x00c3f8000000ffff	// CS(user:0-1G)
+	.quad	0x00cff8000000ffff	// CS(user)
 	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
 __LMA_TSSPH:

@@ -1,7 +1,7 @@
 /********************************************** LDSCRIPT FOR OADG ARCHITECTURE
 	Copyright (C) 2004- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: e4e4b9f75cd9fee7a9df24990857b260256b5915 $
+	$Id$
 */
 
 
@@ -64,9 +64,9 @@ SECTIONS {
 		__kernel_heap = ABSOLUTE(.);
 	} AT > IMAGE
 
-	.ulib __ulib_start : {
-		*(.ulib)
+	.ulib __kernel_base : {
 		*(.ulib_ro)
+		*(.ulib_rw)
 		. = ALIGN(4096);
 	} AT > IMAGE
 

@@ -18,18 +18,22 @@ extern "C"{
 	extern const void (*__KernelConstructor[])(void);
 	extern const uchar __kernel_base[];
 	extern const u32 __VMA_GDTPT;
+	extern const munit __ulib_LMA[];
 	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
 	void __Init32(void){
-		// 初期ページテーブルを初期化、設定、ページング開始
+		// 初期ページテーブルを初期化、設定、ページング開始 TODO::4Mページ、PAE対応
 		for(uint i(0); i < 256; i++){
 			loPageTable[i] = 0x0000007 | (i << 12);
 			kernelPageTable[i] = 0x0000103 | (i << 12);
 		}
+		for(uint i(0); i < 16; i++){
+			kernelPageTable[i] = (munit)__ulib_LMA + 0x0000005 | (i << 12);
+		}
 		kernelPageDir[1023] = ((u32)kernelPageDir & 0xfffff000) | 0x0000103;
 		kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x0000007;
-		kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x0000103;
+		kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x0000107;
 		asm volatile(
 			"mov %%eax, %%cr3;"
 			"mov %%cr4, %%eax;"
