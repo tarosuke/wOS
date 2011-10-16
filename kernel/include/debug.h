@@ -18,9 +18,6 @@
 void __AssertionFailed(const char* file, const unsigned line);
 #if 5 <= CF_DEBUG_LEVEL
 void __AssertionPassed(const char* file, const unsigned line);
-#define ORIGIN "\033[0m"
-#define LIGHTWHITE "\033[1;37m"
-#define LIGHTRED "\033[1;31m"
 #else
 #define __AssertionPassed(a,b)
 #endif
@@ -35,6 +32,9 @@ void Panic(const char*);
 		__AssertionPassed(__FILE__, __LINE__);\
 	}\
 }
+#define ORIGIN "\033[0m"
+#define LIGHTWHITE "\033[1;37m"
+#define LIGHTRED "\033[1;31m"
 #else
 #define dputc(c)
 #define dputs(s)
