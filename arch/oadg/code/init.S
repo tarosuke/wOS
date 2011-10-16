@@ -7,7 +7,7 @@
 #include <config.h>
 #include <arch/segments.h>
 
-.global __init16, __LMA32, __ARCH_Memoryblocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
+.global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, __Init32, __LMA32_16, __VMA_GDT
 
 
@@ -38,7 +38,7 @@ __init16:
 
 	/***** get memorybanks */
 #define SMAP 0x534d4150
-	mov	$__ARCH_Memoryblocks, %edi
+	mov	$__ARCH_MemoryBlocks, %edi
 	xor	%ebx, %ebx
 1:	mov	$0xe820, %eax
 	mov	$SMAP, %edx
@@ -59,7 +59,7 @@ __init16:
 	mov	%ax, %dx
 	shl	$10, %edx
 	push	%edx
-	mov	$__ARCH_Memoryblocks, %ebx
+	mov	$__ARCH_MemoryBlocks, %ebx
 	pop	%eax
 	movl	$0x100000, (%bx)
 	add	$4, %bx
@@ -120,8 +120,8 @@ __LMA_GDTPT:
 
 
 	/***** MEMORYBANKs */
-__ARCH_Memoryblocks:
-	.rept	CF_MAX_MEMORYBLOCKs + 1
+__ARCH_MemoryBlocks:
+	.rept	CF_MAX_MEMORYBANKs + 1
 	.quad	0xffffffffffffffff
 	.quad	0xffffffffffffffff
 	.long	0xffffffff

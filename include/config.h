@@ -38,7 +38,7 @@
 #endif
 
 #ifndef CF_MAX_MEMORYBLOCKs
-#	define CF_MAX_MEMORYBLOCKs 16
+#	define CF_MAX_MEMORYBANKs 16
 #endif
 
 #ifndef CF_DEBUG_LEVEL
