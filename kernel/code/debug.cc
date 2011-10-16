@@ -9,18 +9,11 @@
 #include <debug.h>
 
 #if CF_DEBUG_LEVEL
+extern void __ARCH_putc(char);
 static uint indentLevel(0);
 static void _putc(char c){
 	if(indentLevel < CF_DEBUG_LEVEL){
-		asm volatile(
-			"mov	$0x03fd, %%dx;"
-			"2: inb	%%dx, %%al;"
-			"test	$0x20, %%al;"
-			"je	2b;"
-			"mov	%%cl, %%al;"
-			"mov	$0x03f8, %%dx;"
-			"outb	%%al, %%dx"
-			:: "c"(c) : "ax", "dx");
+		__ARCH_putc(c);
 	}
 }
 

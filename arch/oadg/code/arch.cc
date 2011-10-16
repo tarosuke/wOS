@@ -82,5 +82,18 @@ static class ARCH{
 }arch;
 
 
+#if CF_DEBUG_LEVEL
+void __ARCH_putc(char c){
+	asm volatile(
+		"mov	$0x03fd, %%dx;"
+		"2: inb	%%dx, %%al;"
+		"test	$0x20, %%al;"
+		"je	2b;"
+		"mov	%%cl, %%al;"
+		"mov	$0x03f8, %%dx;"
+		"outb	%%al, %%dx"
+		:: "c"(c) : "ax", "dx");
+}
+#endif
 
 
