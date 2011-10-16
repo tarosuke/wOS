@@ -12,6 +12,7 @@
 #define _CONFIG_
 
 #include "config"
+#include <arch/config.h>
 
 
 #ifndef CF_HZ
@@ -27,18 +28,6 @@
 
 #ifndef CF_TASKROTATE_CYCLE
 #	define CF_TASKROTATE_CYCLE 5
-#endif
-
-#ifndef CF_MAX_IRQs
-#	define CF_MAX_IRQs 17
-#endif
-
-#ifndef CF_MAX_IRQ_SHAREs
-#	define CF_MAX_IRQ_SHAREs 4
-#endif
-
-#ifndef CF_MAX_MEMORYBLOCKs
-#	define CF_MAX_MEMORYBANKs 16
 #endif
 
 #ifndef CF_DEBUG_LEVEL
