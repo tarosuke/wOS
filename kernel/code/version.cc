@@ -1,25 +1,25 @@
 /************************************************************* VERSION STRINGS
 	Copyright (C) 2006- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: 048a72a67f77ffb9a5e5519645bc1903789c3f5c $
+	$Id$
 */
 
 // NOTE: EUC-JP
 
-// #include <version.h>
-// #include <config.h>
+#include <version.h>
+#include <config.h>
 
 
 const char __version[] =
-	"talos 0.7("
+	"talos 0.0("
 	"built at " __DATE__ " " __TIME__ ")"
-#if (0 < CF_DEBUG_LEVEL)
+#if CF_DEBUG_LEVEL
 	" with debug option"
 #endif
 ;
 
 const char __copyright[] =
-	" Copyright (C) 2004-2008 project talos (http://talos-kernel.sf.net/)\n"
+	" Copyright (C) 2004-2011 project talos (http://talos-kernel.sf.net/)\n"
 	" このソフトウェアはGPLに基づいてライセンスされています。\n"
 	" 詳細はGNU一般公有使用許諾書(gpl-*.txt)を参照してください。";
 
