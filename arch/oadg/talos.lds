@@ -14,9 +14,7 @@ MEMORY {
 }
 
 SECTIONS {
-	__kernel_base = 0xfe000000;
-	__ulib_start = 0xfd000000;
-	__archPageTableArray = 0xffc00000;
+	__kernel_base = 0xf0000000; /* NOTE:変更するときは4MiB単位 */
 	__cxa_pure_virtual = 0;
 
 	__init_LMA = LOADADDR(.init);
