@@ -36,6 +36,7 @@ SECTIONS {
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
+	__kProcHeader_LMA = LOADADDR(.kProcHeader);
 
 	/* VARIANT of ADDRESSSPACE */
 	__arch_LOMEM = __init_LMA +
@@ -66,6 +67,11 @@ SECTIONS {
 		*(.ulib_ro)
 		*(.ulib_rw)
 		. = ALIGN(4096);
+	} AT > IMAGE
+
+	.kProcHeader 0 : {
+		*(.kp_def)
+		LONG(0);
 	} AT > IMAGE
 
 	.user 0 : {
