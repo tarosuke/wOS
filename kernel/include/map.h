@@ -8,14 +8,12 @@
 #define _MAP_
 
 #include <types.h>
+#include <resource.h>
 
 
-class MAP{
+class MAP : RESOURCE{
 public:
-	class BODY{
-	public:
-		virtual punit GetPage(punit entry) = 0;
-	};
+	virtual punit GetPage(punit entry) = 0;
 private:
 };
 

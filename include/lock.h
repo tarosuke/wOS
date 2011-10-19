@@ -1,6 +1,6 @@
 /***************************************************************** KERNEL CORE
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
- *	check LICENSE.txt. If you don't have the file, mail us.
+ *	check LICENSE.txt. If you don't have the file, contact us.
  *	$Id$
  */
 
@@ -23,15 +23,16 @@ public:
 	~KEY(){ lock.Unlock(); };
 };
 
+#if 0
 class RKEY{
 	RKEY(RKEY&);
 private:
-	LOCK lock;
+	static LOCK lock;
 public:
 	RKEY(){ lock.Lock(); };
 	~RKEY(){ lock.Unlock(); };
 };
-
+#endif
 
 #endif
 

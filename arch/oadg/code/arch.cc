@@ -20,7 +20,7 @@ extern "C"{
 	extern const u32 __VMA_GDTPT;
 	extern const munit __ulib_LMA[];
 	extern const uchar __kProcHeader_LMA[];
-	static u32 kernelPageDir[1024] __attribute__((aligned(4096)));
+	u32 __kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
 	void __Init32(void){
@@ -32,9 +32,9 @@ extern "C"{
 		for(uint i(0); i < 16; i++){
 			kernelPageTable[i] = (munit)__ulib_LMA + 0x00000005 | (i << 12);
 		}
-		kernelPageDir[1023] = ((u32)kernelPageDir & 0xfffff000) | 0x00000103;
-		kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x00000007;
-		kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x00000107;
+		__kernelPageDir[1023] = ((u32)__kernelPageDir & 0xfffff000) | 0x00000103;
+		__kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x00000007;
+		__kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x00000107;
 		loPageTable[0] = (u32)__kProcHeader_LMA | 0x00000007;
 		asm volatile(
 			"mov %%eax, %%cr3;"
@@ -43,7 +43,7 @@ extern "C"{
 			"mov %%eax, %%cr4;"
 			"mov %%cr0, %%eax;"
 			"or $0x80000000, %%eax;"
-			"mov %%eax, %%cr0" :: "a"(kernelPageDir));
+			"mov %%eax, %%cr0" :: "a"(__kernelPageDir));
 
 		/// これ以降はカーネルコードを使用可能
 

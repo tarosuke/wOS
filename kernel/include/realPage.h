@@ -1,6 +1,6 @@
 /******************************************************* REALPAGE MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
- *	check LICENSE.txt. If you don't have the file, mail us.
+ *	check LICENSE.txt. If you don't have the file, contact us.
  *	$Id$
  */
 
@@ -41,7 +41,7 @@ public:
 			new(&memoryBanks[numOfBanks++]) MEMORYBLOCK(start, size);
 		}
 	};
-	punit GetPages(punit pages = 1);
+	static punit GetPages(punit pages = 1);
 private:
 	static uint numOfBanks;
 	static MEMORYBLOCK memoryBanks[];
