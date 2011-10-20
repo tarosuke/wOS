@@ -35,7 +35,7 @@ extern "C"{
 		__kernelPageDir[1023] = ((u32)__kernelPageDir & 0xfffff000) | 0x00000103;
 		__kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x00000007;
 		__kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x00000107;
-		loPageTable[0] = (u32)__kProcHeader_LMA | 0x00000007;
+		loPageTable[0] = (u32)__kProcHeader_LMA | 0x00000005;
 		asm volatile(
 			"mov %%eax, %%cr3;"
 			"mov %%cr4, %%eax;"
