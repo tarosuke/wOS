@@ -66,18 +66,19 @@ void VIRTUALPAGE::Enable(void* start, munit pages){
 	}
 }
 
-void VIRTUALPAGE::Enable(void* start, const MAP&, munit pages){
+void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, u32 attr){
 	const munit p((munit)start / PAGESIZE);
+	mapID <<= 12;
 	KEY key(lock);
 
 	// ページテーブル準備
 	PrepareTable(p, pages);
 
-	// ページイネーブル(普通)
+	// ページイネーブル(マップ)
 	for(munit v(p); v < p + pages; v++){
 		u32& pte(pageTableArray[v]);
 		if(!(pte & (present || valid))){
-			pte = valid | (InKernel(v) ? 0x102 : 6);
+			pte = mapID | maped | valid | attr | (InKernel(v) ? 0x102 : 6);
 		}
 	}
 }

@@ -26,15 +26,15 @@ public:
 	static const u32 bigPage = 0x80;
 	static const u32 global = 0x100;
 	static const u32 valid = 0x200;
-	static const u32 map = 0x400;
+	static const u32 maped = 0x400;
 	static const u32 copyOnWrite = 0x800;
 	static const u32 pageAttributeIndex4M = 0x1000;
-	// ページ操作(カーネル領域ならEnableでglobalを立て、でなければuserを立てる)
-	static void Enable(void*, munit pages = 1); // 対象ページのvalidを立てる。
-	static void Enable(void*, const MAP&, munit pages = 1); // マップとして割り当てる。
-	//TODO:実行ファイルのためのEnableを考えておく。基本的にはcowなファイルマップだが。
-	static void Enable(void*, munit pa, punit pages = 1); // 実ページを割り当てる。
-	static void Disable(void*, munit pages); // 実ページが割り当てられていたら解放し、presentもvalidも0にする。
+	// ページ有効化(あるいは実ページ／マップ割り当て)
+	static void Enable(void*, munit pages = 1);
+	static void Enable(void*, uint mapID, munit pages = 1, u32 attr = 0);
+	static void Enable(void*, munit pa, punit pages = 1);
+	// ページ無効化・返却
+	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
 	static void Fault(u32 code);
 private:

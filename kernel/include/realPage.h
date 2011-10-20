@@ -35,6 +35,10 @@ public:
 			}
 			return start + page;
 		};
+		inline bool ReleasePages(punit page, punit pages){
+			// 範囲外ならfalse。範囲内ならページを返却してtrue
+			return true;
+		};
 	};
 	static void NewMemoryBank(punit start, punit size){
 		if(numOfBanks < CF_MAX_MEMORYBANKs){
@@ -42,6 +46,7 @@ public:
 		}
 	};
 	static punit GetPages(punit pages = 1);
+	static void ReleasePages(punit page, punit pages = 1);
 private:
 	static uint numOfBanks;
 	static MEMORYBLOCK memoryBanks[];

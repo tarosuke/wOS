@@ -11,7 +11,7 @@
 #include <resource.h>
 
 
-class MAP : RESOURCE{
+class MAP : public RESOURCE{
 public:
 	virtual punit GetPage(punit entry) = 0;
 private:
