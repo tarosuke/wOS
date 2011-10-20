@@ -9,6 +9,7 @@
 .code16
 
 .global __ARCH_SayHello, __putc16, __puts16, __hex16
+.extern __version_LMA
 
 .section .init
 
@@ -106,8 +107,9 @@ __ARCH_SayHello: //端末の初期化と初期メッセージの出力。もし�
 	outb	%al, %dx
 #endif
 	//初期メッセージの出力
-	mov	$1f, %esi
+	mov	$__version_LMA, %esi
 	call	__puts16
+	mov	$'\n', %al
+	call	__putc16
 	ret
-1:	.asciz	"welcome to talos.\n"
 

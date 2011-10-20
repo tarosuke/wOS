@@ -11,7 +11,7 @@
 
 
 const char __version[] =
-	"talos 0.0("
+	"talos 0.0.0("
 	"built at " __DATE__ " " __TIME__ ")"
 #if CF_DEBUG_LEVEL
 	" with debug option"
