@@ -24,7 +24,7 @@ extern "C"{
 		uchar	oemData[256];
 	}__VESA_InfoBlock;
 	extern struct __attribute__ ((packed)){
-		u16	modeAttribtes;
+		u16	modeAttributes;
 		uchar	winAAttributes;
 		uchar	winBAttributes;
 		u16	winGranularity;
@@ -96,89 +96,4 @@ void VESA_Check(){
 	dprintf("            bpp:%u.\n", __VESA_displayInfo.bitPerPixel);
 	dprintf("       BaseAddr:%08lx.\n", __VESA_displayInfo.physBasePtr);
 }
-
-
-
-
-
-
-
-#if 0
-static u32 Mask(int size, int pos){
-	return (~0UL << pos) & ~(~0UL << (pos + size));
-}
-static const COLORMODEL vesaColor(
-	(uint)vesaInfo.bytesPerScanLine / vesaInfo.xResolution,
-	(int)vesaInfo.redFieldPosition + vesaInfo.redMaskSize - 8,
-	(int)vesaInfo.greenFieldPosition + vesaInfo.greenMaskSize - 8,
-	(int)vesaInfo.blueFieldPosition + vesaInfo.blueMaskSize - 8,
-	(DISPLAYCOLOR)Mask(vesaInfo.redMaskSize,
-		vesaInfo.redFieldPosition),
-	(DISPLAYCOLOR)Mask(vesaInfo.greenMaskSize,
-		vesaInfo.greenFieldPosition),
-	(DISPLAYCOLOR)Mask(vesaInfo.blueMaskSize,
-		vesaInfo.blueFieldPosition));
-
-
-
-static DEVICE* Init(const DEVICE::PARAM&){
-	const POINT size(vesaInfo.xResolution, vesaInfo.yResolution);
-	const COLORMODEL model(vesaColor);
-	void* const body(HEAP::Map(vesaInfo.physBasePtr,
-		vesaInfo.bytesPerScanLine * vesaInfo.yResolution));
-	cprintf("VESA display\x1b+\n"
-		"VRAM:%08x(%08x)\n"
-		"xres:%d\n"
-		"yres:%d\n"
-		"opp:%d\n"
-		"bit/mask\x1b+\n"
-		"r:%d/%08x\n"
-		"g:%d/%08x\n"
-		"b:%d/%08x\x1b-\n"
-		"\x1b-OK.\n",
-		body, vesaInfo.physBasePtr,
-		vesaInfo.xResolution,
-		vesaInfo.yResolution,
-		model.opp,
-		model.redBit, model.redMask,
-		model.greenBit, model.greenMask,
-		model.blueBit, model.blueMask);
-
-	COLORMODELEDIMAGE* display(0);
-	switch(model.opp){
-	case 1 :
-		display = new DISPLAY<1>(size, model, body);
-		break;
-	case 2 :
-		display = new DISPLAY<2>(size, model, body);
-		break;
-	case 3 :
-		display = new DISPLAY<3>(size, model, body);
-		break;
-	case 4 :
-		display = new DISPLAY<4>(size, model, body);
-		break;
-	default :
-		cprintf("illigal opp:%d.\n", model.opp);
-		break;
-	}
-
-	if(display){
-		DISPLAYEVENT::New(EVENT::evNewDisplay, *display);
-	}
-
-	return 0;
-}
-
-static const DEVICE::ID ids[] = { { LOCALBUS::vesaDisplay }, { 0 } };
-DRIVER_DEF{
-	DEVICE::local,
-	ids,
-	DEVICE::mlDevice,
-	0,
-	Init
-};
-
-#endif
-
 
