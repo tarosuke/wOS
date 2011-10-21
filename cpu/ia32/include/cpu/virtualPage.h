@@ -36,7 +36,7 @@ public:
 	// ページ無効化・返却
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
-	static void Fault(u32 code);
+	static void Fault(const u32 code);
 private:
 	static const munit pageTableArrayStarts = 0xffc00000;
 	static const munit pageTableArrayStartsPAE = 0xfe000000;
@@ -45,7 +45,6 @@ private:
 	static u32* const rootPageDir;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
-	static void PrepareTable(munit startPage, munit pages);
 };
 
 

@@ -25,13 +25,20 @@ extern "C"{
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
 	void __Init32(void){
 		// 初期ページテーブルを初期化、設定、ページング開始 TODO::4Mページ、PAE対応
+		// ページテーブル確保の手間を省くため、ページディレクトリはすべてvalidに初期化する.
+		for(uint i(0); i < 1024; i++){
+			__kernelPageDir[i] = 0x204; // valid
+		}
+		// 実メモリ1MB以下の部分とそのカーネル内イメージを有効化
 		for(uint i(0); i < 256; i++){
 			loPageTable[i] = 0x00000007 | (i << 12);
 			kernelPageTable[i] = 0x00000103 | (i << 12);
 		}
+		// 仮想メモリで64KiB以下の領域はユーザプロセス向けライブラリに割り当てる
 		for(uint i(0); i < 16; i++){
 			kernelPageTable[i] = (munit)__ulib_LMA + 0x00000005 | (i << 12);
 		}
+		// ページテーブルをページディレクトリへ割り当てる
 		__kernelPageDir[1023] = ((u32)__kernelPageDir & 0xfffff000) | 0x00000103;
 		__kernelPageDir[0] = ((u32)loPageTable & 0xfffff000) | 0x00000007;
 		__kernelPageDir[((u32)__kernel_base) >> 22] = ((u32)kernelPageTable & 0xfffff000) | 0x00000107;

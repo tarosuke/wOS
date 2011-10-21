@@ -24,26 +24,6 @@ const munit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 LOCK VIRTUALPAGE::lock;
 
 
-void VIRTUALPAGE::PrepareTable(munit startPage, munit pages){
-	for(munit p(startPage >> 10); p <= ((startPage + pages) >> 10); p++){
-		u32& pde(rootPageDir[p]);
-		if(!(pde & present)){
-			//ページテーブル割り当て
-			const punit pt(REALPAGE::GetPages(pages));
-			assert(pt);
-			if((kernelStartPage >> 10) <= p){
-				//カーネル領域なので共通ディレクトリにも設定する
-				const u32 v((pt * PAGESIZE) | 0x103);
-				pde = v;
-				__kernelPageDir_VMA[p] = v;
-			}else{
-				// ユーザ領域の
-				pde = (pt * PAGESIZE) | 7;
-			}
-		}
-	}
-}
-
 
 bool VIRTUALPAGE::InKernel(munit pageNum){
 	return kernelStartPage <= pageNum;
@@ -53,9 +33,6 @@ bool VIRTUALPAGE::InKernel(munit pageNum){
 void VIRTUALPAGE::Enable(void* start, munit pages){
 	const munit p((munit)start / PAGESIZE);
 	KEY key(lock);
-
-	// ページテーブル準備
-	PrepareTable(p, pages);
 
 	// ページイネーブル(普通)
 	for(munit v(p); v < p + pages; v++){
@@ -71,9 +48,6 @@ void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, u32 attr){
 	mapID <<= 12;
 	KEY key(lock);
 
-	// ページテーブル準備
-	PrepareTable(p, pages);
-
 	// ページイネーブル(マップ)
 	for(munit v(p); v < p + pages; v++){
 		u32& pte(pageTableArray[v]);
@@ -87,9 +61,6 @@ void VIRTUALPAGE::Enable(void* start, munit pa, punit pages){
 	const munit p((munit)start / PAGESIZE);
 	KEY key(lock);
 
-	// ページテーブル準備
-	PrepareTable(p, pages);
-
 	// 実メモリ割り当て
 	punit rm(REALPAGE::GetPages(pages));
 	assert(rm);
@@ -100,13 +71,81 @@ void VIRTUALPAGE::Enable(void* start, munit pa, punit pages){
 	}
 }
 
-void VIRTUALPAGE::Disable(void*, munit pages){
+void VIRTUALPAGE::Disable(void* start, munit pages){
+	const munit p((munit)start / PAGESIZE);
+	KEY key(lock);
+
+	// ページ無効化(割り当てられていれば返却)
+	for(munit v(p); v < p + pages; v++){
+		u32& pte(pageTableArray[v]);
+		if(pte & present){
+			REALPAGE::ReleasePages(v);
+		}
+		pte = 0;
+	}
 }
 
 
 
 // ページフォルトハンドラ
-void VIRTUALPAGE::Fault(u32 code){
+void VIRTUALPAGE::Fault(const u32 code){
+	///// get targetaddress
+	munit addr;
+	asm volatile("mov %%cr2, %0" : "=g"(addr));
+
+	// マルチプロセサ時に処理中に値が変わると困るのでロック
+	KEY key(lock);
+
+	///// get the pageentry
+	u32& pte(pageTableArray[addr >> 12]);
+
+	if(code & 1){
+		// ページ保護違反
+
+		///// check kernel/user
+		if(code & ~pte & user){
+			//TODO:KILL IT
+			dprintf("Page protection violated at %08x(%08x):%08x.", addr, code, pte);
+			Panic("");
+		}
+
+		///// check writable & not CoW
+		if(code & pte & readOnly){
+			if(~pte & copyOnWrite){
+				//TODO:KILL IT
+				dprintf("Page isn't writable at %08x(%08x):%08x.", addr, code, pte);
+				Panic("");
+			}else{
+				//TODO:CoWな処理(ページを取得して割り当てて複製して戻る)
+				dprintf("Execuse me. CoW isn't avaliable at %08x(%08x):%08x.", addr, code, pte);
+				Panic("");
+			}
+		}
+		Panic("Undefined page fault.");
+	}
+
+	///// check enabled
+	if(~pte & valid){
+		//TODO:KILL IT if (code & user). Panic if it's in kernel
+		dprintf("Touched invalid page at %08x(%08x):%08x.", addr, code, pte);
+		Panic("");
+	}
+
+	if(pte & maped){
+		//TODO:マップによる割り当て
+		Panic("page mapping isn't avaliable.");
+	}else{
+		//普通のページ割り当て
+		const punit newPage(REALPAGE::GetPages());
+		if(!newPage){
+			//TODO:ページアウト待ち
+			Panic("Out of memory.");
+		}
+
+		// ページを割り当ててページをクリア
+		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
+		asm volatile("xor %%eax, %%eax; rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+	}
 }
 
 

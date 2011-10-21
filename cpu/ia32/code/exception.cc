@@ -6,10 +6,54 @@
 
 #include <cpu/exception.h>
 #include <arch/segments.h>
+#include <cpu/virtualPage.h>
+
+
+void (*Handlers[32])(u32 code) = {
+	0, //0
+	0, //1
+	0, //2
+	0, //3
+	0, //4
+	0, //5
+	0, //6
+	0, //7
+	0, //8
+	0, //9
+	0, //10
+	0, //11
+	0, //12
+	0, //13:GPE
+	VIRTUALPAGE::Fault, //14:PageFault
+	0, //15
+	0, //16
+	0, //17
+	0, //18
+	0, //19
+	0, //20
+	0, //21
+	0, //22
+	0, //23
+	0, //24
+	0, //25
+	0, //26
+	0, //27
+	0, //28
+	0, //29
+	0, //30
+	0, //31
+};
+
 
 
 extern "C"{
-	void __FAULT_Handler(uint num, uint err){ /*INTERRUPT::Handler(irq);*/ dprintf("EXCEPTION(%d:%08x).\n", num, err); assert(false); }
+	void __FAULT_Handler(uint num, uint err){
+		if(Handlers[num]){
+			Handlers[num](err);
+		}else{
+			dprintf("EXCEPTION(%d:%08x).\n", num, err); assert(false);
+		}
+	}
 	extern u32 __ExceptionTable[CF_MAX_IRQs][4];
 }
 
