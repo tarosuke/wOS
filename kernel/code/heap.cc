@@ -45,6 +45,7 @@ HEAP::BLOCK HEAP::Get(munit size){
 			mb.mem = 0;
 			return mb;
 		}
+		VIRTUALPAGE::Enable((void*)top, size / PAGESIZE);
 		mb.mem = (void*)top;
 		top = newTop;
 	}
