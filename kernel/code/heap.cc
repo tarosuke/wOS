@@ -24,11 +24,11 @@ LOCK HEAP::lock;
 
 
 HEAP::HEAP(munit start, munit limit){
-	dputs("heap..." INDENT);
+	dputs("kernel heap..." INDENT);
 	top = start;
 	HEAP::limit = limit;
-	dprintf("start:%08x limit:%08x." INDENT "blocksize:", top, HEAP::limit);
-	dputs(UNINDENT UNINDENT "OK.\n");
+	const munit size(limit - start);
+	dprintf(UNINDENT "OK(start:%08x size:%d.%01dMiB).\n", top, size >> 20, ((size & 0xfffff) * 10) >> 20);
 }
 
 HEAP::BLOCK HEAP::Get(munit size){
