@@ -9,36 +9,54 @@
 
 #include <config.h>
 #include <types.h>
+#include <heap.h>
+#include <lock.h>
 #include <debug.h>
 
 
 class REALPAGE{
 public:
 	class MEMORYBLOCK{
-	private:
-		punit start;
-		punit size;
-		punit used;
 	public:
 		MEMORYBLOCK(){};
-		MEMORYBLOCK(punit start, punit size) : start(start / PAGESIZE), size(size / PAGESIZE), used(0){};
+		MEMORYBLOCK(punit start, punit size) : start(start / PAGESIZE), size(size / PAGESIZE), used(0), stack((punit*)HEAP::Get((size + PAGESIZE - 1) / PAGESIZE).mem), stackTop(0){
+			assert(size);
+			assert(stack);
+		};
 		static void* operator new(munit size, void* place){
 			return place;
 		}
 		inline punit GetPages(punit pages){
 			punit page(0);
-			//TODO:ページプールから取得(そのためには仮想メモリのサポートが要る)
-			//ページヒープから取得
-			if(used + pages < used){
-				page = used;
-				used += pages;
+			KEY key(lock);
+			if(stackTop){
+				//スタックから取得
+				page = stack[--stackTop];
+			}else{
+				//ページヒープから取得
+				if(used + pages < used){
+					page = used;
+					used += pages;
+				}
 			}
 			return start + page;
 		};
-		inline bool ReleasePages(punit page, punit pages){
-			// 範囲外ならfalse。範囲内ならページを返却してtrue
+		inline bool ReleasePage(punit page){
+			if(page < start || start + size <= page){
+				//範囲外
+				return false;
+			}
+			KEY key(lock);
+			stack[stackTop++] = page;
 			return true;
 		};
+	private:
+		punit start;
+		punit size;
+		punit used;
+		punit* stack;
+		uint stackTop;
+		LOCK lock;
 	};
 	static void NewMemoryBank(punit start, punit size){
 		if(numOfBanks < CF_MAX_MEMORYBANKs){
@@ -46,7 +64,7 @@ public:
 		}
 	};
 	static punit GetPages(punit pages = 1);
-	static void ReleasePages(punit page, punit pages = 1);
+	static void ReleasePage(punit page);
 private:
 	static uint numOfBanks;
 	static MEMORYBLOCK memoryBanks[];

@@ -15,7 +15,7 @@ punit REALPAGE::GetPages(punit pages){
 	return page;
 }
 
-void REALPAGE::ReleasePages(punit page, punit pages){
-	for(uint b(0); b < numOfBanks && !memoryBanks[b].ReleasePages(page, pages); b++);
+void REALPAGE::ReleasePage(punit page){
+	for(uint b(0); b < numOfBanks && !memoryBanks[b].ReleasePage(page); b++);
 }
 
