@@ -32,7 +32,7 @@ public:
 	// ページ有効化(あるいは実ページ／マップ割り当て)
 	static void Enable(void*, munit pages = 1);
 	static void Enable(void*, uint mapID, munit pages = 1, u32 attr = 0);
-	static void Enable(void*, munit pa, punit pages = 1);
+	static void Enable(void*, munit pa, punit pages);
 	// ページ無効化・返却
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
