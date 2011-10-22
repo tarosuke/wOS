@@ -8,14 +8,12 @@
 #include <realPage.h>
 
 
-//NOTE:ページディレクトリ、ページテーブルの操作は排他で、排他領域中でまず問題が解消されていないことを再確認すること。これは他のプロセサによる問題解決を認識するために必要である。なお、ロックフリープロトコルは無駄にリソースを確保／解放する必要が発生するためカーネルでは使わず、必ず排他処理で実装すること。
-
 extern "C"{
 	extern uchar __kernel_base[];
 	extern u32 __kernelPageDir_VMA[];
 }
 
-// ページテーブルが丸見えという便利な配列。ただし、メモリが割り当てられていないことがあるのでrootPageDirで確認
+// ページテーブルが丸見えという便利な配列。
 u32* const VIRTUALPAGE::pageTableArray((u32*)pageTableArrayStarts);
 u32* const VIRTUALPAGE::rootPageDir((u32*)0xfffff000);
 const munit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
@@ -135,6 +133,22 @@ void VIRTUALPAGE::Fault(const u32 code){
 		//TODO:マップによる割り当て
 		Panic("page mapping isn't avaliable.");
 	}else{
+		u32& kpe(__kernelPageDir_VMA[addr >> 22]);
+		if(kpe & 0x100){
+			//カーネルページテーブル割り当て
+			if(~kpe & 1){
+				//マスターにも割り当てられてない
+				const punit newPage(REALPAGE::GetPages());
+				if(!newPage){
+					//TODO:ページアウト待ち
+					Panic("Out of memory.");
+				}
+				kpe |= (newPage << 12) | 0x103;
+			}
+			pte = kpe;
+			return;
+		}
+
 		//普通のページ割り当て
 		const punit newPage(REALPAGE::GetPages());
 		if(!newPage){
