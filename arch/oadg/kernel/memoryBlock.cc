@@ -32,7 +32,7 @@ public:
 				REALPAGE::NewMemoryBank((*b).start, (*b).size);
 			}
 		}
-		dprintf(UNINDENT "OK.%dMiB avaliable.\n", totalSize / (1024 * 1024));
+		dprintf(UNINDENT "OK(%d.%02d[MiB] avaliable).\n", totalSize >> 20, ((totalSize & 0xfffff) * 100) >> 20);
 	};
 }memorybank;
 

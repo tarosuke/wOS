@@ -28,7 +28,7 @@ HEAP::HEAP(munit start, munit limit){
 	top = start;
 	HEAP::limit = limit;
 	const munit size(limit - start);
-	dprintf(UNINDENT "OK(start:%08x size:%d.%01dMiB).\n", top, size >> 20, ((size & 0xfffff) * 10) >> 20);
+	dprintf(UNINDENT "OK(start:%08x size:%d.%02d[MiB]).\n", top, size >> 20, ((size & 0xfffff) * 100) >> 20);
 }
 
 HEAP::BLOCK HEAP::Get(munit size){
