@@ -21,8 +21,14 @@ public:
 		void* mem;
 		uint index;
 	};
+	static uint GetBlockIndex(munit size);
+	static void* GetByIndex(uint);
 	static BLOCK Get(munit);
 	static void Release(BLOCK&);
+	static void Release(void* mem, uint index){
+		BLOCK b = { mem, index };
+		Release(b);
+	}
 private:
 	class STACK{
 	public:

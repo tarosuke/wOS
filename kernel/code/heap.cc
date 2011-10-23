@@ -33,27 +33,38 @@ HEAP::HEAP(munit start, munit limit){
 
 HEAP::BLOCK HEAP::Get(munit size){
 	BLOCK mb;
-	uint index(0);
-	for(; index < 32 && size < memoryPoolSizes[index]; index++);
+	const uint index(GetBlockIndex(size));
 	size = memoryPoolSizes[index];
 	mb.index = index;
-	if(!(mb.mem = memoryPools[index].Pop())){
+	mb.mem = GetByIndex(index);
+	return mb;
+}
+
+void* HEAP::GetByIndex(uint index){
+	void* r(0);
+	const munit size(memoryPoolSizes[index]);
+	if(!(r = memoryPools[index].Pop())){
 		KEY key(lock);
 		const munit newTop(top + size);
 		if(limit <= newTop){
 			dputs("out of heap.\n");
-			mb.mem = 0;
-			return mb;
+			return 0;
 		}
 		VIRTUALPAGE::Enable((void*)top, size / PAGESIZE);
-		mb.mem = (void*)top;
+		r = (void*)top;
 		top = newTop;
 	}
-	return mb;
+	return r;
 }
 
 void HEAP::Release(HEAP::BLOCK& mb){
 	memoryPools[mb.index].Push(mb.mem);
+}
+
+uint HEAP::GetBlockIndex(munit size){
+	uint i(0);
+	for(; i < 32 && size < memoryPoolSizes[i]; i++);
+	return i;
 }
 
 
