@@ -23,6 +23,7 @@
 	jne	.L_failed
 
 	// 画面情報を取得して有効モードの最大値をbxに取得
+	xor	%edx, %edx
 	push	%ds
 	mov	$.L_videoModes, %ebx
 	mov	(%bx), %si
@@ -32,9 +33,45 @@
 	cmp	$0xffff, %ax
 	je	1f
 	and	$0x1ff, %ax
-	cmp	%ax, %bx
-	ja	1b
+
+	pusha
+	push	%cs
+	pop	%ds
+	mov	%ax, %cx
+	mov	$0x4f01, %ax
+	mov	$__VESA_displayInfo, %edi
+	int	$0x10
+	cmp	$0x004f, %ax
+	je	2f
+3:	popa
+	jmp	1b
+2:	cmpb	$15, 25(%di) //15bps未満は無視
+	jb	3b
+/*	xor	%eax, %eax
+	mov	%cx, %ax
+	call	__hex16
+	mov	$' ', %al
+	call	__putc16
+	mov	18(%di), %eax
+	call	__hex16
+	mov	$' ', %al
+	call	__putc16
+	xor	%eax, %eax
+	mov	25(%di), %al
+	call	__hex16
+	mov	$'\n', %al
+	call	__putc16*/
+	popa
+
+	push	%ds
+	push	%cs
+	pop	%ds
+	mov	$__VESA_displayInfo, %edi
+	cmp	%edx, 18(%di)
+	jb	2f
+	mov	18(%di), %edx
 	mov	%ax, %bx
+2:	pop	%ds
 	jmp	1b
 1:	pop	%ds
 	cmp	$0x010d, %bx
@@ -47,7 +84,7 @@
 	cmp	$0x004f, %ax
 	jne	.L_failed
 
-	// 画面データを取得
+	// 最終的な画面データを取得
 	mov	$0x4f01, %ax
 	mov	%bx, %cx
 	mov	$__VESA_displayInfo, %edi

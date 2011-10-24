@@ -77,7 +77,9 @@ __init16:
 1:	lodsl
 	test	%ax, %ax
 	jz	1f
+	push	%si
 	call	*%ax
+	pop	%si
 	jmp	1b
 1:
 
