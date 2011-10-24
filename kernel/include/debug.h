@@ -34,6 +34,7 @@ void Panic(const char*);
 }
 #define ORIGIN "\033[0m"
 #define LIGHTWHITE "\033[1;37m"
+#define LIGHTYELLOW "\033[1;33m"
 #define LIGHTRED "\033[1;31m"
 #else
 #define dputc(c)
