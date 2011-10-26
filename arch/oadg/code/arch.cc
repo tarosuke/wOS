@@ -1,7 +1,6 @@
 /************************************************************ PLATFORM SERVERS
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #include <types.h>
@@ -20,11 +19,46 @@ extern "C"{
 	extern const u32 __VMA_GDTPT;
 	extern const munit __ulib_LMA[];
 	extern const uchar __kProcHeader_LMA[];
+#if CF_PAE
+	static u64 hiPageDir[512] __attribute__((aligned(4096)));
+	static u64 hiPageTable[512] __attribute__((aligned(4096)));
+	static u64 loPageDir[512] __attribute__((aligned(4096)));
+	static u64 loPageTable[512] __attribute__((aligned(4096)));
+	u64 __kernelPageIndex[4] __attribute__((aligned(4096)));
+#else
 	u32 __kernelPageDir[1024] __attribute__((aligned(4096)));
 	static u32 loPageTable[1024] __attribute__((aligned(4096)));
 	static u32 kernelPageTable[1024] __attribute__((aligned(4096)));
+#endif
 	void __Init32(void){
-		// 初期ページテーブルを初期化、設定、ページング開始 TODO::4Mページ、PAE対応
+		// 初期ページテーブルを初期化、設定、ページング開始 TODO::4Mページ
+#if CF_PAE
+		const munit kb((munit)__kernel_base);
+		__kernelPageIndex[0] = (runit)loPageDir | 1;
+		loPageDir[0] = (runit)loPageTable | 7;
+		__kernelPageIndex[kb >> 30] = (runit)hiPageDir | 1;
+		hiPageDir[(kb >> 21) & 0x1ff] = (runit)hiPageTable | 1;
+
+		// 実メモリ1MB以下の部分とそのカーネル内イメージを有効化
+		for(uint i(0); i < 256; i++){
+			loPageTable[i] = 0x00000007 | (i << 12);
+			hiPageTable[i] = 0x00000103 | (i << 12);
+		}
+		// 仮想メモリで64KiB以下の領域はユーザプロセス向けライブラリに割り当てる
+		for(uint i(0); i < 16; i++){
+			hiPageTable[i] = (punit)__ulib_LMA + 0x00000005 | (i << 12);
+		}
+
+		// PAEでページング開始
+		asm volatile(
+			"mov %%eax, %%cr3;"
+			"mov %%cr4, %%eax;"
+			"or $0x000000a0, %%eax;"
+			"mov %%eax, %%cr4;"
+			"mov %%cr0, %%eax;"
+			"or $0x80000000, %%eax;"
+			"mov %%eax, %%cr0" :: "a"(__kernelPageIndex));
+#else
 		// ページテーブル確保の手間を省くため、ページディレクトリはすべてvalidに初期化する.
 		for(uint i(0); i < 1024; i++){
 			__kernelPageDir[i] = 0x204; // valid
@@ -51,6 +85,7 @@ extern "C"{
 			"mov %%cr0, %%eax;"
 			"or $0x80000000, %%eax;"
 			"mov %%eax, %%cr0" :: "a"(__kernelPageDir));
+#endif
 
 		/// これ以降はカーネルコードを使用可能
 

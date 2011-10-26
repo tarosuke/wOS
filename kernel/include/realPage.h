@@ -1,7 +1,6 @@
 /******************************************************* REALPAGE MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, contact us.
- *	$Id$
  */
 
 #ifndef _REALPAGE_
@@ -19,7 +18,7 @@ public:
 	class MEMORYBLOCK{
 	public:
 		MEMORYBLOCK(){};
-		MEMORYBLOCK(punit start, punit size) : start(start / PAGESIZE), size(size / PAGESIZE), used(0), stack((punit*)HEAP::Get((size + PAGESIZE - 1) / PAGESIZE).mem), stackTop(0){
+		MEMORYBLOCK(runit start, runit size, runit used) : start(start / PAGESIZE), size(size / PAGESIZE), used(used / PAGESIZE), stack((punit*)HEAP::Get((size + PAGESIZE - 1) / PAGESIZE).mem), stackTop(0){
 			assert(size);
 			assert(stack);
 		};
@@ -58,9 +57,9 @@ public:
 		uint stackTop;
 		LOCK lock;
 	};
-	static void NewMemoryBank(punit start, punit size){
+	static void NewMemoryBank(runit start, runit size, runit used){
 		if(numOfBanks < CF_MAX_MEMORYBANKs){
-			new(&memoryBanks[numOfBanks++]) MEMORYBLOCK(start, size);
+			new(&memoryBanks[numOfBanks++]) MEMORYBLOCK(start, size, used + PAGESIZE - 1);
 		}
 	};
 	static punit GetPages(punit pages = 1);

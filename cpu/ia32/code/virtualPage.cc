@@ -1,7 +1,6 @@
 /**************************************************** VIRTUALPAGE MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, contact us.
- *	$Id$
  */
 
 #include <cpu/virtualPage.h>
@@ -10,7 +9,11 @@
 
 extern "C"{
 	extern uchar __kernel_base[];
+#if CF_PAE
+	extern u64 __kernelPageIndex[];
+#else
 	extern u32 __kernelPageDir_VMA[];
+#endif
 }
 
 // ページテーブルが丸見えという便利な配列。
@@ -55,12 +58,12 @@ void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, u32 attr){
 	}
 }
 
-void VIRTUALPAGE::Enable(void* start, munit pa, punit pages){
+void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
 	const munit p((munit)start / PAGESIZE);
 	KEY key(lock);
 
 	// 実メモリ割り当て
-	punit rm(REALPAGE::GetPages(pages));
+	runit rm(REALPAGE::GetPages(pages));
 	assert(rm);
 	for(munit v(p); v < p + pages; v++, rm++){
 		u32& pte(pageTableArray[v]);
@@ -115,7 +118,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 				Panic("");
 			}else{
 				//TODO:CoWな処理(ページを取得して割り当てて複製して戻る)
-				dprintf("Execuse me. CoW isn't avaliable at %08x(%08x):%08x.", addr, code, pte);
+				dprintf("Execuse me. CoW isn't available at %08x(%08x):%08x.", addr, code, pte);
 				Panic("");
 			}
 		}
@@ -131,8 +134,10 @@ void VIRTUALPAGE::Fault(const u32 code){
 
 	if(pte & maped){
 		//TODO:マップによる割り当て
-		Panic("page mapping isn't avaliable.");
+		Panic("page mapping isn't available.");
 	}else{
+		assert(false);
+#if 0
 		u32& kpe(__kernelPageDir_VMA[addr >> 22]);
 		if(kpe & 0x100){
 			//カーネルページテーブル割り当て
@@ -159,6 +164,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 		// ページを割り当ててページをクリア
 		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
 		asm volatile("xor %%eax, %%eax; rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+#endif
 	}
 }
 

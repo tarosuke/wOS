@@ -20,5 +20,9 @@
 #	define CF_MAX_MEMORYBANKs 16
 #endif
 
+#ifndef CF_PAE
+#	define CF_PAE 0
+#endif
+
 
 #endif

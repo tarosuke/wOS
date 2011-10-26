@@ -1,7 +1,6 @@
 /******************************************* ARCHITECTURE DEPENDED INITIALIZER
 	Copyright (C) 2004- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: 3db58d0e79c8b548d0951f5bb51f160af1b1c3c4 $
 */
 
 #include <config.h>
@@ -47,6 +46,7 @@ __init16:
 	jc	3f
 	cmp	$SMAP, %eax
 	jne	3f
+	mov	4(%di),%eax
 	add	$20, %di
 	and	%ebx, %ebx
 	jnz	1b
