@@ -60,4 +60,13 @@ private:
 void* operator new(munit);
 void operator delete(void*);
 
+
+//HEAPではないけどplacement newのための領域確保
+template<class T, uint elements = 1> class PLACER{
+public:
+	void* Place(uint index = 0){ return (void*)thePlace[index]; };
+private:
+	char thePlace[elements][sizeof(T)];
+};
+
 #endif
