@@ -66,6 +66,7 @@ SECTIONS {
 	} AT > IMAGE
 
 	.ulib __kernel_base : {
+		*(.ulib_h)
 		*(.ulib_ro)
 		*(.ulib_rw)
 		. = ALIGN(4096);
