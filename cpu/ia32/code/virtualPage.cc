@@ -77,7 +77,7 @@ void VIRTUALPAGE::Disable(void* start, munit pages){
 	for(munit v(p); v < p + pages; v++){
 		u32& pte(pageTableArray[v]);
 		if(pte & present){
-			REALPAGE::ReleasePage(v);
+			REALPAGE::ReleasePage(pte >> 12);
 		}
 		pte = 0;
 	}
