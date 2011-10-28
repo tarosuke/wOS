@@ -7,10 +7,12 @@
 #define _ULIB_MESSAGE_
 
 
-
 typedef struct _MESSAGE{
-	void* reserved[3];
+	void* reserved[3];	// メッセージのキューイングに使う
 }MESSAGE;
+
+
+MESSAGE* WaitNextMessage(unsigned long long);
 
 
 #endif

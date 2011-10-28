@@ -1,7 +1,7 @@
 /************************************************************* VERSION STRINGS
 	Copyright (C) 2006- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id$
+	$Id: 048a72a67f77ffb9a5e5519645bc1903789c3f5c $
 */
 
 // NOTE: EUC-JP
@@ -11,7 +11,7 @@
 
 
 const char __version[] =
-	"talos 0.0.0("
+	"talos 0.0.0.90("
 	"built at " __DATE__ " " __TIME__ ")"
 #if CF_DEBUG_LEVEL
 	" with debug option"
