@@ -25,10 +25,10 @@ static class MEMORYBANK{
 public:
 	MEMORYBANK(){
 		dputs("memorybank..." INDENT);
-		runit totalSize(0);
+		u64 totalSize(0);
 		MB* b(__ARCH_MemoryBlocks);
 #if !CF_PAE
-		const runit _4G(1ULL << 32);
+		const u64 _4G(1ULL << 32);
 #endif
 		for(uint i(0); i < CF_MAX_MEMORYBANKs && (*b).type != ~0UL; i++, b++){
 			hprintf("start:%16llx size:%16llx type:%lu.\n", (*b).start, (*b).size, (*b).type);

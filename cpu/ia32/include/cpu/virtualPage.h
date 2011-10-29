@@ -10,6 +10,8 @@
 #include <types.h>
 #include <map.h>
 #include <lock.h>
+#include <debug.h>
+
 
 class VIRTUALPAGE{
 public:
@@ -37,12 +39,12 @@ public:
 	// ページフォルトハンドラ
 	static void Fault(const u32 code);
 	// カーネルヒープの末端
-	static u32* const pageTableArray;
+	static runit* const pageTableArray;
+	VIRTUALPAGE(){
+		dprintf("VIRTUALPAGE...pageTableArray(%p).\n", pageTableArray);
+	};
 private:
-	static const munit pageTableArrayStarts = 0xffc00000;
-	static const munit pageTableArrayStartsPAE = 0xfe000000;
-	static const munit kernelStartPage;
-	static u32* const rootPageDir;
+	static const punit kernelStartPage;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
 };

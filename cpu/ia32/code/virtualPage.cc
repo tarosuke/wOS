@@ -13,11 +13,16 @@ extern "C"{
 }
 
 // ページテーブルが丸見えという便利な配列。
-u32* const VIRTUALPAGE::pageTableArray((u32*)pageTableArrayStarts);
-u32* const VIRTUALPAGE::rootPageDir((u32*)0xfffff000);
-const munit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
+#if CF_PAE
+runit* const VIRTUALPAGE::pageTableArray((runit*)0xff800000);
+#else
+runit* const VIRTUALPAGE::pageTableArray((runit*)0xffc00000);
+#endif
+static VIRTUALPAGE vp;
+// カーネル領域とユーザ領域を分ける値
+const punit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 
-// ページテーブルのためのロック(他のプロセッサがページを埋めたのを認識するため)
+// ページテーブルのためのロック(他のプロセッサがページを埋めるのを阻止するため)
 LOCK VIRTUALPAGE::lock;
 
 
@@ -28,12 +33,12 @@ bool VIRTUALPAGE::InKernel(munit pageNum){
 
 
 void VIRTUALPAGE::Enable(void* start, munit pages){
-	const munit p((munit)start / PAGESIZE);
+	const punit p((munit)start / PAGESIZE);
 	KEY key(lock);
 
 	// ページイネーブル(普通)
 	for(munit v(p); v < p + pages; v++){
-		u32& pte(pageTableArray[v]);
+		runit& pte(pageTableArray[v]);
 		if(!(pte & (present || valid))){
 			pte = valid | (InKernel(v) ? 0x102 : 6);
 		}
@@ -47,9 +52,10 @@ void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, u32 attr){
 
 	// ページイネーブル(マップ)
 	for(munit v(p); v < p + pages; v++){
-		u32& pte(pageTableArray[v]);
+		runit& pte(pageTableArray[v]);
 		if(!(pte & (present || valid))){
-			pte = mapID | maped | valid | attr | (InKernel(v) ? 0x102 : 6);
+			pte = mapID | maped | valid | attr |
+				(InKernel(v) ? 0x102 : 6);
 		}
 	}
 }
@@ -62,9 +68,10 @@ void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
 	runit rm(REALPAGE::GetPages(pages));
 	assert(rm);
 	for(munit v(p); v < p + pages; v++, rm++){
-		u32& pte(pageTableArray[v]);
+		runit& pte(pageTableArray[v]);
 		assert(!(pte & (present || valid)));
-		pte = (rm * PAGESIZE) | valid | present | (InKernel(v) ? 0x103 : 7);
+		pte = (rm * PAGESIZE) | valid | present |
+			(InKernel(v) ? 0x103 : 7);
 	}
 }
 
@@ -74,7 +81,7 @@ void VIRTUALPAGE::Disable(void* start, munit pages){
 
 	// ページ無効化(割り当てられていれば返却)
 	for(munit v(p); v < p + pages; v++){
-		u32& pte(pageTableArray[v]);
+		runit& pte(pageTableArray[v]);
 		if(pte & present){
 			REALPAGE::ReleasePage(v);
 		}
@@ -86,7 +93,7 @@ void VIRTUALPAGE::Disable(void* start, munit pages){
 
 // ページフォルトハンドラ
 void VIRTUALPAGE::Fault(const u32 code){
-	///// get targetaddress
+#if 0	///// get targetaddress
 	munit addr;
 	asm volatile("mov %%cr2, %0" : "=g"(addr));
 
@@ -94,7 +101,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 	KEY key(lock);
 
 	///// get the pageentry
-	u32& pte(pageTableArray[addr >> 12]);
+	runit& pte(pageTableArray[addr >> 12]);
 
 	if(code & 1){
 		// ページ保護違反
@@ -102,7 +109,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 		///// check kernel/user
 		if(code & ~pte & user){
 			//TODO:KILL IT
-			dprintf("Page protection violated at %08x(%08x):%08x.", addr, code, pte);
+			dprintf("Page protection violated at %p(%08x):%r.", addr, code, pte);
 			Panic("");
 		}
 
@@ -110,11 +117,11 @@ void VIRTUALPAGE::Fault(const u32 code){
 		if(code & pte & readOnly){
 			if(~pte & copyOnWrite){
 				//TODO:KILL IT
-				dprintf("Page isn't writable at %08x(%08x):%08x.", addr, code, pte);
+				dprintf("Page isn't writable at %p(%08x):%r.", addr, code, pte);
 				Panic("");
 			}else{
 				//TODO:CoWな処理(ページを取得して割り当てて複製して戻る)
-				dprintf("Execuse me. CoW isn't available at %08x(%08x):%08x.", addr, code, pte);
+				dprintf("Execuse me. CoW isn't available at %p(%08x):%r.", addr, code, pte);
 				Panic("");
 			}
 		}
@@ -124,7 +131,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 	///// check enabled
 	if(~pte & valid){
 		//TODO:KILL IT if (code & user). Panic if it's in kernel
-		dprintf("Touched invalid page at %08x(%08x):%08x.", addr, code, pte);
+		dprintf("Touched invalid page at %p(%08x):%r.", addr, code, pte);
 		Panic("");
 	}
 
@@ -134,7 +141,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 	}else{
 		assert(false);
 #if 0
-		u32& kpe(__kernelPageDir_VMA[addr >> 22]);
+		runit& kpe(__kernelPageDir_VMA[addr >> 22]);
 		if(kpe & 0x100){
 			//カーネルページテーブル割り当て
 			if(~kpe & 1){
@@ -162,6 +169,7 @@ void VIRTUALPAGE::Fault(const u32 code){
 		asm volatile("xor %%eax, %%eax; rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
 #endif
 	}
+#endif
 }
 
 
