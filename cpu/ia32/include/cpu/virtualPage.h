@@ -1,7 +1,6 @@
 /**************************************************** VIRTUALPAGE MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, contact us.
- *	$Id$
  */
 
 #ifndef _VIRTUALPAGE_
@@ -11,6 +10,8 @@
 #include <types.h>
 #include <map.h>
 #include <lock.h>
+#include <debug.h>
+
 
 class VIRTUALPAGE{
 public:
@@ -32,18 +33,17 @@ public:
 	// ページ有効化(あるいは実ページ／マップ割り当て)
 	static void Enable(void*, munit pages = 1);
 	static void Enable(void*, uint mapID, munit pages = 1, u32 attr = 0);
-	static void Enable(void*, munit pa, punit pages);
+	static void Enable(void*, runit pa, punit pages);
 	// ページ無効化・返却
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
 	static void Fault(const u32 code);
 	// カーネルヒープの末端
-	static u32* const pageTableArray;
+	static runit* const pageTableArray;
+	VIRTUALPAGE(munit masterPageDirectoryAddress);
 private:
-	static const munit pageTableArrayStarts = 0xffc00000;
-	static const munit pageTableArrayStartsPAE = 0xfe000000;
-	static const munit kernelStartPage;
-	static u32* const rootPageDir;
+	static const punit kernelStartPage;
+	static runit* const masterPageDir;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
 };

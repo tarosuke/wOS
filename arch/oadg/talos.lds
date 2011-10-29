@@ -1,7 +1,7 @@
 /********************************************** LDSCRIPT FOR OADG ARCHITECTURE
 	Copyright (C) 2004- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id$
+	$Id: e4e4b9f75cd9fee7a9df24990857b260256b5915 $
 */
 
 
@@ -33,12 +33,12 @@ SECTIONS {
 	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
 	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
 	__TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
-	__kernelPageDir_VMA = ABSOLUTE(__kernelPageDir) + __kernel_base;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 	__kProcHeader_LMA = LOADADDR(.kProcHeader);
 	__version_LMA = ABSOLUTE(__version) - __kernel_base;
+	__pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */
 	__arch_LOMEM = __init_LMA +

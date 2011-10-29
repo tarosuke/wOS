@@ -175,6 +175,17 @@ void dprintf(const char* f, ...){
 				case 'c' :
 					dputc((char)*p++);
 					break;
+				case 'p' : //仮想アドレス
+					Hex((uint)*p++, '0', 8);
+					break;
+				case 'r' : //実アドレス
+#if CF_PAE
+					Hex((uint)*p++, '0', 8);
+#else
+					Hex(*(u64*)*p, '0', 16);
+					p += 2;
+#endif
+					break;
 				default :
 					dputc(*f);
 					break;

@@ -1,7 +1,6 @@
 /********************************************************* IA32 DEPENDED TYPES
 	Copyright (C) 2006- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: 4c6ed08644c37db9de278ae3ebfcd744aa737ae8 $
 */
 
 
@@ -25,7 +24,11 @@ typedef struct{ u64 content[2]; } u128;
 typedef u32 munit;
 
 /// position & size of real memory
+#if CF_PAE
+typedef u64 runit;
+#else
 typedef u32 runit;
+#endif
 
 /// position & numbers of page
 typedef u32 punit;
