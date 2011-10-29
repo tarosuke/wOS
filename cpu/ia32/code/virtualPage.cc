@@ -103,16 +103,18 @@ void VIRTUALPAGE::Disable(void* start, munit pages){
 
 // ページフォルトハンドラ
 void VIRTUALPAGE::Fault(const u32 code){
-#if 0	///// get targetaddress
+	///// get targetaddress
 	munit addr;
-	asm volatile("mov %%cr2, %0" : "=g"(addr));
+	asm volatile("mov %%cr2, %0" : "=r"(addr));
 
 	// マルチプロセサ時に処理中に値が変わると困るのでロック
 	KEY key(lock);
 
-	///// get the pageentry
-	runit& pte(pageTableArray[addr >> 12]);
+	///// ページエントリ取得
+	const punit page(addr / PAGESIZE);
+	runit& pte(pageTableArray[page]);
 
+	// 違反など検出
 	if(code & 1){
 		// ページ保護違反
 
@@ -149,37 +151,29 @@ void VIRTUALPAGE::Fault(const u32 code){
 		//TODO:マップによる割り当て
 		Panic("page mapping isn't available.");
 	}else{
-		assert(false);
-#if 0
-		runit& kpe(__kernelPageDir_VMA[addr >> 22]);
-		if(kpe & 0x100){
-			//カーネルページテーブル割り当て
-			if(~kpe & 1){
-				//マスターにも割り当てられてない
+		if((munit)&pageTableArray[kernelStartPage] <= addr){
+			//カーネル領域のページテーブルの要求なのでmasterを参照
+			runit& mpe(masterPageDir[page]);
+			if(!(mpe & present)){
+				//masterにもないので確保して設定
 				const punit newPage(REALPAGE::GetPages());
-				if(!newPage){
-					//TODO:ページアウト待ち
-					Panic("Out of memory.");
-				}
-				kpe |= (newPage << 12) | 0x103;
+				assert(newPage);
+				pte = mpe = (newPage << 12) | 0x303;
 			}
-			pte = kpe;
+			pte = mpe;
 			return;
 		}
 
-		//普通のページ割り当て
+		// 普通のページ割り当て
 		const punit newPage(REALPAGE::GetPages());
-		if(!newPage){
-			//TODO:ページアウト待ち
-			Panic("Out of memory.");
-		}
+		assert(newPage);
 
 		// ページを割り当ててページをクリア
 		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
-		asm volatile("xor %%eax, %%eax; rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
-#endif
+		asm volatile(
+			"xor %%eax, %%eax;"
+			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
 	}
-#endif
 }
 
 
