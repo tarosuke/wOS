@@ -6,13 +6,15 @@
 #ifndef _ULIB_MESSAGE_
 #define _ULIB_MESSAGE_
 
+#include <userlib/types.h>
+
 
 typedef struct _MESSAGE{
 	void* reserved[3];	// メッセージのキューイングに使う
 }MESSAGE;
 
 
-MESSAGE* WaitNextMessage(unsigned long long);
+MESSAGE* WaitNextMessage(tunit);
 
 
 #endif

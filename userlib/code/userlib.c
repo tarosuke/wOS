@@ -12,4 +12,6 @@ const struct _ULIB ulib __attribute__((section(".ulibdef"))) = {
 	D(RawSystemcall),
 	D(WaitNextMessage),
 	D(HEAP_Init),
+	D(HEAP_Get),
+	D(HEAP_Release),
 };

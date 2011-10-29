@@ -6,18 +6,15 @@
 #ifndef _ULIB_TASK_
 #define _ULIB_TASK_
 
-#include <userlib/uheap.h>
 
-typedef struct _TASKHEAD{
-	UHEAP* heapStart;
+extern struct{
+	void* heap;
 	unsigned stackSize;
 	struct _MESSAGE* tx;
 	struct _MESSAGE* rx;
 	unsigned status;
 	void (*entry)(void);
-}TASKHEAD;
+}taskHead;
 
-
-extern TASKHEAD taskHead;
 
 #endif

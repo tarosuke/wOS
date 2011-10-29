@@ -7,87 +7,158 @@
 #include <userlib/task.h>
 
 
+//TODO:ファイル名にheapを使うとカーネル本体のHEAPと混同するので分離してビルドする方法を考える
+
+typedef struct{
+	void* link;
+	void* target;
+}ANCHOR;
+
+typedef struct{
+	unsigned* mem;
+	unsigned sizeIndex;
+}MEM;
+
+typedef struct{
+	punit top; // ヒープトップのページ番号
+	punit limit; //ヒープの上限(ページ番号)
+	ANCHOR* anchorStack; //解放後領域をスタックに維持するためだけのスタック
+	ANCHOR* stack[32]; //解放された領域のサイズごとスタック
+}UHEAP;
+
+
 extern unsigned __kernel_base[];
-static const unsigned sizes[32] = {
+static const munit sizes[32] = {
 	64U, 128U, 256U, 512U, 1024U, 2048U, 4096U, 8192U, 16384U, 32768U,
 	65536, 131072U, 262144U, 524288U, 1048576U, 2097152U, 4194304U,
 	8388608U, 16777216, 33554432U, 67108864U, 134217728U, 268435456U,
 	536870912U, 1073741824U, 2147483648U
 };
-#define HEAP UHEAP* const heap = taskHead.heapStart
 
+
+
+
+#define HEAP UHEAP* const heap = taskHead.heap
 void	HEAP_Init(void){
 	HEAP;
 	unsigned i;
-	(*heap).top = (unsigned)&heap[1];
-	(*heap).limit = (unsigned)__kernel_base - taskHead.stackSize;
-	(*heap).anchorStack.whole = 0;
+	(*heap).top = ((unsigned)&heap[1] + PAGESIZE - 1) / PAGESIZE;
+	(*heap).limit =
+		((unsigned)__kernel_base - taskHead.stackSize) / PAGESIZE;
+	(*heap).anchorStack = 0;
 	for(i = 0; i < 32; i++){
-		(*heap).stack[i].whole = 0;
+		(*heap).stack[i] = 0;
 	}
 }
 
+static void Push(ANCHOR** stack, void* node){
+	(*(ANCHOR*)node).link = (**stack).link;
+	*stack = node;
+}
 
-void* HEAP_Get(unsigned size){
+static void* Pop(ANCHOR** stack){
+	ANCHOR* r = *stack;
+	*stack = (*r).link;
+	return r;
+}
+
+static MEM Get(unsigned size){
 	HEAP;
-	unsigned p;
-	unsigned getSize;
-	void* r = 0;
+	unsigned si;
+	ANCHOR** target;
+	unsigned* r = 0;
+	MEM mem = { 0, 0 };
 
-	//プール番号取得
-	for(p = 0; p < 32 && sizes[p] < size; p++);
-	if(32 <= p){
-		//そんなでかいプールはない
-		return 0;
+	//取得サイズ補正(ヘッダ分確保)
+	size += sizeof(unsigned);
+
+	//サイズインデクスを求める
+	for(si = 0; size < sizes[si] && si < 32; si++);
+	if(32 <= si){
+		//そんな大きなプールはない
+		return mem;
 	}
+	size = sizes[si];
+	target = &(*heap).stack[si];
 
-	//要求サイズを確保サイズに更新
-	size = sizes[p];
-
-	if((*heap).stack[p].mem){
-		//プールから取得 TODO:関数ぽくしてcpuモジュールへ移動しておくこと
-		asm volatile(
-			"mov (%%edi), %%eax;"
-			"mov 4(%%edi), %%edx;"
-			"1: mov (%%eax), %%ebx;"
-			"inc %%edx;"
-			"lock cmpxchg8b (%%edi);"
-			"jnz 1b"
-			: "=a"(r) : "D"(&(*heap).stack[p]) : "ebx", "ecx", "edx");
+	if(*target){
+		//プールから取得
+		ANCHOR* a = Pop(target);
+		if(size < PAGESIZE){
+			//PAGESIZE未満のスタックには対象領域がそのまま入っている
+			r = (void*)a;
+		}else{
+			//PAGESIZE以上のスタックにはANCHORが入っている
+			r = (*a).target;
+			Push(&(*heap).anchorStack, a);
+		}
 	}
 
 	if(!r){
-		//ヒープからはページサイズ未満のサイズは切り出せないので、要求サイズが小さければページサイズを切り出して分解する
-		getSize = size < 4096 ? 4096 : size;
-
 		//ヒープから取得
-		asm volatile(
-			"mov (%%edi), %%eax;"
-			"mov %1, %%edx;" //取得サイズ
-			"1: add %%eax, %%edx;"
-			"cmp %2, %%edx;" //リミットチェック
-			"jae 1f;" //リミットオーバー
-			"lock cmpxchg %%edx, (%%edi);"
-			"jnz 1b;"
-			"jmp 2f;"
-			"1: xor %%eax, %%eax;"
-			"2:"
-			: "=a"(r) : "g"(getSize), "g"((*heap).limit), "D"(&(*heap).top) : "edx");
-		
-		//TODO:要求サイズが小さかったら分解
-		if(size < getSize){
-			
+		r = (void*)((*heap).top * PAGESIZE);
+		if(size < PAGESIZE){
+			//PAGESIZE未満なのでヒープは1ページ進めて余りはスタックへ
+			unsigned i;
+			(*heap).top++;
+			for(i = size; i < PAGESIZE; i += size){
+				Push(target, &r[i / sizeof(unsigned)]);
+			}
+		}else{
+			//PAGESIZE以上なのでヒープをそのまま進める
+			(*heap).top += size / PAGESIZE;
 		}
 	}
 
 	if(!r){
 		//out of heap
-		return 0;
+		return mem;
 	}
 
-	//TODO:対象ページをイネーブル(ulibの別の関数)
+	mem.mem = r;
+	mem.sizeIndex = si;
+	return mem;
+}
 
-	return r;
+void* HEAP_Get(unsigned size){
+	MEM mem = Get(size);
+	if(!mem.mem){ return 0; }
+	//TODO: ページイネーブル
+	mem.mem[0] = mem.sizeIndex;
+	return &mem.mem[1];
+}
+
+void HEAP_Release(void* mem){
+	HEAP;
+
+	//種別判定
+	if((unsigned)mem & (PAGESIZE - 1)){
+		//普通のメモリ
+		unsigned* m = mem;
+		m--;
+		if(*m < 6){
+			//ページサイズ未満なので領域をそのままスタックへ
+			Push(&(*heap).stack[*m], m);
+		}else{
+			//ページサイズ以上なのでANCHORを使う
+			ANCHOR* a = Pop(&(*heap).anchorStack);
+			if(!a){
+				//anchorStackは空なので新しく割り当てる
+				unsigned i;
+				a = (void*)((*heap).top * PAGESIZE);
+				(*heap).top++;
+				for(i = sizeof(ANCHOR); i < PAGESIZE; i += sizeof(ANCHOR)){
+					Push(&(*heap).anchorStack, &a[i]);
+				}
+			}
+			(*a).target = m;
+			Push(&(*heap).stack[*m], a);
+
+			//TODO:ページの解放
+		}
+	}else{
+		//TODO:マップの解放
+	}
 }
 
 

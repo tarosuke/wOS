@@ -7,7 +7,7 @@
 #include <userlib/task.h>
 
 
-MESSAGE* WaitNextMessage(unsigned long long uptime){
+MESSAGE* WaitNextMessage(tunit uptime){
 	// TODO:taskHeadのrxを処理済みにして。uptimeの設定
 	asm volatile("int $0x30");
 	return taskHead.rx;
