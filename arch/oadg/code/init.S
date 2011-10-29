@@ -35,6 +35,28 @@ __init16:
 	/***** say 'hello' */
 	call	__ARCH_SayHello
 
+	/***** system check */
+	mov	$2, %eax
+	cpuid
+#if CF_PAE
+	test	$0x40, %edx
+	jnz	1f
+	mov	$3f, %esi
+	jmp	2f
+3:	.ascii	"FATAL:PAE not available at this processor. "
+	.asciz	"Use non-PAE kernel."
+#endif
+1:	jmp	1f
+
+	/* fails */
+2:	mov	$'\n', %al
+	call	__putc16
+	call	__puts16
+3:	hlt
+	jmp	3b
+
+1:
+
 	/***** get memorybanks */
 #define SMAP 0x534d4150
 	mov	$__ARCH_MemoryBlocks, %edi
