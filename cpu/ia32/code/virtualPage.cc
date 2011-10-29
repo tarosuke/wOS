@@ -18,14 +18,24 @@ runit* const VIRTUALPAGE::pageTableArray((runit*)0xff800000);
 #else
 runit* const VIRTUALPAGE::pageTableArray((runit*)0xffc00000);
 #endif
-static VIRTUALPAGE vp;
+
 // カーネル領域とユーザ領域を分ける値
 const punit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 
 // ページテーブルのためのロック(他のプロセッサがページを埋めるのを阻止するため)
 LOCK VIRTUALPAGE::lock;
 
+// マスターページディレクトリ
+runit* VIRTUALPAGE::masterPageDir;
 
+
+VIRTUALPAGE::VIRTUALPAGE(munit mpd){
+	dputs("virtual pages..." INDENT);
+	dprintf("pageTableArray: %p.\n", pageTableArray);
+	dprintf("kernelPageDir: %p.\n", mpd);
+	masterPageDir = (runit*)mpd;
+	dputs(UNINDENT "OK.\n");
+}
 
 bool VIRTUALPAGE::InKernel(munit pageNum){
 	return kernelStartPage <= pageNum;

@@ -40,11 +40,10 @@ public:
 	static void Fault(const u32 code);
 	// カーネルヒープの末端
 	static runit* const pageTableArray;
-	VIRTUALPAGE(){
-		dprintf("VIRTUALPAGE...pageTableArray(%p).\n", pageTableArray);
-	};
+	VIRTUALPAGE(munit masterPageDirectoryAddress);
 private:
 	static const punit kernelStartPage;
+	static runit* masterPageDir;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
 };

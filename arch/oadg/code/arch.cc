@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <cpu/cpu.h>
 #include <core.h>
+#include <cpu/virtualPage.h>
 
 
 /// ARCH(プラットフォーム依存)コードの入り口
@@ -20,14 +21,14 @@ extern "C"{
 	extern const munit __ulib_LMA[];
 	extern const uchar __kProcHeader_LMA[];
 #if CF_PAE
-	runit __pageRoot[4] __attribute__((aligned(4096)));
 	static runit pageDirs[4][512] __attribute__((aligned(4096)));
 	static runit hiPageTable[512] __attribute__((aligned(4096)));
 	static runit loPageTable[512] __attribute__((aligned(4096)));
+	runit __pageRoot[4] __attribute__((aligned(4096)));
 #else
-	runit __pageRoot[1024] __attribute__((aligned(4096)));
 	static runit hiPageTable[1024] __attribute__((aligned(4096)));
 	static runit loPageTable[1024] __attribute__((aligned(4096)));
+	runit __pageRoot[1024] __attribute__((aligned(4096)));
 #endif
 	void __Init32(void){
 		// 初期ページテーブルを初期化、設定、ページング開始
@@ -37,12 +38,12 @@ extern "C"{
 		for(uint i(0); i < 4; i++){
 			//PDPTとページディレクトリ自身
 			__pageRoot[i] =
-			pageDirs[4][512 - 4 + i] =
+			pageDirs[3][512 - 4 + i] =
 				(runit)pageDirs[i] | 0x201;
 
 			//ページディレクトリはすべてvalidに初期化する
 			for(uint j(0); j < 512; j++){
-				pageDirs[i][j] = 0x200ULL;
+				pageDirs[i][j] |= 0x200ULL;
 			}
 		}
 
@@ -99,6 +100,14 @@ extern "C"{
 
 		// カーネルを初期化
 		dputs("Initializing kernel..." INDENT);
+
+		// 初期カーネルページテーブルを記録
+		#if CF_PAE
+		VIRTUALPAGE((munit)pageDirs + kb);
+		#else
+		VIRTUALPAGE((munit)__pageRoot + kb);
+		#endif
+
 		for(const void (**cons)(void)(__KernelConstructor); *cons; cons++){
 			(*cons)();
 		}
