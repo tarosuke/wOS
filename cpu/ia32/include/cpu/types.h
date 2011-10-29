@@ -24,7 +24,11 @@ typedef struct{ u64 content[2]; } u128;
 typedef u32 munit;
 
 /// position & size of real memory
+#if CF_PAE
 typedef u64 runit;
+#else
+typedef u32 runit;
+#endif
 
 /// position & numbers of page
 typedef u32 punit;

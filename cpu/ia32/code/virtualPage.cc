@@ -9,11 +9,7 @@
 
 extern "C"{
 	extern uchar __kernel_base[];
-#if CF_PAE
-	extern u64 __kernelPageIndex[];
-#else
-	extern u32 __kernelPageDir_VMA[];
-#endif
+	extern runit __pageRoot_VMA[];
 }
 
 // ページテーブルが丸見えという便利な配列。

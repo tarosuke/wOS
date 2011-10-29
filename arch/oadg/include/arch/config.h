@@ -1,7 +1,6 @@
 /***************************************************************** ARCH CONFIG
  *	Copyright (C) 2010- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #ifndef _ARCH_CONFIG_
@@ -21,7 +20,7 @@
 #endif
 
 #ifndef CF_PAE
-#	define CF_PAE 0
+#	define CF_PAE 1
 #endif
 
 
