@@ -26,14 +26,14 @@ const punit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 LOCK VIRTUALPAGE::lock;
 
 // マスターページディレクトリ
-runit* VIRTUALPAGE::masterPageDir;
+runit* const VIRTUALPAGE::masterPageDir(0);
 
 
 VIRTUALPAGE::VIRTUALPAGE(munit mpd){
 	dputs("virtual pages..." INDENT);
 	dprintf("pageTableArray: %p.\n", pageTableArray);
 	dprintf("kernelPageDir: %p.\n", mpd);
-	masterPageDir = (runit*)mpd;
+	*const_cast<runit**>(&masterPageDir) = (runit*)mpd;
 	dputs(UNINDENT "OK.\n");
 }
 

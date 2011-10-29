@@ -43,7 +43,7 @@ public:
 	VIRTUALPAGE(munit masterPageDirectoryAddress);
 private:
 	static const punit kernelStartPage;
-	static runit* masterPageDir;
+	static runit* const masterPageDir;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
 };
