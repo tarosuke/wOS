@@ -12,7 +12,7 @@
 
 /// ARCH(プラットフォーム依存)コードの入り口
 extern "C"{
-	void __Init32(void)__attribute__((noreturn));
+	void Init(void)__attribute__((noreturn));
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
 	extern const void (*__KernelConstructor[])(void);
@@ -20,6 +20,7 @@ extern "C"{
 	extern const u32 __VMA_GDTPT;
 	extern const munit __ulib_LMA[];
 	extern const uchar __kProcHeader_LMA[];
+#if CF_IA32
 #if CF_PAE
 	static runit pageDirs[4][512] __attribute__((aligned(4096)));
 	static runit hiPageTable[512] __attribute__((aligned(4096)));
@@ -30,9 +31,15 @@ extern "C"{
 	static runit loPageTable[1024] __attribute__((aligned(4096)));
 	runit __pageRoot[1024] __attribute__((aligned(4096)));
 #endif
-	void __Init32(void){
+#endif
+#if CF_AMD64
+	runit __pageRoot[512] __attribute__((aligned(4096)));
+#endif
+
+	void Init(void){
 		// 初期ページテーブルを初期化、設定、ページング開始
 		const munit kb((munit)__kernel_base);
+#if CF_IA32
 #if CF_PAE
 		//ページディレクトリ構造を構築
 		for(uint i(0); i < 4; i++){
@@ -92,6 +99,7 @@ extern "C"{
 			"mov %%cr0, %%eax;"
 			"or $0x80000000, %%eax;"
 			"mov %%eax, %%cr0" :: "a"(__pageRoot));
+#endif
 
 		/// これ以降はカーネルコードを使用可能
 
@@ -102,7 +110,7 @@ extern "C"{
 		dputs("Initializing kernel..." INDENT);
 
 		// 初期カーネルページテーブルを記録
-		#if CF_PAE
+		#if CF_PAE && !CF_AMD64
 		VIRTUALPAGE((munit)pageDirs + kb);
 		#else
 		VIRTUALPAGE((munit)__pageRoot + kb);

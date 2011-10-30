@@ -118,9 +118,9 @@ libuser.a : $(uobjs) $(keyfiles)
 	@echo $@
 	@$(AR) -rc $@ $(uobjs)
 
-talos : kproc.o kernel.o ulib.o libuser.a ../../arch/$(arch)/talos.lds $(keyfiles)
+talos : kproc.o kernel.o ulib.o libuser.a target.lds $(keyfiles)
 	@echo $@
-	@$(LD) $(ldopts) -T ../../arch/$(arch)/talos.lds -o talos.elf -Map talos.map
+	@$(LD) $(ldopts) -T target.lds -o talos.elf -Map talos.map
 	@$(OC) -O binary talos.elf talos
 	@$(prefix)objdump -xdS talos.elf > talos.dis
 
@@ -152,10 +152,6 @@ endif
 
 ############################################################### MAINTAIN RULES
 .PHONY : clean reconf indent count todo backup-repository conf
-
-config : ../../arch/$(arch)/talos.conf
-	@echo $@
-	@cp ../../arch/$(arch)/talos.conf $@
 
 reconf :
 	cp ../../arch/$(arch)/makefile .
