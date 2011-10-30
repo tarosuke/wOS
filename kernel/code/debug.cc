@@ -197,16 +197,22 @@ void dprintf(const char* f, ...){
 }
 
 
-void Panic(const char* message){
-	dputs(message);
-#if 3 <= CF_DEBUG_LEVEL
-	u32* s = (u32*)(void*)&message;
+void Dump(const void* start){
+	const u32* s((const u32*)start);
 	for(uint i = 0; i < 128; i++, s++){
 		if(!(i & 7)){
 			dprintf("\n%02x: ", i);
 		}
 		dprintf("%08x ", *s);
 	}
+}
+
+
+
+void Panic(const char* message){
+	dputs(message);
+#if 3 <= CF_DEBUG_LEVEL
+	Dump(message);
 #endif
 	for(;;){
 		asm volatile("hlt");

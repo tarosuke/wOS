@@ -73,7 +73,7 @@ extern "C"{
 		// 64KiB以下のカーネル領域はユーザプロセス向けライブラリ
 		for(uint i(0); i < 16; i++){
 			hiPageTable[i] =
-				(runit)__ulib_LMA + 0x00000305 | (i << 12);
+				((runit)__ulib_LMA + 0x00000305) | (i << 12);
 		}
 
 		// カーネルプロセス空間の一番下4KiBはカーネルプロセスヘッダ

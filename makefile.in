@@ -32,7 +32,7 @@ ccopts = $(base_ccopts) -Wa,-W -nostdinc++ -fno-enforce-eh-specs -fno-threadsafe
 	-fno-rtti -fno-exceptions -fno-unwind-tables -ffunction-sections \
 	-fcheck-new
 aopts = $(incs)
-ldopts = -N --cref -nostdlib
+ldopts = -N --cref -nostdlib -z nodefaultlib
 
 
 
@@ -101,17 +101,17 @@ endif
 ############################################################### EXPLICIT RULES
 kernel.o : $(kobjs) $(keyfiles) ../../kernel/kernel.lds
 	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../kernel/kernel.lds -o $@ -Map kernel.map $(kobjs) $(LIBPATH)libgcc.a
+	@$(LD) -N --cref -nostdlib -r -T ../../kernel/kernel.lds -o $@ -Map kernel.map $(kobjs)
 	@$(prefix)objdump -xdS kernel.o > kernel.dis
 
 kproc.o : $(kpobjs) $(keyfiles) ../../arch/$(arch)/kproc.lds
 	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../arch/$(arch)/kproc.lds -o $@ -Map kproc.map $(kpobjs) $(LIBPATH)libgcc.a
+	@$(LD) -N --cref -nostdlib -r -T ../../arch/$(arch)/kproc.lds -o $@ -Map kproc.map $(kpobjs)
 	@$(prefix)objdump -xdS kproc.o > kproc.dis
 
 ulib.o : $(ulobjs) $(keyfiles) ../../userlib/userlib.lds
 	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../userlib/userlib.lds -o $@ -Map ulib.map $(ulobjs) $(LIBPATH)libgcc.a
+	@$(LD) -N --cref -nostdlib -r -T ../../userlib/userlib.lds -o $@ -Map ulib.map $(ulobjs)
 	@$(prefix)objdump -xdS ulib.o > ulib.dis
 
 libuser.a : $(uobjs) $(keyfiles)
@@ -120,7 +120,7 @@ libuser.a : $(uobjs) $(keyfiles)
 
 talos : kproc.o kernel.o ulib.o libuser.a ../../arch/$(arch)/talos.lds $(keyfiles)
 	@echo $@
-	@$(LD) $(ldopts) -T ../../arch/$(arch)/talos.lds -o talos.elf -Map talos.map $(LIBPATH)libgcc.a
+	@$(LD) $(ldopts) -T ../../arch/$(arch)/talos.lds -o talos.elf -Map talos.map
 	@$(OC) -O binary talos.elf talos
 	@$(prefix)objdump -xdS talos.elf > talos.dis
 
@@ -208,7 +208,7 @@ upload-drafts:
 ################################################### ENVIRONMENT BUILDING RULES
 .PHONY: gnutools gnutools-clean
 
-gccVer = 4.2.1
+gccVer = 4.4.0
 binutilsVer = 2.17
 gnuArch = $(subst ia32,i686,$(cpu))
 toolPath = $(shell pwd)/../tools
@@ -274,8 +274,8 @@ $(buildDir)/binutils/Makefile: ../../makefile.in
 	cd $(dir $@); ../../../$(binutilsName)/configure $(binutilsOptions)
 
 $(prefix)as: $(buildDir)/binutils/Makefile
-	make -C $(buildDir)/binutils -j2
-	make -C $(buildDir)/binutils -j2 install
+	make -C $(buildDir)/binutils -j7
+	make -C $(buildDir)/binutils -j7 install
 
 
 $(buildDir)/gcc/Makefile: ../$(gccName)/configure $(prefix)as
@@ -284,6 +284,6 @@ $(buildDir)/gcc/Makefile: ../../makefile.in
 	cd $(dir $@); ../../../$(gccName)/configure $(gccOptions)
 
 $(prefix)gcc: $(buildDir)/gcc/Makefile
-	make -C $(buildDir)/gcc -j2 all-gcc
-	make -C $(buildDir)/gcc -j2 install-gcc
+	make -C $(buildDir)/gcc -j7 all-gcc
+	make -C $(buildDir)/gcc -j7 install-gcc
 
