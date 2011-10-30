@@ -4,7 +4,7 @@
 */
 
 
-OUTPUT_FORMAT("elf32-amd64")
+OUTPUT_FORMAT(elf64-x86-64)
 EXTERN(__init16)
 GROUP(kproc.o kernel.o ulib.o libuser.a)
 
@@ -29,7 +29,7 @@ SECTIONS {
 	__kernel_size = SIZEOF(.kernel);
 
 	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
-	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
+	__VMA_GDT = (__LMA_GDT) + __kernel_base;
 	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
 	__TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
