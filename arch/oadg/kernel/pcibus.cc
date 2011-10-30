@@ -8,7 +8,7 @@
 #include <debug.h>
 
 
-static PCIBUS pcibus;
+static PCIBUS pcibus __attribute__((init_priority(5000)));
 
 u32 PCIBUS::ReadConfig1(uint bus, uint dev, uint func, uint addr){
 	out32(CONFIG_ADDR, 0x80000000 | (bus << 16) |
@@ -67,7 +67,7 @@ bool PCIBUS::Register(uint bus, uint dev, uint func){
 
 PCIBUS::PCIBUS(){
 	u32 val;
-	dputs("PCI bus scanning..." INDENT);
+	dputs("PCI-bus: scanning..." INDENT);
 
 	///// check type
 	val = ReadConfig1(0, 0, 0, 0);
