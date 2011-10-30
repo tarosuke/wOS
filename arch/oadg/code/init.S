@@ -7,8 +7,10 @@
 #include <arch/segments.h>
 
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
-.extern __kernelProcessDefs16, __InitConsole16, __Init32, __LMA32_16, __VMA_GDT
-
+.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __VMA_GDT
+#ifdef CF_AMD64
+.extern __pageRoot
+#endif
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
@@ -166,7 +168,15 @@ __LMA32:
 	mov	%ax, %gs
 	mov	%ax, %ss
 	mov	$1f, %esp
-	ljmp	$KCSel, $__Init32
+#if CF_IA32
+	ljmp	$KCSel, $Init
+#endif
+
+/********************************************** GET 64BITS MODE INITIALIZER */
+#if CF_AMD64
+	hlt
+#endif
+
 	.space	4096, 0
 1:
 

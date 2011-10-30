@@ -25,11 +25,12 @@ configure:
 	@if ! [ -d arch/$(ARCH) ]; then echo 'set right ARCH. do "ls arch"'; exit -1; fi
 	@echo "arch:"$(ARCH)" target:"$(TARGET)
 	@if ! [ -d objs/$(TARGET) ]; then mkdir objs/$(TARGET); fi
-	@cp arch/$(ARCH)/makefile arch/$(ARCH)/talos.conf objs/$(TARGET)
+	@cp arch/$(ARCH)/makefile arch/$(ARCH)/config objs/$(TARGET)/
+	@ln -s arch/$(ARCH)/target.lds objs/$(TARGET)
 
 confall:
-	@echo -n 'prepareing...'
-	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/makefile arch/$$t/talos.conf objs/$$t; echo -n $$t; fi; done
+	@echo -n 'prepareing'
+	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/makefile arch/$$t/config objs/$$t/; ln -s ../../arch/$$t/target.lds objs/$$t; echo -n '...'$$t; fi; done
 	@echo '...done.'
 
 todo:

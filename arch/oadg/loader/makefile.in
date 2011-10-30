@@ -1,4 +1,4 @@
-########################################################## MAKEFILE FOR OADG-LOADERS
+###################################################### MAKEFILE FOR OADG-LOADERS
 
 %.o : ../../arch/$(arch)/loader/%.s
 	$(CPP) $(copts) -o- $< | $(AS) -o $@
