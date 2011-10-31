@@ -29,14 +29,14 @@ SECTIONS {
 	__kernel_size = SIZEOF(.kernel);
 
 	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
-	__VMA_GDT = (__LMA_GDT) + __kernel_base;
+	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
 	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
 	__TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 	__kProcHeader_LMA = LOADADDR(.kProcHeader);
-	__version_LMA = ABSOLUTE(__version) - __kernel_base;
+	__version_LMA = ABSOLUTE(__version) &0xffff;
 	__pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */

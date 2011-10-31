@@ -7,9 +7,12 @@
 #include <arch/segments.h>
 
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
-.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __VMA_GDT
+.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16
 #ifdef CF_AMD64
 .extern __pageRoot
+#endif
+#ifndef CF_IA32
+.extern __VMA_GDT
 #endif
 
 
@@ -141,8 +144,10 @@ __LMA_TSSPH:
 	.word	GDTLIMIT	// LIMIT OF GDT
 	.long	__LMA_GDT	// GDT
 __LMA_GDTPT:
+#if CF_IA32
 	.word	GDTLIMIT	// LIMIT OF GDT
 	.long	__VMA_GDT	// GDT(upper mirror)
+#endif
 
 
 	/***** MEMORYBANKs */

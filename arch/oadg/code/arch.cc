@@ -17,7 +17,9 @@ extern "C"{
 	extern const void (*__ArchDest[])(void);
 	extern const void (*__KernelConstructor[])(void);
 	extern const uchar __kernel_base[];
+#if CF_IA32
 	extern const u32 __VMA_GDTPT;
+#endif
 	extern const munit __ulib_LMA[];
 	extern const uchar __kProcHeader_LMA[];
 #if CF_IA32
@@ -104,17 +106,19 @@ extern "C"{
 		/// これ以降はカーネルコードを使用可能
 
 		// GDTを上位メモリのミラーに更新
+#if CF_IA32
 		asm volatile("lgdt %0;" :: "m"(__VMA_GDTPT)); //内容が同一なのでセグメントは放置
+#endif
 
 		// カーネルを初期化
 		dputs("Initializing kernel..." INDENT);
 
 		// 初期カーネルページテーブルを記録
-		#if CF_PAE && !CF_AMD64
+#if CF_PAE && !CF_AMD64
 		VIRTUALPAGE((munit)pageDirs + kb);
-		#else
+#else
 		VIRTUALPAGE((munit)__pageRoot + kb);
-		#endif
+#endif
 
 		for(const void (**cons)(void)(__KernelConstructor); *cons; cons++){
 			(*cons)();
