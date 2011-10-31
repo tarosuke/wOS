@@ -33,7 +33,7 @@ ccopts = $(base_ccopts) -Wa,-W -nostdinc++ -fno-enforce-eh-specs -fno-threadsafe
 	-fno-rtti -fno-exceptions -fno-unwind-tables -ffunction-sections \
 	-fcheck-new
 aopts = $(incs)
-ldopts = -N --cref -nostdlib -z nodefaultlib
+ldopts = -N --cref -nostdlib -z nodefaultlib --gc-sections
 
 
 
