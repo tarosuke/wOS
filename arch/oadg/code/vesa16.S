@@ -45,7 +45,7 @@
 	je	2f
 3:	popa
 	jmp	1b
-2:	cmpb	$15, 25(%di) //15bps未満は無視
+2:	cmpb	$15, 25(%di) //15bpp未満は無視
 	jb	3b
 /*	xor	%eax, %eax
 	mov	%cx, %ax

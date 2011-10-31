@@ -43,7 +43,7 @@ __init16:
 	/***** system check */
 	mov	$2, %eax
 	cpuid
-#if CF_PAE
+#if CF_PAE && !CF_AMD64
 	test	$0x40, %edx
 	jnz	1f
 	mov	$3f, %esi
