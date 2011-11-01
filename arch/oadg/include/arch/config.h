@@ -23,5 +23,9 @@
 #	define CF_PAE 1
 #endif
 
+#ifndef CF_VESA_MODE
+#	define CF_VESA_MODE 0 //自動取得
+#endif
+
 
 #endif

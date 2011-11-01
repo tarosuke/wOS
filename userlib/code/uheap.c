@@ -15,7 +15,7 @@ typedef struct{
 }ANCHOR;
 
 typedef struct{
-	unsigned* mem;
+	munit* mem;
 	unsigned sizeIndex;
 }MEM;
 
@@ -42,9 +42,9 @@ static const munit sizes[32] = {
 void	HEAP_Init(void){
 	HEAP;
 	unsigned i;
-	(*heap).top = ((unsigned)&heap[1] + PAGESIZE - 1) / PAGESIZE;
+	(*heap).top = ((munit)&heap[1] + PAGESIZE - 1) / PAGESIZE;
 	(*heap).limit =
-		((unsigned)__kernel_base - taskHead.stackSize) / PAGESIZE;
+		((munit)__kernel_base - taskHead.stackSize) / PAGESIZE;
 	(*heap).anchorStack = 0;
 	for(i = 0; i < 32; i++){
 		(*heap).stack[i] = 0;
@@ -62,15 +62,12 @@ static void* Pop(ANCHOR** stack){
 	return r;
 }
 
-static MEM Get(unsigned size){
+static MEM Get(munit size){
 	HEAP;
 	unsigned si;
 	ANCHOR** target;
-	unsigned* r = 0;
+	munit* r = 0;
 	MEM mem = { 0, 0 };
-
-	//取得サイズ補正(ヘッダ分確保)
-	size += sizeof(unsigned);
 
 	//サイズインデクスを求める
 	for(si = 0; size < sizes[si] && si < 32; si++);
@@ -120,8 +117,8 @@ static MEM Get(unsigned size){
 	return mem;
 }
 
-void* HEAP_Get(unsigned size){
-	MEM mem = Get(size);
+void* HEAP_Get(munit size){
+	MEM mem = Get(size + sizeof(munit));
 	if(!mem.mem){ return 0; }
 	//TODO: ページイネーブル
 	mem.mem[0] = mem.sizeIndex;
@@ -132,7 +129,7 @@ void HEAP_Release(void* mem){
 	HEAP;
 
 	//種別判定
-	if((unsigned)mem & (PAGESIZE - 1)){
+	if((munit)mem & (PAGESIZE - 1)){
 		//普通のメモリ
 		unsigned* m = mem;
 		m--;

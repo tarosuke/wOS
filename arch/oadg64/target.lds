@@ -4,7 +4,7 @@
 */
 
 
-OUTPUT_FORMAT("elf32-amd64")
+OUTPUT_FORMAT(elf64-x86-64)
 EXTERN(__init16)
 GROUP(kproc.o kernel.o ulib.o libuser.a)
 
@@ -13,7 +13,9 @@ MEMORY {
 }
 
 SECTIONS {
-	__kernel_base = 0xf00000000000; /* NOTE:変更するときは4MiB単位 */
+	__kernel_base = 0xfffffffff0000000; /* NOTE:変更するときは4MiB単位 */
+	__kernelBase_hi = __kernel_base >> 32;
+	__kernelBase_lo = __kernel_base & 0xffffffff;
 	__cxa_pure_virtual = 0;
 
 	__init_LMA = LOADADDR(.init);
@@ -36,7 +38,7 @@ SECTIONS {
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 	__kProcHeader_LMA = LOADADDR(.kProcHeader);
-	__version_LMA = ABSOLUTE(__version) - __kernel_base;
+	__version_LMA = ABSOLUTE(__version) &0xffff;
 	__pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */

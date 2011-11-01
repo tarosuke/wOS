@@ -15,7 +15,7 @@ extern const struct _ULIB{
 	void (*RawSystemcall)(void);		/* 配置未定のシステムコールはこれを使う(開発用) */
 	MESSAGE* (*WaitNextMessage)(unsigned long long); /* 次のイベントを返す。なければタイムアウトまで待つ */
 	void (*HEAP_Init)(void);		// ユーザヒープ初期化(カーネルが使う)
-	void* (*HEAP_Get)(unsigned size);	// ユーザヒープから取得
+	void* (*HEAP_Get)(munit size);	// ユーザヒープから取得
 	void (*HEAP_Release)(void*);		// ユーザヒープへ返却
 	//TODO:メモリ管理(マップ)
 	//TODO:条件に合致するサーバを探し、パラメタとして自身への通信路と0個以上のマップを渡す

@@ -1,6 +1,6 @@
 
 /************************************************************** VESA-VBE初期化 */
-
+#include <config.h>
 
 .code16
 
@@ -12,6 +12,7 @@
 
 .section .init
 .L_Init:
+#if !CF_VESA_MODE
 	// 有効モードの取得
 	mov	%cs, %ax
 	mov	%ax, %ds
@@ -45,7 +46,7 @@
 	je	2f
 3:	popa
 	jmp	1b
-2:	cmpb	$15, 25(%di) //15bps未満は無視
+2:	cmpb	$15, 25(%di) //15bpp未満は無視
 	jb	3b
 /*	xor	%eax, %eax
 	mov	%cx, %ax
@@ -76,7 +77,10 @@
 1:	pop	%ds
 	cmp	$0x010d, %bx
 	jb	.L_failed //有効なモードを取得できていないので失敗
-
+#else
+	mov	$CF_VESA_MODE, %bx
+	and	$0x1ff, %bx
+#endif
 	// 画面モードを設定
 	or	$0xc000, %bx
 	mov	$0x4f02, %ax

@@ -107,9 +107,15 @@ __ARCH_SayHello: //端末の初期化と初期メッセージの出力。もし�
 	outb	%al, %dx
 #endif
 	//初期メッセージの出力
+	push	%ds
 	mov	$__version_LMA, %esi
+	mov	%esi, %eax
+	shr	$4, %eax
+	mov	%ax, %ds
+	and	$0xf, %esi
 	call	__puts16
 	mov	$'\n', %al
 	call	__putc16
+	pop	%ds
 	ret
 
