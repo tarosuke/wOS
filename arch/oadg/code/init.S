@@ -193,6 +193,7 @@ __LMA32:
 	ljmp	$KCSel, $Init
 #endif
 
+
 /********************************************** GET 64BITS MODE INITIALIZER */
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
@@ -286,34 +287,24 @@ out %al, %dx
 .align 4096
 .L_RPDP:
 __pageRoot:
-	.rept 512
-	.quad	0
-	.endr
+	.space 4096
 .L_hiPDPR:
-	.rept 512
-	.quad	0
-	.endr
+.L_PDT0:
+	.space 4096
 .L_hiPDT:
-	.rept 512
-	.quad	0
-	.endr
+.L_PDT1:
+	.space 4096
+.L_loPDPR:
+.L_PDT2:
+	.space 4096
+.L_loPDT:
+.L_PDT3:
+	.space 4096
 .L_hiPT:
 __hiPageTable: /* 各階層のページディレクトリを覗く穴を置くためにこれをメモリとしてアクセスできる必要がある */
-	.rept 512
-	.quad	0
-	.endr
-.L_loPDPR:
-	.rept 512
-	.quad	0
-	.endr
-.L_loPDT:
-	.rept 512
-	.quad	0
-	.endr
+	.space 4096
 .L_loPT:
-	.rept 512
-	.quad	0
-	.endr
+	.space 4096
 #endif
 
 	.space	4096, 0
