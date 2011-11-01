@@ -26,7 +26,7 @@ configure:
 	@echo "arch:"$(ARCH)" target:"$(TARGET)
 	@if ! [ -d objs/$(TARGET) ]; then mkdir objs/$(TARGET); fi
 	@cp arch/$(ARCH)/makefile arch/$(ARCH)/config objs/$(TARGET)/
-	@ln -s arch/$(ARCH)/target.lds objs/$(TARGET)
+	@ln -s ../../arch/$(ARCH)/target.lds objs/$(TARGET)
 
 confall:
 	@echo -n 'prepareing'
