@@ -44,7 +44,7 @@ public:
 				REALPAGE::NewMemoryBank((*b).start, (*b).size, (*b).start < kbase ? kbase : 0);
 			}
 		}
-		dprintf(UNINDENT "OK(%lld.%02lld[MiB] available).\n", totalSize >> 20, ((totalSize & 0xfffff) * 100) >> 20);
+		dprintf(UNINDENT "OK(%m available).\n", totalSize);
 	};
 }memorybank;
 

@@ -176,15 +176,50 @@ void dprintf(const char* f, ...){
 					dputc((char)*p++);
 					break;
 				case 'p' : //仮想アドレス
+#if CF_IA32
 					Hex((uint)*p++, '0', 8);
+#endif
+#if CF_AMD64
+					Hex(*(u64*)*p, '0', 16);
+					p += 2;
+#endif
 					break;
 				case 'r' : //実アドレス
-#if CF_PAE
+#if !CF_PAE && !CF_AMD64
 					Hex((uint)*p++, '0', 8);
 #else
 					Hex(*(u64*)*p, '0', 16);
 					p += 2;
 #endif
+					break;
+				case 'm' : //自動副単位メモリサイズ
+					{
+					static const u64 KiB(1024ULL);
+					static const u64 MiB(KiB*KiB);
+					static const u64 GiB(MiB*KiB);
+					const u64 size(*(u64*)p);
+// 					const u64 size(GiB * 3);
+					p += 2;
+					static const struct SCALE{
+						u64 scale;
+						const char* name;
+					}scale[] = {
+						{ GiB, "[GiB]" },
+						{ MiB, "[MiB]" },
+						{ KiB, "[KiB]" },
+						{ 0, "[Byte(s)]" },
+					};
+					const SCALE* sc(scale);
+					for(; size < (*sc).scale; sc++);
+					if((*sc).scale){
+						UDec(size / (*sc).scale, ' ', ' ', 0);
+						dputc('.');
+						UDec((size & ((*sc).scale - 1)) * 100 / (*sc).scale, '0', ' ', 2);
+					}else{
+						UDec(size, ' ', ' ', 0);
+					}
+					dputs((*sc).name);
+					}
 					break;
 				default :
 					dputc(*f);
