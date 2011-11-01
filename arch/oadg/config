@@ -9,7 +9,8 @@
  * CF_MAX_MEMORYBLOCKs	：扱えるメモリブロックの数(16)
  * CF_PAE		：PAEサポート(0)、0ならPAE(4GiB以上の物理メモリ空間サポート)なし。
  * CF_DEBUG_LEVEL	：デバグ出力レベル(0)。0なら出力されない。非0ならシリアルポートへ。
+ * CF_VESA_MODE		：VESA VBEの画面モード(0)。0にすると自動検出
  */
 
 #define CF_DEBUG_LEVEL		5
-
+#define CF_VESA_MODE		0x10e
