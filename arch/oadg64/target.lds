@@ -13,7 +13,9 @@ MEMORY {
 }
 
 SECTIONS {
-	__kernel_base = 0xf00000000000; /* NOTE:変更するときは4MiB単位 */
+	__kernel_base = 0xfffffffff0000000; /* NOTE:変更するときは4MiB単位 */
+	__kernelBase_hi = __kernel_base >> 32;
+	__kernelBase_lo = __kernel_base & 0xffffffff;
 	__cxa_pure_virtual = 0;
 
 	__init_LMA = LOADADDR(.init);

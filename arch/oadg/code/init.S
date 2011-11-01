@@ -9,7 +9,8 @@
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16
 #ifdef CF_AMD64
-.extern __pageRoot
+.global __hiPageTable, __pageRoot
+.extern __pageRoot, __kernelBase_hi, __kernelBase_lo
 #endif
 #ifndef CF_IA32
 .extern __VMA_GDT
@@ -172,17 +173,135 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$1f, %esp
+	mov	$9f, %esp
 #if CF_IA32
 	ljmp	$KCSel, $Init
 #endif
 
 /********************************************** GET 64BITS MODE INITIALIZER */
 #if CF_AMD64
+	/***** RPDPにPDPRを登録 */
+	mov	$.L_RPDP, %edi
+	mov	$.L_loPDPR, %eax
+	or	$0x207, %eax
+	mov	%eax, (%edi)
+	mov	$.L_hiPDPR, %ebx
+	mov	$39, %ecx
+	call	.L_SetKernelBase
+
+	/***** hiPDPRにhiPDTを登録 */
+	mov	$.L_hiPDPR, %edi
+	mov	$.L_hiPDT, %ebx
+	mov	$30, %ecx
+	call	.L_SetKernelBase
+
+	/***** hiPDTにhiPTを登録 */
+	mov	$.L_hiPDT, %edi
+	mov	$.L_hiPT, %ebx
+	mov	$21, %ecx
+	call	.L_SetKernelBase
+
+	/***** loPDPRにloPDTを設定 */
+	mov	$.L_loPDT, %eax
+	or	$0x207, %eax
+	mov	%eax, (.L_loPDPR)
+
+	/***** loPDTにloPTを設定 */
+	mov	$.L_loPT, %eax
+	or	$0x207, %eax
+	mov	%eax, (.L_loPDT)
+
+	/***** loPTとhiPTに1MiB以下の物理空間をエイリアス */
+	mov	$256, %ecx
+	mov	$0x203, %eax
+	mov	$0x207, %edx
+	mov	$0x1000, %ebx
+	mov	$.L_hiPT, %edi
+	mov	$.L_loPT, %esi
+1:	mov	%eax, (%edi)
+	add	%ebx, %eax
+	add	$8, %edi
+	mov	%edx, (%esi)
+	add	%ebx, %edx
+	add	$8, %esi
+	loop	1b
+
+	/***** いよいよ64bitsモードをONにする */
+	mov	$__pageRoot, %eax
+	mov	%eax, %cr3
+	mov	%cr4, %eax
+	or	$0x000000a0, %eax
+	mov	%eax, %cr4
+	mov	$0xc0000080, %ecx
+	rdmsr
+	bts	$8, %eax
+	wrmsr
+	mov	%cr0, %eax
+	bts	$31, %eax
+	mov	%eax, %cr0
+
+	/***** TODO:64bitsセグメントの準備 */
+
+	/***** 下準備が終わったのでInitへ */
+
+mov $'*', %al
+mov $0x3f8, %dx
+out %al, %dx
+
 	hlt
+
+
+.L_SetKernelBase:
+	/* edxのテーブルにebxのアドレスを設定。ビット位置はecx */
+	mov	$__kernelBase_hi, %edx
+	mov	$__kernelBase_lo, %eax
+1:	/* edx:eaxをecx回右シフト */
+	clc
+	rcr	$1, %edx
+	rcr	$1, %eax
+	loop	1b
+	and	$0x1ff, %eax
+	or	$0x203, %ebx
+	mov	%ebx, (%edi, %eax, 8)
+	ret
+
+
+
+/***** INITIAL PAGETABLE */
+.align 4096
+.L_RPDP:
+__pageRoot:
+	.rept 512
+	.quad	0
+	.endr
+.L_hiPDPR:
+	.rept 512
+	.quad	0
+	.endr
+.L_hiPDT:
+	.rept 512
+	.quad	0
+	.endr
+.L_hiPT:
+__hiPageTable: /* 各階層のページディレクトリを覗く穴を置くためにこれをメモリとしてアクセスできる必要がある */
+	.rept 512
+	.quad	0
+	.endr
+.L_loPDPR:
+	.rept 512
+	.quad	0
+	.endr
+.L_loPDT:
+	.rept 512
+	.quad	0
+	.endr
+.L_loPT:
+	.rept 512
+	.quad	0
+	.endr
 #endif
 
 	.space	4096, 0
-1:
+9:
 
 

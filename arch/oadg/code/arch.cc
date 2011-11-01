@@ -35,7 +35,7 @@ extern "C"{
 #endif
 #endif
 #if CF_AMD64
-	runit __pageRoot[512] __attribute__((aligned(4096)));
+	extern runit __pageRoot[512];
 #endif
 
 	void Init(void){
