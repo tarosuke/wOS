@@ -42,14 +42,29 @@ __init16:
 	call	__ARCH_SayHello
 
 	/***** system check */
+#if CF_AMD64
+	mov	$0x80000000, %eax
+	cpuid
+	cmp	$0x80000000, %eax
+	jbe	2f
+	mov	$0x80000001, %eax
+	cpuid
+	bt	$29, %edx
+	jc	1f
+2:	mov	$3f, %esi
+	jmp	2f
+3:	.ascii	"FATAL: 64bits mode not available. "
+	.asciz	"Use ia32(oadg) kernel."
+#endif
+1:
+#if CF_PAE && !CF_AMD64
 	mov	$2, %eax
 	cpuid
-#if CF_PAE && !CF_AMD64
 	test	$0x40, %edx
 	jnz	1f
 	mov	$3f, %esi
 	jmp	2f
-3:	.ascii	"FATAL:PAE not available at this processor. "
+3:	.ascii	"FATAL: PAE not available. "
 	.asciz	"Use non-PAE kernel."
 #endif
 1:	jmp	1f
