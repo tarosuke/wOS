@@ -13,6 +13,7 @@
 /// ARCH(プラットフォーム依存)コードの入り口
 extern "C"{
 	void Init(void)__attribute__((noreturn));
+#if 0
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
 	extern const void (*__KernelConstructor[])(void);
@@ -37,8 +38,9 @@ extern "C"{
 #if CF_AMD64
 	extern runit __pageRoot[512];
 #endif
-
+#endif
 	void Init(void){
+#if 0
 		// 初期ページテーブルを初期化、設定、ページング開始
 		const munit kb((munit)__kernel_base);
 #if CF_IA32
@@ -135,7 +137,7 @@ extern "C"{
 
 		// プロセッサを起動
 		new(0) CPU(0); // TODO:SMPの時は初期化しないルートからプロセッサ番号を渡す
-
+#endif
 		//ここには到達しないはず
 		assert(false);
 		asm volatile("cli; hlt");

@@ -7,11 +7,9 @@
 #include <arch/segments.h>
 
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
-.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16
-#ifdef CF_AMD64
+.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
+.extern __kernelBase_hi, __kernelBase_lo
 .global __hiPageTable, __pageRoot
-.extern __pageRoot, __kernelBase_hi, __kernelBase_lo
-#endif
 #ifndef CF_IA32
 .extern __VMA_GDT
 #endif
@@ -179,7 +177,7 @@ __ARCH_MemoryBlocks:
 
 
 
-/********************************************** GET 32BITS MODE INITIALIZER */
+/************************************* SET SEGMENTS & GET TRUE CODE SEGMENT */
 .code32
 __LMA32:
 	mov	$KDSel, %ax
@@ -190,11 +188,12 @@ __LMA32:
 	mov	%ax, %ss
 	mov	$9f, %esp
 #if CF_IA32
-	ljmp	$KCSel, $Init
+	ljmp	$KCSel, $1f
+1:
 #endif
 
 
-/********************************************** GET 64BITS MODE INITIALIZER */
+/******************************************************* INITIALIZE PAGEING */
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
 	mov	$.L_RPDP, %edi
@@ -221,8 +220,45 @@ __LMA32:
 	mov	$.L_loPDT, %eax
 	or	$0x207, %eax
 	mov	%eax, (.L_loPDPR)
+#endif
+#if CF_IA32
+#if CF_PAE
+	/***** PDTPとPDT3自身にPDT0-3を設定 */
+	xor	%edx, %edx
+	mov	$.L_PDT3, %edi
+	add	$4064, %edi
+	mov	$.L_PDT0, %eax
+	call	1f
+	mov	$.L_PDT1, %eax
+	call	1f
+	mov	$.L_PDT2, %eax
+	call	1f
+	mov	$.L_PDT3, %eax
+	call	1f
+	jmp	2f
 
-	/***** loPDTにloPTを設定 */
+1:	or	$0x201, %eax
+	mov	%eax, .L_PDTP(, %edx, 8)
+	mov	%eax, (%edi, %edx, 8)
+	/* ページディレクトリの全エントリをvalidにしておく */
+	mov	$512, %ecx
+	xor	%ebx, %ebx
+3:	orl	$0x200, (%eax, %ebx, 8)
+	inc	%ebx
+	loop	3b
+	inc	%edx
+	ret
+2:
+	/***** PDT3にhiPTを登録 */
+	mov	$.L_PDT3, %edx
+	mov	$.L_hiPT, %ebx
+	mov	$21, %ecx
+	call	.L_SetKernelBase
+#else
+#endif
+#endif
+
+	/***** loPDT(long)／PDT0(PAE)にloPTを設定 */
 	mov	$.L_loPT, %eax
 	or	$0x207, %eax
 	mov	%eax, (.L_loPDT)
@@ -242,16 +278,37 @@ __LMA32:
 	add	$8, %esi
 	loop	1b
 
-	/***** いよいよ64bitsモードをONにする */
+	/***** カーネルの下位64KiBをユーザプロセス向けライブラリにする */
+	mov	$__ulib_LMA, %eax
+	or	$0x305, %eax
+	xor	%edx, %edx
+	mov	$16, %ecx
+1:	mov	%eax, .L_hiPT(, %edx, 8)
+	add	$0x1000, %eax
+	inc	%edx
+	loop	1b
+
+	/***** TODO:カーネルプロセス空間の最下位4KiBはカーネルプロセスヘッダ */
+/*	mov	$__kProcHeader, %eax
+	or	$5, %eax
+	mov	%eax, (.L_loPT)*/
+
+	/***** ページングをONにする */
 	mov	$__pageRoot, %eax
 	mov	%eax, %cr3
 	mov	%cr4, %eax
+#if CF_IA32 && !CF_PAE
+	or	$0x00000080, %eax
+#else
 	or	$0x000000a0, %eax
+#endif
 	mov	%eax, %cr4
+#if CF_AMD64
 	mov	$0xc0000080, %ecx
 	rdmsr
 	bts	$8, %eax
 	wrmsr
+#endif
 	mov	%cr0, %eax
 	bts	$31, %eax
 	mov	%eax, %cr0
@@ -259,12 +316,7 @@ __LMA32:
 	/***** TODO:64bitsセグメントの準備 */
 
 	/***** 下準備が終わったのでInitへ */
-
-mov $'*', %al
-mov $0x3f8, %dx
-out %al, %dx
-
-	hlt
+jmp	STOP
 
 
 .L_SetKernelBase:
@@ -286,28 +338,41 @@ out %al, %dx
 /***** INITIAL PAGETABLE */
 .align 4096
 .L_RPDP:
+.L_PDTP:
 __pageRoot:
 	.space 4096
+#if CF_PAE || CF_AMD64
 .L_hiPDPR:
-.L_PDT0:
-	.space 4096
-.L_hiPDT:
-.L_PDT1:
-	.space 4096
-.L_loPDPR:
-.L_PDT2:
-	.space 4096
-.L_loPDT:
 .L_PDT3:
 	.space 4096
+.L_hiPDT:
+.L_PDT2:
+	.space 4096
+.L_loPDPR:
+.L_PDT1:
+	.space 4096
+.L_loPDT:
+.L_PDT0:
+	.space 4096
+#endif
 .L_hiPT:
 __hiPageTable: /* 各階層のページディレクトリを覗く穴を置くためにこれをメモリとしてアクセスできる必要がある */
 	.space 4096
 .L_loPT:
 	.space 4096
-#endif
+
+
+
+
+
+
+STOP:
+	mov $'*', %al
+	mov $0x3f8, %dx
+	out %al, %dx
+	hlt
+
 
 	.space	4096, 0
 9:
-
 
