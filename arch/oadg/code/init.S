@@ -122,11 +122,11 @@ __init16:
 	call	*%ax
 	pop	%si
 	jmp	1b
-1:
+1:	jmp	.L_getMode32
 
 
 /********************************************************** GET 32bits MODE */
-
+.L_getMode32:
 	/***** SETUP GDT */
 	mov	$.L_GDTPT, %ebx
 	lgdt	(%bx)
@@ -174,9 +174,6 @@ __ARCH_MemoryBlocks:
 
 
 
-
-
-
 /************************************* SET SEGMENTS & GET TRUE CODE SEGMENT */
 .code32
 __LMA32:
@@ -186,14 +183,14 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$9f, %esp
-#if CF_IA32
-	ljmp	$KCSel, $1f
+	mov	$1f, %esp
+	ljmp	$KCSel, $.L_initPages
+	.space	4096, 0
 1:
-#endif
 
 
 /******************************************************* INITIALIZE PAGEING */
+.L_initPages:
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
 	mov	$.L_RPDP, %edi
@@ -353,11 +350,8 @@ __LMA32:
 	mov	%cr0, %eax
 	bts	$31, %eax
 	mov	%eax, %cr0
-	/***** TODO:64bitsセグメントの準備 */
 
-	/***** 下準備が終わったのでInitへ */
-jmp	STOP
-
+	jmp	.L_initPagedSegments
 
 .L_SetKernelBase:
 	/* edxのテーブルにebxのアドレスを設定。ビット位置はecx */
@@ -374,9 +368,8 @@ jmp	STOP
 	ret
 
 
-
 /***** INITIAL PAGETABLE */
-.align 4096
+	.align 4096
 .L_RPDP:
 .L_PDTP:
 __pageRoot:
@@ -403,6 +396,20 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 
 
 
+/************************************************ INITIALIZE PAGED SEGMENTS */
+.L_initPagedSegments:
+
+
+
+
+
+	/***** 下準備が終わったのでInitへ */
+jmp	STOP
+
+
+
+
+
 
 
 
@@ -413,6 +420,4 @@ STOP:
 	hlt
 
 
-	.space	4096, 0
-9:
 
