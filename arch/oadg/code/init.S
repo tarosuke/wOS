@@ -52,10 +52,10 @@ __init16:
 2:	mov	$3f, %esi
 	jmp	2f
 3:	.ascii	"FATAL: 64bits mode not available. "
-	.asciz	"Use ia32(oadg) kernel."
+	.asciz	"Try ia32(oadg) kernel not oadg64."
 #endif
 1:
-#if CF_PAE && !CF_AMD64
+#if CF_PAE && CF_IA32
 	mov	$2, %eax
 	cpuid
 	test	$0x40, %edx
@@ -63,7 +63,7 @@ __init16:
 	mov	$3f, %esi
 	jmp	2f
 3:	.ascii	"FATAL: PAE not available. "
-	.asciz	"Use non-PAE kernel."
+	.asciz	"Try non-PAE kernel(\"#define CF_PAE 0\" in config)."
 #endif
 1:	jmp	1f
 
@@ -237,9 +237,11 @@ __LMA32:
 	call	1f
 	jmp	2f
 
-1:	or	$0x201, %eax
+1:	push	%eax
+	or	$0x201, %eax
 	mov	%eax, .L_PDTP(, %edx, 8)
 	mov	%eax, (%edi, %edx, 8)
+	pop	%eax
 	/* ページディレクトリの全エントリをvalidにしておく */
 	mov	$512, %ecx
 	xor	%ebx, %ebx
@@ -252,16 +254,43 @@ __LMA32:
 	/***** PDT3にhiPTを登録 */
 	mov	$.L_PDT3, %edx
 	mov	$.L_hiPT, %ebx
-	mov	$21, %ecx
-	call	.L_SetKernelBase
+	or	$0x207, %ebx
+	mov	$__kernelBase_lo, %eax
+	shr	$21, %eax
+	and	$0x1ff, %eax
+	mov	%ebx, (%edx, %eax, 8)
 #else
+	/***** __pageRootの全エントリをvalidに */
+	mov	$__pageRoot, %edi
+	mov	$0x200, %eax
+	mov	$1024, %cx
+	rep stosl
+
+	/***** __pageRootにloPT、hiPTを登録 */
+	mov	$__pageRoot, %ebx
+	mov	$.L_loPT, %eax
+	or	$0x207, %eax
+	mov	%eax, (%ebx)
+
+	mov	$.L_hiPT, %edx
+	or	$0x303, %edx
+	mov	$__kernelBase_lo, %eax
+	shr	$22, %eax
+	mov	%edx, (%ebx, %eax, 4)
+
+	/***** __pageRootにそれ自身を登録 */
+	mov	%ebx, %eax
+	or	$0x303, %eax
+	mov	%eax, 4092(%ebx)
 #endif
 #endif
 
+#if CF_AMD64 || (CF_IA32 && CF_PAE)
 	/***** loPDT(long)／PDT0(PAE)にloPTを設定 */
 	mov	$.L_loPT, %eax
 	or	$0x207, %eax
 	mov	%eax, (.L_loPDT)
+#endif
 
 	/***** loPTとhiPTに1MiB以下の物理空間をエイリアス */
 	mov	$256, %ecx
@@ -272,10 +301,18 @@ __LMA32:
 	mov	$.L_loPT, %esi
 1:	mov	%eax, (%edi)
 	add	%ebx, %eax
+#if CF_IA32 && !CF_PAE
+	add	$4, %edi
+#else
 	add	$8, %edi
+#endif
 	mov	%edx, (%esi)
 	add	%ebx, %edx
+#if CF_IA32 && !CF_PAE
+	add	$4, %esi
+#else
 	add	$8, %esi
+#endif
 	loop	1b
 
 	/***** カーネルの下位64KiBをユーザプロセス向けライブラリにする */
@@ -283,7 +320,11 @@ __LMA32:
 	or	$0x305, %eax
 	xor	%edx, %edx
 	mov	$16, %ecx
+#if CF_IA32 && !CF_PAE
+1:	mov	%eax, .L_hiPT(, %edx, 4)
+#else
 1:	mov	%eax, .L_hiPT(, %edx, 8)
+#endif
 	add	$0x1000, %eax
 	inc	%edx
 	loop	1b
@@ -312,7 +353,6 @@ __LMA32:
 	mov	%cr0, %eax
 	bts	$31, %eax
 	mov	%eax, %cr0
-
 	/***** TODO:64bitsセグメントの準備 */
 
 	/***** 下準備が終わったのでInitへ */
@@ -329,7 +369,7 @@ jmp	STOP
 	rcr	$1, %eax
 	loop	1b
 	and	$0x1ff, %eax
-	or	$0x203, %ebx
+	or	$0x207, %ebx
 	mov	%ebx, (%edi, %eax, 8)
 	ret
 
