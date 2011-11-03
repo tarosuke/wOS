@@ -75,7 +75,7 @@ extern "C"{
 
 
 static void* Get16(u32 p){
-	return (void*)(((p & 0xffff0000) >> 12) | (p & 0xffff));
+	return (void*)((munit)(((p & 0xffff0000) >> 12) | (p & 0xffff)));
 }
 
 void VESA_Check(){
