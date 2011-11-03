@@ -345,7 +345,13 @@ __LMA32:
 	bts	$31, %eax
 	mov	%eax, %cr0
 
+#if CF_IA32
 	jmp	.L_initPagedSegments
+#endif
+#if CF_AMD64
+	ljmp	$KCSel, $.L_initPagedSegments
+#endif
+
 
 .L_SetKernelBase:
 	/* edxのテーブルにebxのアドレスを設定。ビット位置はecx */
@@ -399,28 +405,42 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	add	%eax, 2(%edi)
 	add	%eax, %edi
 	lgdt	(%edi)
-	jmp	.L_setupTSS
+	mov	$KDSel, %ax
+	mov	%ax, %ds
+	mov	%ax, %es
+	jmp	.L_getKernel
 #endif
 #if CF_AMD64
 	.code64
 	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
-	mov	$__kernel_base, %rax
 	mov	$.L_GDTPT64, %rdi
-	add	%rax, 2(%rdi)
-	add	%rax, %rdi
 	lgdt	(%rdi)
-	jmp	.L_setupTSS
+	pushf
+	push	$KCSel
+	push	$1f
+	iret
+1:	xor	%ax, %ax
+	mov	%ax, %ss
+	mov	%ax, %ds
+	mov	%ax, %es
+	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
+	mov	$__kernel_base, %rax
+	add	%rax, 2(%rdi)
+	lgdt	(%rdi)
+	jmp	.L_getKernel
 
+	.align 4
 .L_GDTPT64:
 	.word	GDTLIMIT	// LIMIT OF GDT64
 	.quad	1f		// GDT64
-.align 256
-1:	.quad	0
-	.quad	0x0060980000000000	// CS(kernel)
-	.quad	0x0000800000000000	// DS/ES(kernel)
+	.quad	0
+	.align 256
+1:	.quad	0			// DS/ES
+	.quad	0x0020980000000000	// CS(kernel)
+	.quad	0
 	.quad	0x0060f80000000000	// CS(user)
-	.quad	0x0000800000000000	// DS/ES(user)
-	.quad	0			// may not be used)
+	.quad	0
+	.quad	0x00cf9a000000ffff	// CS(kernel, 32bits)
 __LMA_TSSPH:
 	.rept	CF_MAX_PROCESSORs
 	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
@@ -428,29 +448,6 @@ __LMA_TSSPH:
 	.endr
 #endif
 
-
-
-/**************************************************************** SETUP TSS */
-.L_setupTSS:
-	jmp	STOP
-
-
-	/***** 下準備が終わったのでInitへ */
+/************************************************* 下準備が終わったのでInitへ */
 .L_getKernel:
 	jmp	Init
-
-
-
-
-
-
-
-
-STOP:
-	mov $'*', %al
-	mov $0x3f8, %dx
-	out %al, %dx
-	hlt
-
-
-
