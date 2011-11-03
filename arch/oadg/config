@@ -7,7 +7,7 @@
  * CF_MAX_IRQs		：使うIRQの数(16)
  * CF_MAX_IRQ_SHARERs	：IRQの共有可能数(4)
  * CF_MAX_MEMORYBLOCKs	：扱えるメモリブロックの数(16)
- * CF_PAE		：PAEサポート(0)、0ならPAE(4GiB以上の物理メモリ空間サポート)なし。
+ * CF_PAE		：PAEサポート(1)、0ならPAE(4GiB以上の物理メモリ空間サポート)なし。
  * CF_DEBUG_LEVEL	：デバグ出力レベル(0)。0なら出力されない。非0ならシリアルポートへ。
  * CF_VESA_MODE		：VESA VBEの画面モード(0)。0にすると自動検出
  */

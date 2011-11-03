@@ -2,6 +2,7 @@
 
 arch = oadg
 cpu = amd64
+base_ccopts = -m64 -mcmodel=large
 
 include ../../makefile.in
 include ../../arch/oadg/loader/makefile.in
@@ -11,7 +12,7 @@ include ../../arch/oadg/loader/makefile.in
 
 .phony : emu
 qemuOptFiles = .qemu-netopt .qemu-nicopt
-qemuOpts = -vga std -serial stdio -smp 8 $(shell cat $(qemuOptFiles))
+qemuOpts = --no-kvm -d cpu_reset -D talos.log -vga std -serial stdio -smp 8 $(shell cat $(qemuOptFiles))
 
 
 emu : emufd

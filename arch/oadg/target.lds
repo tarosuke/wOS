@@ -1,13 +1,12 @@
 /********************************************** LDSCRIPT FOR OADG ARCHITECTURE
 	Copyright (C) 2004- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: e4e4b9f75cd9fee7a9df24990857b260256b5915 $
 */
 
 
 OUTPUT_FORMAT("elf32-i386")
-EXTERN(__init16)
-GROUP(kproc.o kernel.o ulib.o libuser.a)
+ENTRY(__init16)
+GROUP(kproc.o ulib.o libuser.a)
 
 MEMORY {
 	IMAGE (wxi) : ORIGIN = 0x10000, LENGTH = 0x80000
@@ -15,6 +14,8 @@ MEMORY {
 
 SECTIONS {
 	__kernel_base = 0xf0000000; /* NOTE:変更するときは4MiB単位 */
+	__kernelBase_hi = 0;
+	__kernelBase_lo = __kernel_base;
 	__cxa_pure_virtual = 0;
 
 	__init_LMA = LOADADDR(.init);
@@ -30,8 +31,6 @@ SECTIONS {
 	__kernel_size = SIZEOF(.kernel);
 
 	__LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
-	__VMA_GDT = ABSOLUTE(__LMA_GDT) + __kernel_base;
-	__VMA_GDTPT = ABSOLUTE(__LMA_GDTPT) + __kernel_base;
 	__TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
 	/* utilities */
@@ -58,9 +57,21 @@ SECTIONS {
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {
 		__core_base = ABSOLUTE(.);
-		*(.kernel_ro*)
+		*(.text*)
+		. = ALIGN(4);
+		__KernelConstructor = .;
+		*(.ctors)
+		*(SORT(.ctors.*))
 		LONG(0);
-		*(.kernel_rw*)
+		__KernelDestructor = .;
+		*(.dtors)
+		*(SORT(.dtors.*))
+		LONG(0);
+		*(.rodata*)
+		*(.data*)
+		*(.eh_frame)
+		*(.gnu*)
+		*(.bss*)
 		. = ALIGN(4096);
 		__kernel_heap = ABSOLUTE(.);
 	} AT > IMAGE
@@ -77,25 +88,8 @@ SECTIONS {
 	} AT > IMAGE
 
 	.user 0 : {
-		*(.portDef)
-		*(.text*)
-		*(.rodata*)
-		*(.data*)
-		*(.eh_frame)
-		*(.gnu*)
-/*		__GlobalConstructor = .;
-		*(.ctors)
-		*(SORT(.ctors.*))
-		LONG(0);
-		__GlobalDestructor = .;
-		*(.dtors)
-		*(SORT(.dtors.*))
-		LONG(0);
-*/		*(.bss)
-	} AT > IMAGE
-
-	/DISCARD/ : {
-		*(*)
+		*(.userProcess)
+		LONG(0)
 	} AT > IMAGE
 }
 

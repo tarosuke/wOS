@@ -20,7 +20,7 @@
 #endif
 
 #ifndef CF_PAE
-#	define CF_PAE 1
+#	define CF_PAE 0
 #endif
 
 #ifndef CF_VESA_MODE

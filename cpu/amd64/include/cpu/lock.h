@@ -1,7 +1,6 @@
 /***************************************************************** KERNEL CORE
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 
@@ -16,7 +15,7 @@ class LOCK{
 	friend class KEY;
 	friend class RKEY;
 private:
-	u32 stat;
+	u64 stat;
 #if 2 <= CF_MAX_PROCESSORs
 	bool lock;
 #endif

@@ -6,15 +6,10 @@
 #include <config.h>
 #include <arch/segments.h>
 
-.global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
-.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16
-#ifdef CF_AMD64
+.global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_TSSPH
+.extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
+.extern __kernelBase_hi, __kernelBase_lo, __kernel_base
 .global __hiPageTable, __pageRoot
-.extern __pageRoot, __kernelBase_hi, __kernelBase_lo
-#endif
-#ifndef CF_IA32
-.extern __VMA_GDT
-#endif
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
@@ -54,10 +49,10 @@ __init16:
 2:	mov	$3f, %esi
 	jmp	2f
 3:	.ascii	"FATAL: 64bits mode not available. "
-	.asciz	"Use ia32(oadg) kernel."
+	.asciz	"Try ia32(oadg) kernel not oadg64."
 #endif
 1:
-#if CF_PAE && !CF_AMD64
+#if CF_PAE && CF_IA32
 	mov	$2, %eax
 	cpuid
 	test	$0x40, %edx
@@ -65,7 +60,7 @@ __init16:
 	mov	$3f, %esi
 	jmp	2f
 3:	.ascii	"FATAL: PAE not available. "
-	.asciz	"Use non-PAE kernel."
+	.asciz	"Try non-PAE kernel(\"#define CF_PAE 0\" in config)."
 #endif
 1:	jmp	1f
 
@@ -124,11 +119,11 @@ __init16:
 	call	*%ax
 	pop	%si
 	jmp	1b
-1:
+1:	jmp	.L_getMode32
 
 
 /********************************************************** GET 32bits MODE */
-
+.L_getMode32:
 	/***** SETUP GDT */
 	mov	$.L_GDTPT, %ebx
 	lgdt	(%bx)
@@ -143,14 +138,15 @@ __init16:
 
 	/***** TEMPORARY GDT */
 .align 256
-__LMA_GDT:
-	.quad	0
+1:	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
 	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
 	.quad	0x00cff8000000ffff	// CS(user)
 	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
+#if CF_IA32
 __LMA_TSSPH:
+#endif
 	.rept	CF_MAX_PROCESSORs
 	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
 	.endr
@@ -158,12 +154,7 @@ __LMA_TSSPH:
 	/***** GDT POINTER */
 .L_GDTPT:
 	.word	GDTLIMIT	// LIMIT OF GDT
-	.long	__LMA_GDT	// GDT
-__LMA_GDTPT:
-#if CF_IA32
-	.word	GDTLIMIT	// LIMIT OF GDT
-	.long	__VMA_GDT	// GDT(upper mirror)
-#endif
+	.long	1b		// GDT
 
 
 	/***** MEMORYBANKs */
@@ -176,10 +167,7 @@ __ARCH_MemoryBlocks:
 
 
 
-
-
-
-/********************************************** GET 32BITS MODE INITIALIZER */
+/************************************* SET SEGMENTS & GET TRUE CODE SEGMENT */
 .code32
 __LMA32:
 	mov	$KDSel, %ax
@@ -188,12 +176,15 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$9f, %esp
-#if CF_IA32
-	ljmp	$KCSel, $Init
-#endif
+	mov	$.L_temporaryStackTop, %esp
+	ljmp	$KCSel, $.L_initPages
+	.space	4096, 0
+.L_temporaryStackTop:
 
-/********************************************** GET 64BITS MODE INITIALIZER */
+
+
+/******************************************************* INITIALIZE PAGEING */
+.L_initPages:
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
 	mov	$.L_RPDP, %edi
@@ -220,11 +211,77 @@ __LMA32:
 	mov	$.L_loPDT, %eax
 	or	$0x207, %eax
 	mov	%eax, (.L_loPDPR)
+#endif
+#if CF_IA32
+#if CF_PAE
+	/***** PDTPとPDT3自身にPDT0-3を設定 */
+	xor	%edx, %edx
+	mov	$.L_PDT3, %edi
+	add	$4064, %edi
+	mov	$.L_PDT0, %eax
+	call	1f
+	mov	$.L_PDT1, %eax
+	call	1f
+	mov	$.L_PDT2, %eax
+	call	1f
+	mov	$.L_PDT3, %eax
+	call	1f
+	jmp	2f
 
-	/***** loPDTにloPTを設定 */
+1:	push	%eax
+	or	$0x201, %eax
+	mov	%eax, .L_PDTP(, %edx, 8)
+	mov	%eax, (%edi, %edx, 8)
+	pop	%eax
+	/* ページディレクトリの全エントリをvalidにしておく */
+	mov	$512, %ecx
+	xor	%ebx, %ebx
+3:	orl	$0x200, (%eax, %ebx, 8)
+	inc	%ebx
+	loop	3b
+	inc	%edx
+	ret
+2:
+	/***** PDT3にhiPTを登録 */
+	mov	$.L_PDT3, %edx
+	mov	$.L_hiPT, %ebx
+	or	$0x207, %ebx
+	mov	$__kernelBase_lo, %eax
+	shr	$21, %eax
+	and	$0x1ff, %eax
+	mov	%ebx, (%edx, %eax, 8)
+#else
+	/***** __pageRootの全エントリをvalidに */
+	mov	$__pageRoot, %edi
+	mov	$0x200, %eax
+	mov	$1024, %cx
+	rep stosl
+
+	/***** __pageRootにloPT、hiPTを登録 */
+	mov	$__pageRoot, %ebx
+	mov	$.L_loPT, %eax
+	or	$0x207, %eax
+	mov	%eax, (%ebx)
+
+	mov	$.L_hiPT, %edx
+	or	$0x303, %edx
+	mov	$__kernelBase_lo, %eax
+	shr	$22, %eax
+	mov	%edx, (%ebx, %eax, 4)
+
+	/***** __pageRootにそれ自身を登録 */
+	mov	%ebx, %eax
+	or	$0x303, %eax
+	mov	%eax, 4092(%ebx)
+#endif
+#endif
+
+#if CF_AMD64 || (CF_IA32 && CF_PAE)
+	/***** loPDT(long)／PDT0(PAE)にloPTを設定 */
 	mov	$.L_loPT, %eax
 	or	$0x207, %eax
 	mov	%eax, (.L_loPDT)
+#endif
 
 	/***** loPTとhiPTに1MiB以下の物理空間をエイリアス */
 	mov	$256, %ecx
@@ -235,35 +292,65 @@ __LMA32:
 	mov	$.L_loPT, %esi
 1:	mov	%eax, (%edi)
 	add	%ebx, %eax
+#if CF_IA32 && !CF_PAE
+	add	$4, %edi
+#else
 	add	$8, %edi
+#endif
 	mov	%edx, (%esi)
 	add	%ebx, %edx
+#if CF_IA32 && !CF_PAE
+	add	$4, %esi
+#else
 	add	$8, %esi
+#endif
 	loop	1b
 
-	/***** いよいよ64bitsモードをONにする */
+	/***** カーネルの下位64KiBをユーザプロセス向けライブラリにする */
+	mov	$__ulib_LMA, %eax
+	or	$0x305, %eax
+	xor	%edx, %edx
+	mov	$16, %ecx
+#if CF_IA32 && !CF_PAE
+1:	mov	%eax, .L_hiPT(, %edx, 4)
+#else
+1:	mov	%eax, .L_hiPT(, %edx, 8)
+#endif
+	add	$0x1000, %eax
+	inc	%edx
+	loop	1b
+
+	/***** TODO:カーネルプロセス空間の最下位4KiBはカーネルプロセスヘッダ */
+/*	mov	$__kProcHeader, %eax
+	or	$5, %eax
+	mov	%eax, (.L_loPT)*/
+
+	/***** ページングをONにする */
 	mov	$__pageRoot, %eax
 	mov	%eax, %cr3
 	mov	%cr4, %eax
+#if CF_IA32 && !CF_PAE
+	or	$0x00000080, %eax
+#else
 	or	$0x000000a0, %eax
+#endif
 	mov	%eax, %cr4
+#if CF_AMD64
 	mov	$0xc0000080, %ecx
 	rdmsr
 	bts	$8, %eax
 	wrmsr
+#endif
 	mov	%cr0, %eax
 	bts	$31, %eax
 	mov	%eax, %cr0
 
-	/***** TODO:64bitsセグメントの準備 */
-
-	/***** 下準備が終わったのでInitへ */
-
-mov $'*', %al
-mov $0x3f8, %dx
-out %al, %dx
-
-	hlt
+#if CF_IA32
+	jmp	.L_initPagedSegments
+#endif
+#if CF_AMD64
+	ljmp	$KCSel, $.L_initPagedSegments
+#endif
 
 
 .L_SetKernelBase:
@@ -276,47 +363,91 @@ out %al, %dx
 	rcr	$1, %eax
 	loop	1b
 	and	$0x1ff, %eax
-	or	$0x203, %ebx
+	or	$0x207, %ebx
 	mov	%ebx, (%edi, %eax, 8)
 	ret
 
 
-
 /***** INITIAL PAGETABLE */
-.align 4096
+	.align 4096
 .L_RPDP:
+.L_PDTP:
 __pageRoot:
-	.rept 512
-	.quad	0
-	.endr
+	.space 4096
+#if CF_PAE || CF_AMD64
 .L_hiPDPR:
-	.rept 512
-	.quad	0
-	.endr
+.L_PDT3:
+	.space 4096
 .L_hiPDT:
-	.rept 512
-	.quad	0
-	.endr
+.L_PDT2:
+	.space 4096
+.L_loPDPR:
+.L_PDT1:
+	.space 4096
+.L_loPDT:
+.L_PDT0:
+	.space 4096
+#endif
 .L_hiPT:
 __hiPageTable: /* 各階層のページディレクトリを覗く穴を置くためにこれをメモリとしてアクセスできる必要がある */
-	.rept 512
-	.quad	0
-	.endr
-.L_loPDPR:
-	.rept 512
-	.quad	0
-	.endr
-.L_loPDT:
-	.rept 512
-	.quad	0
-	.endr
+	.space 4096
 .L_loPT:
-	.rept 512
+	.space 4096
+
+
+
+/************************************************ INITIALIZE PAGED SEGMENTS */
+.L_initPagedSegments:
+#if CF_IA32
+	/***** カーネルイメージへミラーしたGDTを読み込む */
+	mov	$__kernelBase_lo, %eax
+	mov	$.L_GDTPT, %edi
+	add	%eax, 2(%edi)
+	add	%eax, %edi
+	lgdt	(%edi)
+	mov	$KDSel, %ax
+	mov	%ax, %ds
+	mov	%ax, %es
+	jmp	.L_getKernel
+#endif
+#if CF_AMD64
+	.code64
+	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
+	mov	$.L_GDTPT64, %rdi
+	lgdt	(%rdi)
+	pushf
+	push	$KCSel
+	push	$1f
+	iret
+1:	xor	%ax, %ax
+	mov	%ax, %ss
+	mov	%ax, %ds
+	mov	%ax, %es
+	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
+	mov	$__kernel_base, %rax
+	add	%rax, 2(%rdi)
+	lgdt	(%rdi)
+	jmp	.L_getKernel
+
+	.align 4
+.L_GDTPT64:
+	.word	GDTLIMIT	// LIMIT OF GDT64
+	.quad	1f		// GDT64
 	.quad	0
+	.align 256
+1:	.quad	0			// DS/ES
+	.quad	0x0020980000000000	// CS(kernel)
+	.quad	0
+	.quad	0x0060f80000000000	// CS(user)
+	.quad	0
+	.quad	0x00cf9a000000ffff	// CS(kernel, 32bits)
+__LMA_TSSPH:
+	.rept	CF_MAX_PROCESSORs
+	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
+	.quad	0x000089000000006c
 	.endr
 #endif
 
-	.space	4096, 0
-9:
-
-
+/************************************************* 下準備が終わったのでInitへ */
+.L_getKernel:
+	jmp	Init

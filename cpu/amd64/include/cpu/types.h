@@ -12,26 +12,22 @@ typedef unsigned char uchar;
 typedef unsigned uint;
 typedef short i16;
 typedef unsigned short u16;
-typedef long i32;
-typedef unsigned long u32;
-typedef long long i64;
-typedef unsigned long long u64;
+typedef int i32;
+typedef unsigned int u32;
+typedef long i64;
+typedef unsigned long u64;
 typedef struct{ u64 content[2]; } i128;
 typedef struct{ u64 content[2]; } u128;
 
 
 /// position & size of virtual memory
-typedef u32 munit;
+typedef u64 munit;
 
 /// position & size of real memory
-#if CF_PAE
 typedef u64 runit;
-#else
-typedef u32 runit;
-#endif
 
 /// position & numbers of page
-typedef u32 punit;
+typedef u64 punit;
 
 const munit PAGESIZE(4096);
 

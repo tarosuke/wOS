@@ -1,6 +1,6 @@
 ################################################### MAKEFILE FOR WHOLE TARGETs
 
-.PHONY: help all clean configure tools emu confall todo
+.PHONY: help all clean configure tools emu confall todo cleantools erasetools
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
@@ -20,17 +20,24 @@ clean:
 tools:
 	@for t in $(targets); do make -C $$t gnutools || exit -1; done
 
+cleantools:
+	@rm -r objs/gcc* objs/binutils*
+
+erasetools:
+	@rm -rf objs/tools
+
 configure:
 	@if [ -z $(ARCH) ]; then echo 'set ARCH. do "make help"'; exit -1; fi
 	@if ! [ -d arch/$(ARCH) ]; then echo 'set right ARCH. do "ls arch"'; exit -1; fi
 	@echo "arch:"$(ARCH)" target:"$(TARGET)
 	@if ! [ -d objs/$(TARGET) ]; then mkdir objs/$(TARGET); fi
-	@cp arch/$(ARCH)/makefile arch/$(ARCH)/config objs/$(TARGET)/
-	@ln -s arch/$(ARCH)/target.lds objs/$(TARGET)
+	@cp arch/$(ARCH)/config objs/$(TARGET)/
+	@ln -s ../../arch/$(ARCH)/makefile objs/$(TARGET)
+	@ln -s ../../arch/$(ARCH)/target.lds objs/$(TARGET)
 
 confall:
 	@echo -n 'prepareing'
-	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/makefile arch/$$t/config objs/$$t/; ln -s ../../arch/$$t/target.lds objs/$$t; echo -n '...'$$t; fi; done
+	@for t in $(shell ls arch); do if ! [ -d objs/$$t ]; then mkdir objs/$$t; cp arch/$$t/config objs/$$t/; ln -s ../../arch/$$t/target.lds objs/$$t; ln -s ../../arch/$$t/makefile objs/$$t; echo -n '...'$$t; fi; done
 	@echo '...done.'
 
 todo:
