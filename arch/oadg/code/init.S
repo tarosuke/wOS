@@ -6,13 +6,10 @@
 #include <config.h>
 #include <arch/segments.h>
 
-.global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_GDT, __LMA_GDTPT, __LMA_TSSPH
+.global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
-.extern __kernelBase_hi, __kernelBase_lo
+.extern __kernelBase_hi, __kernelBase_lo, __kernel_base
 .global __hiPageTable, __pageRoot
-#ifndef CF_IA32
-.extern __VMA_GDT
-#endif
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
@@ -141,14 +138,15 @@ __init16:
 
 	/***** TEMPORARY GDT */
 .align 256
-__LMA_GDT:
-	.quad	0
+1:	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
 	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
 	.quad	0x00cff8000000ffff	// CS(user)
 	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
+#if CF_IA32
 __LMA_TSSPH:
+#endif
 	.rept	CF_MAX_PROCESSORs
 	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
 	.endr
@@ -156,12 +154,7 @@ __LMA_TSSPH:
 	/***** GDT POINTER */
 .L_GDTPT:
 	.word	GDTLIMIT	// LIMIT OF GDT
-	.long	__LMA_GDT	// GDT
-__LMA_GDTPT:
-#if CF_IA32
-	.word	GDTLIMIT	// LIMIT OF GDT
-	.long	__VMA_GDT	// GDT(upper mirror)
-#endif
+	.long	1b		// GDT
 
 
 	/***** MEMORYBANKs */
@@ -183,10 +176,11 @@ __LMA32:
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$1f, %esp
+	mov	$.L_temporaryStackTop, %esp
 	ljmp	$KCSel, $.L_initPages
 	.space	4096, 0
-1:
+.L_temporaryStackTop:
+
 
 
 /******************************************************* INITIALIZE PAGEING */
@@ -398,13 +392,52 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 
 /************************************************ INITIALIZE PAGED SEGMENTS */
 .L_initPagedSegments:
+#if CF_IA32
+	/***** カーネルイメージへミラーしたGDTを読み込む */
+	mov	$__kernelBase_lo, %eax
+	mov	$.L_GDTPT, %edi
+	add	%eax, 2(%edi)
+	add	%eax, %edi
+	lgdt	(%edi)
+	jmp	.L_setupTSS
+#endif
+#if CF_AMD64
+	.code64
+	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
+	mov	$__kernel_base, %rax
+	mov	$.L_GDTPT64, %rdi
+	add	%rax, 2(%rdi)
+	add	%rax, %rdi
+	lgdt	(%rdi)
+	jmp	.L_setupTSS
+
+.L_GDTPT64:
+	.word	GDTLIMIT	// LIMIT OF GDT64
+	.quad	1f		// GDT64
+.align 256
+1:	.quad	0
+	.quad	0x0060980000000000	// CS(kernel)
+	.quad	0x0000800000000000	// DS/ES(kernel)
+	.quad	0x0060f80000000000	// CS(user)
+	.quad	0x0000800000000000	// DS/ES(user)
+	.quad	0			// may not be used)
+__LMA_TSSPH:
+	.rept	CF_MAX_PROCESSORs
+	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
+	.quad	0x000089000000006c
+	.endr
+#endif
 
 
 
+/**************************************************************** SETUP TSS */
+.L_setupTSS:
+	jmp	STOP
 
 
 	/***** 下準備が終わったのでInitへ */
-jmp	STOP
+.L_getKernel:
+	jmp	Init
 
 
 

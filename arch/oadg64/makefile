@@ -2,6 +2,7 @@
 
 arch = oadg
 cpu = amd64
+base_ccopts = -m64
 
 include ../../makefile.in
 include ../../arch/oadg/loader/makefile.in
