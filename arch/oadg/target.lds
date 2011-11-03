@@ -36,7 +36,6 @@ SECTIONS {
 	/* utilities */
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 	__kProcHeader_LMA = LOADADDR(.kProcHeader);
-	__version_LMA = ABSOLUTE(__version) - __kernel_base;
 	__pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */

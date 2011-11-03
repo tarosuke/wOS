@@ -1,7 +1,6 @@
 /*************************************************************** DEBUG CONSOLE
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #include <config.h>
@@ -235,10 +234,13 @@ void dprintf(const char* f, ...){
 void Dump(const void* start){
 	const u32* s((const u32*)start);
 	for(uint i = 0; i < 128; i++, s++){
-		if(!(i & 7)){
-			dprintf("\n%02x: ", i);
+		if(!(i & 3)){
+			dputc('\n');
+			Hex((munit)start + i, '0', sizeof(munit) * 2);
+			dputc(':');
 		}
-		dprintf("%08x ", *s);
+		dputc(' ');
+		Hex(*s, '0', 8);
 	}
 }
 

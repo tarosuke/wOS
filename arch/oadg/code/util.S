@@ -1,7 +1,6 @@
 /********************************************************* ASSEMBLER UTILITIES
 	Copyright (C) 2009- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: 73df46f58963e9dc7115210b9aec4177350994e2 $
 */
 
 #include <config.h>
@@ -28,9 +27,6 @@
 	sub	$__kernel_LMA, %ebx
 	add	$__kernel_VMA, %ebx
 	ret*/
-
-
-
 
 
 
@@ -81,7 +77,8 @@ __hex16:
 2:	call	__putc16
 	loop	1b
 	ret
-__ARCH_SayHello: //端末の初期化と初期メッセージの出力。もしデバグモードなら両方に出力
+//端末の初期化と初期メッセージの出力。もしデバグモードなら両方に出力
+__ARCH_SayHello:
 	//初期化
 #if CF_DEBUG_LEVEL
 	mov	$0x03fa, %dx
@@ -107,15 +104,9 @@ __ARCH_SayHello: //端末の初期化と初期メッセージの出力。もし�
 	outb	%al, %dx
 #endif
 	//初期メッセージの出力
-	push	%ds
-	mov	$__version_LMA, %esi
-	mov	%esi, %eax
-	shr	$4, %eax
-	mov	%ax, %ds
-	and	$0xf, %esi
+	mov	$1f, %esi
 	call	__puts16
 	mov	$'\n', %al
 	call	__putc16
-	pop	%ds
 	ret
-
+1:	.asciz	"\n((((( welcome to talos )))))\n"

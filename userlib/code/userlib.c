@@ -8,7 +8,7 @@
 
 #define D(n) n : n
 const struct _ULIB ulib __attribute__((section(".ulibdef"))) = {
-	version : 0x0000005a, /* 0.0.0.90 */
+	version : 0x00000000+132, /* 0.0.0.132 */
 	D(RawSystemcall),
 	D(WaitNextMessage),
 	D(HEAP_Init),
