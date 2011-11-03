@@ -1,6 +1,6 @@
 ################################################### MAKEFILE FOR WHOLE TARGETs
 
-.PHONY: help all clean configure tools emu confall todo
+.PHONY: help all clean configure tools emu confall todo cleantools erasetools
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
@@ -19,6 +19,12 @@ clean:
 
 tools:
 	@for t in $(targets); do make -C $$t gnutools || exit -1; done
+
+cleantools:
+	@rm -r objs/gcc* objs/binutils*
+
+erasetools:
+	@rm -rf objs/tools
 
 configure:
 	@if [ -z $(ARCH) ]; then echo 'set ARCH. do "make help"'; exit -1; fi
