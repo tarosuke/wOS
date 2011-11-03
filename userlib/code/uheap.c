@@ -42,9 +42,11 @@ static const munit sizes[32] = {
 void	HEAP_Init(void){
 	HEAP;
 	unsigned i;
-	(*heap).top = ((munit)&heap[1] + PAGESIZE - 1) / PAGESIZE;
+	(*heap).top = (punit)
+		(((munit)&heap[1] + PAGESIZE - 1) / PAGESIZE);
 	(*heap).limit =
-		((munit)__kernel_base - taskHead.stackSize) / PAGESIZE;
+		(punit)
+		(((munit)__kernel_base - taskHead.stackSize) / PAGESIZE);
 	(*heap).anchorStack = 0;
 	for(i = 0; i < 32; i++){
 		(*heap).stack[i] = 0;

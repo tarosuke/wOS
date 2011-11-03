@@ -2,6 +2,7 @@
 
 arch = oadg
 cpu = ia32
+base_ccopts = -m32
 
 include ../../makefile.in
 include ../../arch/oadg/loader/makefile.in
