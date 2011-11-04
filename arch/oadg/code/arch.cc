@@ -5,7 +5,6 @@
 
 #include <types.h>
 #include <debug.h>
-#include <cpu/cpu.h>
 #include <core.h>
 #include <cpu/virtualPage.h>
 
@@ -34,10 +33,9 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-#if 0
-		// プロセッサを起動
-		new(0) CPU(0); // TODO:SMPの時は初期化しないルートからプロセッサ番号を渡す
-#endif
+
+//TODO:カーネルプロセスをセットアップして、スケジューラの特別な入り口から入る
+
 		//ここには到達しないはず
 		assert(false);
 		asm volatile("cli; hlt");

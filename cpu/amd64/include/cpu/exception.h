@@ -1,7 +1,6 @@
 /*********************************************************** EXCEPTION HANDLER
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #ifndef _CPU_EXCEPTION_
@@ -16,8 +15,8 @@
 class EXCEPTION{
 private:
 	static const uint systemExceptions = 32;
-	static u64 vector[];
-	static const struct IDTP{ u16 limit; u64* table; }__attribute__((packed)) idtp;
+	static u64 vector[][2];
+	static const struct IDTP{ u16 limit; void* table; }__attribute__((packed)) idtp;
 public:
 	EXCEPTION();
 	void RegisterFault(uint num, void (*handler)(u32));

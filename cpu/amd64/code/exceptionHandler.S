@@ -12,53 +12,104 @@
 
 #define ARCH_BASE_VECTOR 32
 
-.code32
+.code64
 
 .text
 /***** フォルト専用ハンドラ(フラグを引数に) */
 .L_faultPad:
-	mov	%esp, %ebp
-	push	%ds
-	push	%es
+	push	%rax
+	push	%rbx
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rbp
+	push	%r8
+	push	%r9
+	push	%r10
+	push	%r11
+	push	%r12
+	push	%r13
+	push	%r14
+	push	%r15
+	mov	%rsp, %rbp
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
-	push	40(%ebp)
-	push	%eax
+	mov	120(%rbp), %rsi
 	call	__FAULT_Handler
-	add	$8, %esp
 	/****** 終了 */
-	pop	%es
-	pop	%ds
-	popal
-	add	$4, %esp
+	mov	$UDSel, %ax
+	mov	%ax, %es
+	mov	%ax, %ds
+	pop	%r15
+	pop	%r14
+	pop	%r13
+	pop	%r12
+	pop	%r11
+	pop	%r10
+	pop	%r9
+	pop	%r8
+	pop	%rbp
+	pop	%rsi
+	pop	%rdx
+	pop	%rcx
+	pop	%rbx
+	pop	%rax
+	pop	%rdi
+	add	$4, %rsp
 	iret
 
 /***** 割り込みハンドラ(共通部) */
 .L_jumpPad:
-	push	%ds
-	push	%es
+	push	%rax
+	push	%rbx
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rbp
+	push	%r8
+	push	%r9
+	push	%r10
+	push	%r11
+	push	%r12
+	push	%r13
+	push	%r14
+	push	%r15
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
-	sub	$ARCH_BASE_VECTOR, %eax
-	push	%eax
+	sub	$ARCH_BASE_VECTOR, %rax
 	/***** ハンドラ実行 */
 	call	__INTERRUPT_Handler
-	pop	%eax
+	add	$8, %rsp
 	/***** 終了 */
-3:	pop	%es
-	pop	%ds
-	popal
+	mov	$UDSel, %ax
+	mov	%ax, %es
+	mov	%ax, %ds
+	pop	%r15
+	pop	%r14
+	pop	%r13
+	pop	%r12
+	pop	%r11
+	pop	%r10
+	pop	%r9
+	pop	%r8
+	pop	%rbp
+	pop	%rsi
+	pop	%rdx
+	pop	%rcx
+	pop	%rbx
+	pop	%rax
+	pop	%rdi
 	iret
 
 /***** 割り込みハンドラ(個別部) */
-	.align	16
+	.align	16, 0x90
 __ExceptionTable:
 	.macro	jumpers f t
 	.align	16, 0x90
-	pushal
-	mov	$\f, %eax
+	push	%rdi
+	mov	$\f, %rdi
 	.if	(ARCH_BASE_VECTOR <= \f)
 	/***** NORMAL HANDLER */
 	jmp	.L_jumpPad

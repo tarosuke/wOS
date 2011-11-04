@@ -14,7 +14,7 @@
 
 
 extern "C"{
-	extern u64 __TSSPH[];
+	extern u64 __TSSPH[][2];
 };
 
 
@@ -57,4 +57,5 @@ for(;;){ asm volatile("hlt"); dprintf("uptime:%llu\r", CORE::GetUptime()); };
 void* CPU::operator new(munit size, uint cpuid){
 	return (void*)&kernelStacks[cpuid][4096 - size];
 }
+
 #endif
