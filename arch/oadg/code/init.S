@@ -450,4 +450,13 @@ __LMA_TSSPH:
 
 /************************************************* 下準備が終わったのでInitへ */
 .L_getKernel:
+	/***** スタックをカーネルイメージ内へ移動 */
+#if CF_AMD64
+	mov	$__kernel_base, %rax
+	add	%rax, %rsp
+#endif
+#if CF_IA32
+	mov	$__kernel_base, %eax
+	add	%eax, %esp
+#endif
 	jmp	Init
