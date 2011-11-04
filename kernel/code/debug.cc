@@ -6,6 +6,8 @@
 #include <config.h>
 #include <types.h>
 #include <debug.h>
+#include <stdarg.h>
+
 
 #if CF_DEBUG_LEVEL
 extern void __ARCH_putc(char);
@@ -117,14 +119,16 @@ static inline void Dec(i64 val, char head, int chars){
 
 
 void dprintf(const char* f, ...){
-	const munit* p;
-	char h;
-	int n;
-
-	for(p = reinterpret_cast<munit*>((munit)&f), p++; *f; f++){
+	va_list p;
+	va_start(p, f);
+	for(; *f; f++){
 		if(*f == '%'){
 			uint longLevel;
-			f++;
+			char h;
+			int n;
+			if(!++f){
+				break;
+			}
 
 			/***** 桁フォーマット取得 */
 			h = ' ';
@@ -144,61 +148,45 @@ void dprintf(const char* f, ...){
 			switch(*f){
 				case 0 : return;
 				case 's' :
-					dputs((const char*)*p++);
+					dputs(va_arg(p, char*));
 					longLevel = 0;
 					break;
 				case 'd' :
 					if(1 < longLevel){
-						Dec(*(i64*)p, h, n);
-						p += 2;
+						Dec(va_arg(p, i64), h, n);
 					}else{
-						Dec((int)*p++, h, n);
+						Dec(va_arg(p, int), h, n);
 					}
 					break;
 				case 'u' :
 					if(1 < longLevel){
-						UDec(*(u64*)p, h, ' ', n);
-						p += 2;
+						UDec(va_arg(p, u64), h, ' ', n);
 					}else{
-						UDec((uint)*p++, h, ' ', n);
+						UDec(va_arg(p, uint), h, ' ', n);
 					}
 					break;
 				case 'x' :
 					if(1 < longLevel){
-						Hex(*(u64*)p, h, n);
-						p += 2;
+						Hex(va_arg(p, u64), h, n);
 					}else{
-						Hex((uint)*p++, h, n);
+						Hex(va_arg(p, uint), h, n);
 					}
 					break;
 				case 'c' :
-					dputc((char)*p++);
+					dputc(va_arg(p, int));
 					break;
 				case 'p' : //仮想アドレス
-#if CF_IA32
-					Hex((uint)*p++, '0', 8);
-#endif
-#if CF_AMD64
-					Hex(*(u64*)*p, '0', 16);
-					p += 2;
-#endif
+					Hex(va_arg(p, munit), '0', sizeof(munit) * 2);
 					break;
 				case 'r' : //実アドレス
-#if !CF_PAE && !CF_AMD64
-					Hex((uint)*p++, '0', 8);
-#else
-					Hex(*(u64*)*p, '0', 16);
-					p += 2;
-#endif
+					Hex(va_arg(p, runit), '0', sizeof(runit) * 2);
 					break;
-				case 'm' : //自動副単位メモリサイズ
+				case 'm' : //自動副単位メモリサイズ(u64で指定すること)
 					{
 					static const u64 KiB(1024ULL);
 					static const u64 MiB(KiB*KiB);
 					static const u64 GiB(MiB*KiB);
-					const u64 size(*(u64*)p);
-// 					const u64 size(GiB * 3);
-					p += 2;
+					const u64 size(va_arg(p, u64));
 					static const struct SCALE{
 						u64 scale;
 						const char* name;
@@ -228,6 +216,7 @@ void dprintf(const char* f, ...){
 			dputc(*f);
 		}
 	}
+	va_end(p);
 }
 
 
