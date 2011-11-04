@@ -181,16 +181,20 @@ void dprintf(const char* f, ...){
 				case 'r' : //実アドレス
 					Hex(va_arg(p, runit), '0', sizeof(runit) * 2);
 					break;
-				case 'm' : //自動副単位メモリサイズ(u64で指定すること)
+				case 'm' : //自動副単位メモリサイズ(u64で指定すること。//TODO:可変長整数にする)
 					{
 					static const u64 KiB(1024ULL);
 					static const u64 MiB(KiB*KiB);
 					static const u64 GiB(MiB*KiB);
+					static const u64 TiB(GiB*KiB);
+					static const u64 PiB(TiB*KiB);
 					const u64 size(va_arg(p, u64));
 					static const struct SCALE{
 						u64 scale;
 						const char* name;
 					}scale[] = {
+						{ PiB, "[PiB]" },
+						{ TiB, "[TiB]" },
 						{ GiB, "[GiB]" },
 						{ MiB, "[MiB]" },
 						{ KiB, "[KiB]" },
