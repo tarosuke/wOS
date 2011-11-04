@@ -146,75 +146,78 @@ void dprintf(const char* f, ...){
 
 			/***** 出力 */
 			switch(*f){
-				case 0 : return;
-				case 's' :
-					dputs(va_arg(p, char*));
-					longLevel = 0;
-					break;
-				case 'd' :
-					if(1 < longLevel){
-						Dec(va_arg(p, i64), h, n);
-					}else{
-						Dec(va_arg(p, int), h, n);
-					}
-					break;
-				case 'u' :
-					if(1 < longLevel){
-						UDec(va_arg(p, u64), h, ' ', n);
-					}else{
-						UDec(va_arg(p, uint), h, ' ', n);
-					}
-					break;
-				case 'x' :
-					if(1 < longLevel){
-						Hex(va_arg(p, u64), h, n);
-					}else{
-						Hex(va_arg(p, uint), h, n);
-					}
-					break;
-				case 'c' :
-					dputc(va_arg(p, int));
-					break;
-				case 'p' : //仮想アドレス
-					Hex(va_arg(p, munit), '0', sizeof(munit) * 2);
-					break;
-				case 'r' : //実アドレス
-					Hex(va_arg(p, runit), '0', sizeof(runit) * 2);
-					break;
-				case 'm' : //自動副単位メモリサイズ(u64で指定すること。//TODO:可変長整数にする)
-					{
-					static const u64 KiB(1024ULL);
-					static const u64 MiB(KiB*KiB);
-					static const u64 GiB(MiB*KiB);
-					static const u64 TiB(GiB*KiB);
-					static const u64 PiB(TiB*KiB);
-					const u64 size(va_arg(p, u64));
-					static const struct SCALE{
-						u64 scale;
-						const char* name;
-					}scale[] = {
-						{ PiB, "[PiB]" },
-						{ TiB, "[TiB]" },
-						{ GiB, "[GiB]" },
-						{ MiB, "[MiB]" },
-						{ KiB, "[KiB]" },
-						{ 0, "[Byte(s)]" },
-					};
-					const SCALE* sc(scale);
-					for(; size < (*sc).scale; sc++);
-					if((*sc).scale){
-						UDec(size / (*sc).scale, ' ', ' ', 0);
-						dputc('.');
-						UDec((size & ((*sc).scale - 1)) * 100 / (*sc).scale, '0', ' ', 2);
-					}else{
-						UDec(size, ' ', ' ', 0);
-					}
-					dputs((*sc).name);
-					}
-					break;
-				default :
-					dputc(*f);
-					break;
+			case 0 : return;
+			case 's' :
+				{
+				const char* str(va_arg(p, char*));
+				dputs(str ? str : "(null)");
+				longLevel = 0;
+				}
+				break;
+			case 'd' :
+				if(1 < longLevel){
+					Dec(va_arg(p, i64), h, n);
+				}else{
+					Dec(va_arg(p, int), h, n);
+				}
+				break;
+			case 'u' :
+				if(1 < longLevel){
+					UDec(va_arg(p, u64), h, ' ', n);
+				}else{
+					UDec(va_arg(p, uint), h, ' ', n);
+				}
+				break;
+			case 'x' :
+				if(1 < longLevel){
+					Hex(va_arg(p, u64), h, n);
+				}else{
+					Hex(va_arg(p, uint), h, n);
+				}
+				break;
+			case 'c' :
+				dputc(va_arg(p, int));
+				break;
+			case 'p' : //仮想アドレス
+				Hex(va_arg(p, munit), '0', sizeof(munit) * 2);
+				break;
+			case 'r' : //実アドレス
+				Hex(va_arg(p, runit), '0', sizeof(runit) * 2);
+				break;
+			case 'm' : //自動副単位メモリサイズ(u64で指定すること。//TODO:可変長整数にする)
+				{
+				static const u64 KiB(1024ULL);
+				static const u64 MiB(KiB*KiB);
+				static const u64 GiB(MiB*KiB);
+				static const u64 TiB(GiB*KiB);
+				static const u64 PiB(TiB*KiB);
+				const u64 size(va_arg(p, u64));
+				static const struct SCALE{
+					u64 scale;
+					const char* name;
+				}scale[] = {
+					{ PiB, "[PiB]" },
+					{ TiB, "[TiB]" },
+					{ GiB, "[GiB]" },
+					{ MiB, "[MiB]" },
+					{ KiB, "[KiB]" },
+					{ 0, "[Byte(s)]" },
+				};
+				const SCALE* sc(scale);
+				for(; size < (*sc).scale; sc++);
+				if((*sc).scale){
+					UDec(size / (*sc).scale, ' ', ' ', 0);
+					dputc('.');
+					UDec((size & ((*sc).scale - 1)) * 100 / (*sc).scale, '0', ' ', 2);
+				}else{
+					UDec(size, ' ', ' ', 0);
+				}
+				dputs((*sc).name);
+				}
+				break;
+			default :
+				dputc(*f);
+				break;
 			}
 		}else{
 			dputc(*f);

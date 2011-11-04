@@ -1,7 +1,6 @@
 /******************************************************** MEMORYBANK COMPANION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id: 6cc7799dacd4f238fe8f5b256350f88e32dfeb68 $
  */
 
 #include <config.h>
@@ -27,14 +26,14 @@ public:
 		dputs("memorybank..." INDENT);
 		u64 totalSize(0);
 		MB* b(__ARCH_MemoryBlocks);
-#if !CF_PAE
+#if !CF_PAE && !CF_AMD64
 		const u64 _4G(1ULL << 32);
 #endif
-		for(uint i(0); i < CF_MAX_MEMORYBANKs && (*b).type != ~0UL; i++, b++){
-			hprintf("start:%16llx size:%16llx type:%lu.\n", (*b).start, (*b).size, (*b).type);
+		for(uint i(0); i < CF_MAX_MEMORYBANKs && (*b).type != 0xffffffff; i++, b++){
+			hprintf("start:%16llx size:%16llx type:%x.\n", (*b).start, (*b).size, (*b).type);
 			if((*b).type == 1){
 				const runit kbase((runit)__kernel_heap - (runit)__kernel_base);
-#if !CF_PAE
+#if !CF_PAE && !CF_AMD64
 				if(_4G <= (*b).start || _4G < (*b).start + (*b).size){
 					dputs(LIGHTYELLOW"WARNING: PAE not available.\n"ORIGIN);
 					continue;

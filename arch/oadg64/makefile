@@ -12,7 +12,7 @@ include ../../arch/oadg/loader/makefile.in
 
 .phony : emu
 qemuOptFiles = .qemu-netopt .qemu-nicopt
-qemuOpts = -vga std -serial stdio -smp 8 $(shell cat $(qemuOptFiles))
+qemuOpts = -vga std -serial stdio -smp 8 -m 8196 $(shell cat $(qemuOptFiles))
 
 
 emu : emufd

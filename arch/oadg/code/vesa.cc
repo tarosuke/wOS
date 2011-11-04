@@ -74,17 +74,19 @@ extern "C"{
 
 
 
-static void* Get16(u32 p){
-	return (void*)((munit)(((p & 0xffff0000) >> 12) | (p & 0xffff)));
+static void* Get16(munit p){
+	return (void*)(((p & 0xffff0000) >> 12) + (p & 0xffff));
 }
 
 void VESA_Check(){
+#if 0
 	dputs("enumlating supported display modes...\n");
 	for(u16* m((u16*)Get16(__VESA_InfoBlock.videoModes)); *m != 0xffff; m++){
 		if(0x10d <= (*m & 0x1ff)){
 			dprintf(" %04x\n", *m & 0x1ff);
 		}
 	}
+#endif
 	dprintf(" VESA signature:%04s\n", __VESA_InfoBlock.signature);
 	dprintf("        version:%04x\n", __VESA_InfoBlock.version);
 	dprintf("     OEM string:%s\n", Get16(__VESA_InfoBlock.oemString));

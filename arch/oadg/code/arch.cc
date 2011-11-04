@@ -16,19 +16,11 @@ extern "C"{
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
 	extern const void (*__KernelConstructor[])(void);
-	extern runit __pageRoot[512];
+	extern runit __pageRoot_VMA[];
 
 	void Init(void){
 		// カーネルを初期化
 		dputs("Initializing kernel..." INDENT);
-#if 0
-// 		// 初期カーネルページテーブルを記録
-// #if CF_PAE && !CF_AMD64
-// 		VIRTUALPAGE((munit)pageDirs + kb);
-// #else
-// 		VIRTUALPAGE((munit)__pageRoot + kb);
-// #endif
-
 		for(const void (**cons)(void)(__KernelConstructor); *cons; cons++){
 			(*cons)();
 		}
@@ -42,6 +34,7 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
+#if 0
 		// プロセッサを起動
 		new(0) CPU(0); // TODO:SMPの時は初期化しないルートからプロセッサ番号を渡す
 #endif

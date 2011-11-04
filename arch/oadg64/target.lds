@@ -37,6 +37,7 @@ SECTIONS {
 	__arch_CGA_VRAM = __kernel_base + 0xb8000;
 	__kProcHeader_LMA = LOADADDR(.kProcHeader);
 	__pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
+	__hiPageTable_VMA = ABSOLUTE(__hiPageTable) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */
 	__arch_LOMEM = __init_LMA +
@@ -48,11 +49,10 @@ SECTIONS {
 	.init 0x10000 : {
 		LONG(ABSOLUTE(__init16));
 		LONG(__arch_LOMEM);
-		*(.init)
-		*(.kp_init)
-		*(.kp_ro)
-		*(.kp_rw)
-		*(.kp_def)
+		KEEP(*(.kp_init))
+		KEEP(*(.kp_ro))
+		KEEP(*(.kp_rw))
+		KEEP(*(.kp_def))
 	} AT > IMAGE
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {
@@ -60,13 +60,13 @@ SECTIONS {
 		*(.text*)
 		. = ALIGN(4);
 		__KernelConstructor = .;
-		*(.ctors)
-		*(SORT(.ctors.*))
-		LONG(0);
+		KEEP(*(.ctors))
+		KEEP(*(SORT(.ctors.*)))
+		QUAD(0);
 		__KernelDestructor = .;
-		*(.dtors)
-		*(SORT(.dtors.*))
-		LONG(0);
+		KEEP(*(.dtors))
+		KEEP(*(SORT(.dtors.*)))
+		QUAD(0);
 		*(.rodata*)
 		*(.data*)
 		*(.eh_frame)
@@ -84,7 +84,7 @@ SECTIONS {
 
 	.kProcHeader 0 : {
 		*(.kp_def)
-		LONG(0);
+		QUAD(0);
 	} AT > IMAGE
 
 	.user 0 : {
