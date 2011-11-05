@@ -416,13 +416,12 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	.code64
 	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
-	lgdt	(%rdi)
-	mov	$KDSel, %rax
-	push	%rax
+	push	$16
 	push	$.L_temporaryStackTop
 	pushf
 	push	$KCSel
 	push	$1f
+	lgdt	(%rdi)
 	iret
 1:	mov	$KDSel, %ax
 	mov	%ax, %ss
