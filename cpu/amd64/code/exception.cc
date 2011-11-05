@@ -47,25 +47,33 @@ void (*Handlers[32])(u32 code) = {
 
 
 extern "C"{
-	void __FAULT_Handler(uint num, uint err){
+	void __FAULT_Handler(uint num, uint err, EXCEPTION::FRAME* frame){
 		if(Handlers[num]){
 			Handlers[num](err);
 		}else{
-			dprintf("EXCEPTION(%d:%08x).\n", num, err); assert(false);
+			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
+			dprintf("rip:%p.\n", (*frame).withErrorCode.rip);
+			dprintf(" cs:%llx.\n", (*frame).withErrorCode.cs);
+			dprintf("flg:%08llx.\n", (*frame).withErrorCode.rflags);
+			dprintf("rsp:%p.\n", (*frame).withErrorCode.rsp);
+			dprintf(" ss:%llx.\n"UNINDENT, (*frame).withErrorCode.ss);
+			assert(false);
 		}
 	}
 	extern u32 __ExceptionTable[CF_MAX_IRQs][4];
 }
 
 u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs][2]__attribute__((aligned(8)));
-const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 8, (void*)vector };
+const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 16, (void*)vector };
 static EXCEPTION exeptionHandler;
 
 EXCEPTION::EXCEPTION(){
 	dputs("exception..." INDENT);
 	for(uint n(0); n < systemExceptions + CF_MAX_IRQs; n++){
 		u64 p((munit)__ExceptionTable[n]);
-		vector[n][0] = 0x00008e0000000000ULL | (KCSel << 16) | ((p & 0xffff0000ULL) << 32) | (p & 0xffffULL);
+		vector[n][0] = 0x00008e0000000000ULL | (KCSel << 16) |
+			((p & 0xffff0000ULL) << 32) |
+			(p & 0xffffULL);
 		vector[n][1] = p >> 32;
 	}
 	asm volatile("lidt %0" :: "m"(idtp));

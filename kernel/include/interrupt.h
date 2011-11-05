@@ -23,6 +23,7 @@ public:
 	};
 	static inline void Handler(uint irq){
 		if(CF_MAX_IRQs <= irq){
+			dprintf("irq %d not supported.\n", irq);
 			assert(false);
 			return;
 		}

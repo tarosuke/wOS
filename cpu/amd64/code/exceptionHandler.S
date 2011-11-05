@@ -31,15 +31,20 @@
 	push	%r13
 	push	%r14
 	push	%r15
-	mov	%rsp, %rbp
-	mov	$0, %dx
-	mov	%dx, %ds
-	mov	%dx, %es
-	mov	120(%rbp), %rsi
-	call	__FAULT_Handler
-	/****** 終了 */
-	mov	$UDSel, %ax
+	mov	%rsp, %rdx
+	mov	120(%rsp), %rsi
+	mov	%ds, %ax
+	push	%ax
+	mov	%es, %ax
+	push	%ax
+	mov	$KDSel, %ax
+	mov	%ax, %ds
 	mov	%ax, %es
+	mov	%rsp, %rbp
+	call	__FAULT_Handler
+	pop	%ax
+	mov	%ax, %es
+	pop	%ax
 	mov	%ax, %ds
 	pop	%r15
 	pop	%r14
@@ -57,7 +62,7 @@
 	pop	%rax
 	pop	%rdi
 	add	$8, %rsp
-	iret
+	iretq
 
 /***** 割り込みハンドラ(共通部) */
 .L_jumpPad:
@@ -75,16 +80,19 @@
 	push	%r13
 	push	%r14
 	push	%r15
-	mov	$0, %dx
-	mov	%dx, %ds
-	mov	%dx, %es
-	sub	$ARCH_BASE_VECTOR, %rax
-	/***** ハンドラ実行 */
-	call	__INTERRUPT_Handler
-	add	$8, %rsp
-	/***** 終了 */
-	mov	$UDSel, %ax
+	mov	%ds, %ax
+	push	%ax
+	mov	%es, %ax
+	push	%ax
+	mov	$KDSel, %ax
+	mov	%ax, %ds
 	mov	%ax, %es
+	sub	$ARCH_BASE_VECTOR, %rdi
+	mov	%rsp, %rbp
+	call	__INTERRUPT_Handler
+	pop	%ax
+	mov	%ax, %es
+	pop	%ax
 	mov	%ax, %ds
 	pop	%r15
 	pop	%r14
@@ -101,7 +109,8 @@
 	pop	%rbx
 	pop	%rax
 	pop	%rdi
-	iret
+	iretq
+
 
 /***** 割り込みハンドラ(個別部) */
 	.align	16, 0x90

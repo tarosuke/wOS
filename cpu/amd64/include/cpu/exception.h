@@ -13,13 +13,47 @@
 
 
 class EXCEPTION{
+public:
+	struct FRAME{
+		u64 r15;
+		u64 r14;
+		u64 r13;
+		u64 r12;
+		u64 r11;
+		u64 r10;
+		u64 r9;
+		u64 r8;
+		u64 rbp;
+		u64 rsi;
+		u64 rdx;
+		u64 rcx;
+		u64 rbx;
+		u64 rax;
+		u64 rdi;
+		union{
+			struct{
+				u64 rip;
+				u64 cs;
+				u64 rflags;
+				u64 rsp;
+				u64 ss;
+			}noErrorCode;
+			struct{
+				u64 errorCode;
+				u64 rip;
+				u64 cs;
+				u64 rflags;
+				u64 rsp;
+				u64 ss;
+			}withErrorCode;
+		};
+	};
+	EXCEPTION();
+	void RegisterFault(uint num, void (*handler)(u32));
 private:
 	static const uint systemExceptions = 32;
 	static u64 vector[][2];
 	static const struct IDTP{ u16 limit; void* table; }__attribute__((packed)) idtp;
-public:
-	EXCEPTION();
-	void RegisterFault(uint num, void (*handler)(u32));
 };
 
 
