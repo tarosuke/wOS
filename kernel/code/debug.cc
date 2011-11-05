@@ -245,7 +245,7 @@ void Dump(const void* start){
 void Panic(const char* message){
 	dputs(message);
 #if 3 <= CF_DEBUG_LEVEL
-	Dump(message);
+	Dump((const void*)&message);
 #endif
 	for(;;){
 		asm volatile("hlt");
