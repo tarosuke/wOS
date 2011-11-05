@@ -146,10 +146,10 @@ __init16:
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
 #if CF_IA32
 __LMA_TSSPH:
-#endif
 	.rept	CF_MAX_PROCESSORs
 	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
 	.endr
+#endif
 
 	/***** GDT POINTER */
 .L_GDTPT:
@@ -448,6 +448,7 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	.quad	0x0060fa0000000000	// CS(user)
 	.quad	0x00c0f20000000000	// DS(user)
 	.quad	0x00cffa000000ffff	// CS(user, 32bits)
+	.quad	0x00cff2000000ffff	// DS(user, 32bits)
 __LMA_TSSPH:
 	.space	CF_MAX_PROCESSORs * 16	// PLACEHOLDER FOR TSS
 #define xax rax
