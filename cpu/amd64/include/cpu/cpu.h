@@ -1,7 +1,6 @@
 /************************************************************ CPU MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #ifndef _CPU_
@@ -12,8 +11,9 @@
 #include <config.h>
 
 class CPU{
+public:
 	CPU();
- private:
+private:
 	struct TSS{
 		u32 reserved0;
 		void* rsp[3];
@@ -26,10 +26,8 @@ class CPU{
 	const uint cpuid;
 	TSS& tss;
 	static TSS tsss[];
-	static uchar kernelStacks[][4096];
- public:
-	static void* operator new(munit size, uint cpuid);
-	CPU(uint id);
+	static uint idPool;
+	static uint GetID();
 };
 
 

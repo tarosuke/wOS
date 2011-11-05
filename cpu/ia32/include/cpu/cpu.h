@@ -12,8 +12,9 @@
 #include <config.h>
 
 class CPU{
+public:
 	CPU();
- private:
+private:
 	struct TSS{
 		u32 link;
 		u32 esp0;
@@ -45,10 +46,8 @@ class CPU{
 	const uint cpuid;
 	TSS& tss;
 	static TSS tsss[];
-	static uchar kernelStacks[][4096];
- public:
-	static void* operator new(munit size, uint cpuid);
-	CPU(uint id);
+	static uint idPool;
+	static uint GetID();
 };
 
 

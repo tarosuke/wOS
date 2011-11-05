@@ -32,7 +32,7 @@
 	push	%r14
 	push	%r15
 	mov	%rsp, %rbp
-	mov	$KDSel, %dx
+	mov	$0, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
 	mov	120(%rbp), %rsi
@@ -56,7 +56,7 @@
 	pop	%rbx
 	pop	%rax
 	pop	%rdi
-	add	$4, %rsp
+	add	$8, %rsp
 	iret
 
 /***** 割り込みハンドラ(共通部) */
@@ -75,7 +75,7 @@
 	push	%r13
 	push	%r14
 	push	%r15
-	mov	$KDSel, %dx
+	mov	$0, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
 	sub	$ARCH_BASE_VECTOR, %rax

@@ -54,7 +54,7 @@ extern "C"{
 			dprintf("EXCEPTION(%d:%08x).\n", num, err); assert(false);
 		}
 	}
-	extern u32 __ExceptionTable[CF_MAX_IRQs][8];
+	extern u32 __ExceptionTable[CF_MAX_IRQs][4];
 }
 
 u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs][2]__attribute__((aligned(8)));

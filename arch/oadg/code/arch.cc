@@ -33,7 +33,11 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-
+asm volatile("sti");
+for(;;){
+	asm volatile("hlt");
+	dprintf("uptime:%llu\r", CORE::GetUptime());
+}
 //TODO:カーネルプロセスをセットアップして、スケジューラの特別な入り口から入る
 
 		//ここには到達しないはず

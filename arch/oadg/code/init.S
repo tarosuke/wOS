@@ -409,12 +409,17 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	mov	%ax, %ds
 	mov	%ax, %es
 	jmp	.L_getKernel
+#define xax eax
+#define xsp esp
 #endif
 #if CF_AMD64
 	.code64
 	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
 	lgdt	(%rdi)
+	xor	%rax, %rax
+	push	%rax
+	push	$.L_temporaryStackTop
 	pushf
 	push	$KCSel
 	push	$1f
@@ -442,21 +447,14 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel, 32bits)
 __LMA_TSSPH:
-	.rept	CF_MAX_PROCESSORs
-	.quad	0x000089000000006c	// PLACEHOLDER FOR TSS
-	.quad	0x000089000000006c
-	.endr
+	.space	CF_MAX_PROCESSORs * 16	// PLACEHOLDER FOR TSS
+#define xax rax
+#define xsp rsp
 #endif
 
 /************************************************* 下準備が終わったのでInitへ */
 .L_getKernel:
 	/***** スタックをカーネルイメージ内へ移動 */
-#if CF_AMD64
-	mov	$__kernel_base, %rax
-	add	%rax, %rsp
-#endif
-#if CF_IA32
-	mov	$__kernel_base, %eax
-	add	%eax, %esp
-#endif
+	mov	$__kernel_base, %xax
+	add	%xax, %xsp
 	jmp	Init
