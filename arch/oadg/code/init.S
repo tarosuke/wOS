@@ -417,17 +417,19 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
 	lgdt	(%rdi)
-	xor	%rax, %rax
+	mov	$KDSel, %rax
 	push	%rax
 	push	$.L_temporaryStackTop
 	pushf
 	push	$KCSel
 	push	$1f
 	iret
-1:	xor	%ax, %ax
+1:	mov	$KDSel, %ax
 	mov	%ax, %ss
 	mov	%ax, %ds
 	mov	%ax, %es
+	mov	%ax, %fs
+	mov	%ax, %gs
 	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
 	mov	$__kernel_base, %rax
 	add	%rax, 2(%rdi)
@@ -440,12 +442,12 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	.quad	1f		// GDT64
 	.quad	0
 	.align 256
-1:	.quad	0			// DS/ES
+1:	.quad	0
 	.quad	0x0020980000000000	// CS(kernel)
-	.quad	0
-	.quad	0x0060f80000000000	// CS(user)
-	.quad	0
-	.quad	0x00cf9a000000ffff	// CS(kernel, 32bits)
+	.quad	0x00c0920000000000	// DS(kernel)
+	.quad	0x0060fa0000000000	// CS(user)
+	.quad	0x00c0f20000000000	// DS(user)
+	.quad	0x00cffa000000ffff	// CS(user, 32bits)
 __LMA_TSSPH:
 	.space	CF_MAX_PROCESSORs * 16	// PLACEHOLDER FOR TSS
 #define xax rax
