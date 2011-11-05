@@ -8,7 +8,6 @@
 #include <arch/segments.h>
 #include <debug.h>
 #include <arch/pic.h>
-#include <lock.h>
 
 
 extern "C"{
@@ -17,21 +16,9 @@ extern "C"{
 
 
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
-uint CPU::idPool(0);
-
-static CPU cpu;
 
 
-uint CPU::GetID(){
-	static LOCK lock;
-	KEY key(lock);
-	return idPool++;
-}
-
-
-CPU::CPU() : cpuid(GetID()), tss(tsss[cpuid]){
-	assert(cpuid < CF_MAX_PROCESSORs);
-
+CPU::CPU(uint id) : cpuid(id), tss(tsss[cpuid]){
 	dprintf("cpu(%d)..."INDENT, cpuid);
 
 	//  当該プロセッサ用のTSSを設定

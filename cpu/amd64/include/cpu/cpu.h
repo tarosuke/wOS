@@ -11,8 +11,11 @@
 #include <config.h>
 
 class CPU{
-public:
 	CPU();
+	CPU(CPU&);
+	void operator=(CPU&);
+protected:
+	CPU(uint id);
 private:
 	struct TSS{
 		u32 reserved0;

@@ -5,7 +5,7 @@
 
 #include <types.h>
 #include <debug.h>
-#include <core.h>
+#include <pu.h>
 #include <cpu/virtualPage.h>
 
 
@@ -33,12 +33,7 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-asm volatile("sti");
-for(;;){
-	asm volatile("hlt");
-	dprintf("uptime:%llu\r", CORE::GetUptime());
-}
-//TODO:カーネルプロセスをセットアップして、スケジューラの特別な入り口から入る
+		new PU;
 
 		//ここには到達しないはず
 		assert(false);
