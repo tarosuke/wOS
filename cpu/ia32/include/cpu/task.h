@@ -10,6 +10,8 @@
 
 
 class CPUTASK {
+	CPUTASK(CPUTASK&);
+	void operator=(CPUTASK&);
 public:
 	static inline runit GetPageRoot(){
 		runit r;
@@ -19,6 +21,10 @@ public:
 	static inline void SetPageRoot(runit root){
 		asm volatile("mov %0, %%cr3" :: "r"(root));
 	};
+protected:
+	CPUTASK(){};
+private:
+	void* stack;
 };
 
 

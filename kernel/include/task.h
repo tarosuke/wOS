@@ -11,6 +11,7 @@
 #include <queue.h>
 #include <pu.h>
 #include <map.h>
+#include <cpu/task.h>
 
 extern "C"{
 #include <userlib/task.h>
@@ -18,7 +19,7 @@ extern "C"{
 }
 
 
-class TASK /*: public PUTASK*/{
+class TASK : public CPUTASK{
 	UNDEFAULT(TASK);
 	friend class PU;
 public:
