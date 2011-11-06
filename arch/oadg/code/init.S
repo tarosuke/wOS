@@ -178,7 +178,7 @@ __LMA32:
 	mov	%ax, %ss
 	mov	$.L_temporaryStackTop, %esp
 	ljmp	$KCSel, $.L_initPages
-	.space	4096, 0
+	.space	1024, 0
 .L_temporaryStackTop:
 
 
