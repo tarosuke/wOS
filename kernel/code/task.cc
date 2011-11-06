@@ -9,5 +9,4 @@
 TASK::TASKQUEUE TASK::readyQueue;
 
 
-TASK::TASK() : owner(0){
-}
+TASK::TASK() : owner(0), priority(__pri_max){}

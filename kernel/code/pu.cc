@@ -10,21 +10,23 @@
 #include <task.h>
 
 
+TASK PU::idleTasks[CF_MAX_PROCESSORs];
 uint PU::idPool(0);
 uint PU::poolPool(0);
 static char puPool[CF_MAX_PROCESSORs][sizeof(PU)] __attribute__((aligned(4)));
 
 
-PU::PU() : CPU(NewID()){
+PU::PU() : CPU(NewID()), running(&idleTasks[CPU::cpuid]){
+	(*running).owner = this;
 	asm volatile("sti");
 
 	// タスクを分捕って実行。なければhltして暇潰し
 	for(;;){
 		TASK* task(TASK::GetReadyOne());
 		if(task){
-			//TODO:*taskを実行
 			(*task).owner = this;
-			//TODO:CPU::Runとか
+			//TODO:コンテキストスイッチ
+			running = task;
 		}else{
 			asm volatile("hlt");
 			dprintf("uptime:%llu\r", CORE::GetUptime());

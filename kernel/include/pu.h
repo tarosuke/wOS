@@ -11,16 +11,18 @@
 #include <cpu/cpu.h>
 
 
+class TASK;
 class PU : public CPU{
 public:
 	PU();
 	void* operator new(munit);
 private:
+	TASK* running;		//このプロセッサで実行中のタスク
 	static uint idPool;
 	static uint poolPool;
 	static uint NewID();
+	static TASK idleTasks[];
 };
-
 
 
 #endif

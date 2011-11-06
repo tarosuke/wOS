@@ -14,6 +14,7 @@ class CPU{
 	UNDEFAULT(CPU);
 protected:
 	CPU(uint id);
+	const uint cpuid;
 private:
 	struct TSS{
 		u32 reserved0;
@@ -24,11 +25,8 @@ private:
 		u16 reserved3;
 		u16 iobase;
 	}__attribute__((packed));
-	const uint cpuid;
 	TSS& tss;
 	static TSS tsss[];
-	static uint idPool;
-	static uint GetID();
 };
 
 
