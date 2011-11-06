@@ -28,6 +28,7 @@ public:
 		MB* b(__ARCH_MemoryBlocks);
 #if !CF_PAE && !CF_AMD64
 		const u64 _4G(1ULL << 32);
+		bool needPAE(false);
 #endif
 		for(uint i(0); i < CF_MAX_MEMORYBANKs && (*b).type != 0xffffffff; i++, b++){
 			hprintf("start:%16llx size:%16llx type:%x.\n", (*b).start, (*b).size, (*b).type);
@@ -35,7 +36,7 @@ public:
 				const runit kbase((runit)__kernel_heap - (runit)__kernel_base);
 #if !CF_PAE && !CF_AMD64
 				if(_4G <= (*b).start || _4G < (*b).start + (*b).size){
-					dputs(LIGHTYELLOW"WARNING: PAE not available.\n"ORIGIN);
+					needPAE = true;
 					continue;
 				}
 #endif
@@ -43,6 +44,11 @@ public:
 				REALPAGE::NewMemoryBank((*b).start, (*b).size, (*b).start < kbase ? kbase : 0);
 			}
 		}
+#if !CF_PAE && !CF_AMD64
+		if(needPAE){
+			dputs(LIGHTYELLOW"NOTE: PAE not available but there're over-4GiB memory.\nNOTE: Try PAE kernel if you want use their memory.\n"ORIGIN);
+		}
+#endif
 		dprintf(UNINDENT "OK(%m available).\n", totalSize);
 	};
 }memorybank;
