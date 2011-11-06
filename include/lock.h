@@ -8,14 +8,14 @@
 #ifndef _LOCK_
 #define _LOCK_
 
-
+#include <types.h>
 #include <config.h>
 #include <cpu/lock.h>
 
 
 class KEY{
-	KEY();
 	KEY(KEY&);
+	void operator=(KEY&);
 private:
 	LOCK& lock;
 public:
@@ -23,16 +23,15 @@ public:
 	~KEY(){ lock.Unlock(); };
 };
 
-#if 0
-class RKEY{
-	RKEY(RKEY&);
+class IKEY{
+	IKEY(IKEY&);
+	void operator=(IKEY&);
 private:
-	static LOCK lock;
+	ILOCK lock;
 public:
-	RKEY(){ lock.Lock(); };
-	~RKEY(){ lock.Unlock(); };
+	IKEY(){ lock.Lock(); };
+	~IKEY(){ lock.Unlock(); };
 };
-#endif
 
 #endif
 
