@@ -12,9 +12,7 @@
 #include <config.h>
 
 class CPU{
-	CPU();
-	CPU(CPU&);
-	void operator=(CPU&);
+	UNDEFAULT(CPU);
 protected:
 	CPU(uint id);
 private:
