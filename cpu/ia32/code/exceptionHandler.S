@@ -23,6 +23,7 @@
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
+	push	%esp
 	push	40(%ebp)
 	push	%eax
 	call	__FAULT_Handler

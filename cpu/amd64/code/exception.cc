@@ -47,16 +47,17 @@ void (*Handlers[32])(u32 code) = {
 
 
 extern "C"{
-	void __FAULT_Handler(uint num, uint err, EXCEPTION::FRAME* frame){
+	void __FAULT_Handler(uint num, uint err, EXCEPTION::FRAME* f){
 		if(Handlers[num]){
 			Handlers[num](err);
 		}else{
+			EXCEPTION::FRAME frame(*f);
 			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
-			dprintf("rip:%p.\n", (*frame).withErrorCode.rip);
-			dprintf(" cs:%llx.\n", (*frame).withErrorCode.cs);
-			dprintf("flg:%08llx.\n", (*frame).withErrorCode.rflags);
-			dprintf("rsp:%p.\n", (*frame).withErrorCode.rsp);
-			dprintf(" ss:%llx.\n"UNINDENT, (*frame).withErrorCode.ss);
+			dprintf("rip:%p.\n", frame.withErrorCode.rip);
+			dprintf(" cs:%llx.\n", frame.withErrorCode.cs);
+			dprintf("flg:%08llx.\n", frame.withErrorCode.rflags);
+			dprintf("rsp:%p.\n", frame.withErrorCode.rsp);
+			dprintf(" ss:%llx.\n"UNINDENT, frame.withErrorCode.ss);
 			assert(false);
 		}
 	}

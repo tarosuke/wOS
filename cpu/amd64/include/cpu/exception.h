@@ -13,6 +13,8 @@
 
 
 class EXCEPTION{
+	EXCEPTION(EXCEPTION&);
+	void operator=(EXCEPTION&);
 public:
 	struct FRAME{
 		u64 r15;
@@ -47,7 +49,7 @@ public:
 				u64 ss;
 			}withErrorCode;
 		};
-	};
+	}__attribute__((packed));;
 	EXCEPTION();
 	void RegisterFault(uint num, void (*handler)(u32));
 private:
