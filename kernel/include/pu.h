@@ -16,6 +16,7 @@ class PU : public CPU{
 public:
 	PU();
 	void* operator new(munit);
+	void Dispatch();
 private:
 	TASK* running;		//このプロセッサで実行中のタスク
 	static uint idPool;

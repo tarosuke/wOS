@@ -18,19 +18,23 @@ static char puPool[CF_MAX_PROCESSORs][sizeof(PU)] __attribute__((aligned(4)));
 
 PU::PU() : CPU(NewID()), running(&idleTasks[CPU::cpuid]){
 	(*running).owner = this;
-	asm volatile("sti");
+	CPU::EnableInterrupt();
 
-	// タスクを分捕って実行。なければhltして暇潰し
-	for(;;){
-		TASK* task(TASK::GetReadyOne());
-		if(task){
-			(*task).owner = this;
-			//TODO:コンテキストスイッチ
-			running = task;
-		}else{
-			asm volatile("hlt");
-			dprintf("uptime:%llu\r", CORE::GetUptime());
-		}
+	// 最初にタスクを分捕ってみる。暇ならhltして暇潰し
+	for(Dispatch();;){
+		CPU::Halt();
+		dprintf("uptime:%llu\r", CORE::GetUptime());
+	}
+}
+
+void PU::Dispatch(){
+	TASK* task(TASK::GetReadyOne());
+	if(task){
+		//今までのタスクを手放して新しいタスクを入手
+		(*running).owner = 0;
+		(*task).owner = this;
+		//TODO:コンテキストスイッチ
+		running = task;
 	}
 }
 

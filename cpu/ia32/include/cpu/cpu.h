@@ -13,6 +13,16 @@
 
 class CPU{
 	UNDEFAULT(CPU);
+public:
+	static inline void EnableInterrupt(){
+		asm volatile("sti");
+	};
+	static inline void DisableInterrupt(){
+		asm volatile("cli");
+	};
+	static inline void Halt(){
+		asm volatile("hlt");
+	}
 protected:
 	CPU(uint id);
 	const uint cpuid;
