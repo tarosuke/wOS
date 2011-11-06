@@ -26,7 +26,8 @@ namespace TIME{
 typedef u32 tchar;
 
 
-
+///デフォルト封じ(デフォルトコンストラクタとか余計なお世話なのですよ)
+#define UNDEFAULT(t) t(); t(t&); void operator=(t&);
 
 
 #endif
