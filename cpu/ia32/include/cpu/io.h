@@ -1,7 +1,6 @@
 /******************************************************* IA32 I/O MANIPULATION
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id: 4c6ed08644c37db9de278ae3ebfcd744aa737ae8 $
  */
 
 #ifndef _CPU_IO_
