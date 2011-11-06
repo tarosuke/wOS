@@ -30,7 +30,7 @@ protected:
 		asm volatile("push %0;popf;" :: "g"(stat));
 	};
 private:
-	u32 stat;
+	munit stat;
 };
 
 
