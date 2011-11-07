@@ -11,24 +11,17 @@
 #include <cpu/types.h>
 
 
+///デフォルト封じ(デフォルトコンストラクタとか余計なお世話なのですよ)
+#define UNDEFAULT(t) t(); t(t&); void operator=(t&);
+
 /// position & size of filesystem
 typedef u64 funit;
 
-
 /// time(unit:microseconds)
 typedef u64 tunit;
-namespace TIME{
-	static const tunit infinite = (tunit)-1LL;
-	static const tunit continuous = (tunit)-2LL;
-};
 
 /// talos charactor
 typedef u32 tchar;
 
 
-///デフォルト封じ(デフォルトコンストラクタとか余計なお世話なのですよ)
-#define UNDEFAULT(t) t(); t(t&); void operator=(t&);
-
-
 #endif
-
