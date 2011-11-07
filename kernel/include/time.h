@@ -6,9 +6,10 @@
 #ifndef _TIME_
 #define _TIME_
 
+#include <types.h>
+
 
 class TIME{
-	UNDEFAULT(TIME);
 public:
 	static const tunit infinite = (tunit)-1LL;
 	static const tunit continuous = (tunit)-2LL;
@@ -18,9 +19,34 @@ public:
 		uint sec;
 		uint usec;
 	};
-	TIME(tunit origin = 0) : time(origin){};
+	struct DATE{
+		tunit year;
+		uint month;
+		uint date;
+		uint dayOfWeek;
+		uint hour;
+		uint min;
+		uint sec;
+		uint usec;
+	};
+	TIME(tunit origin = 0, uint edow = 0) : time(origin), edow(edow){};
+	TIME(TIME& org) : time(org.Get()), edow(org.edow){};
+	void operator=(TIME& org){
+		time = org.Get();
+	};
+	tunit Get() const{
+		tunit now(time);
+		while(now != time){ now = time; };
+		return now;
+	};
+	tunit Get(DATE&) const;
+	tunit Get(HMS&) const;
+	inline void operator+=(tunit n){
+		time += n;
+	};
 private:
 	tunit time;
+	const uint edow;
 };
 
 #endif

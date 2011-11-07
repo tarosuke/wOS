@@ -7,6 +7,7 @@
 #include <types.h>
 #include <debug.h>
 #include <stdarg.h>
+#include <time.h>
 
 
 #if CF_DEBUG_LEVEL
@@ -217,13 +218,14 @@ void dprintf(const char* f, ...){
 				break;
 			case 't' : //tunitを時間で
 				{
-				const tunit t(va_arg(p, tunit));
-				const tunit s(t / 1000000);
-				dprintf("%lld:%02lld:%02lld.%06lld",
-					s / 3600,
-					(s / 60) % 60,
-					s % 60,
-					t % 1000000ULL);
+				const TIME& t(*va_arg(p, TIME*));
+				TIME::HMS hms;
+				t.Get(hms);
+				dprintf("%lld:%02d:%02d.%06d",
+					hms.hour,
+					hms.min,
+					hms.sec,
+					hms.usec);
 				}break;
 			default :
 				dputc(*f);

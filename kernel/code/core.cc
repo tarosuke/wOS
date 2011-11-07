@@ -10,7 +10,7 @@
 #include <debug.h>
 
 
-tunit CORE::uptime(0);
+TIME CORE::uptime(0, 0);
 static CORE core;
 
 void CORE::SystemCall(){

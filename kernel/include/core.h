@@ -8,18 +8,19 @@
 #ifndef _CORE_
 #define _CORE_
 
-
 #include <types.h>
 #include <config.h>
 #include <interrupt.h>
 #include <debug.h>
+#include <time.h>
+
 
 class CORE{
 	CORE(CORE&);
 private:
 	static const tunit tickTime = 1000000ULL / CF_HZ;
 	static const uint systemCallIRQ = 16;
-	static tunit uptime;
+	static TIME uptime;
 	static void SystemCall();
 public:
 	CORE(){
@@ -30,15 +31,11 @@ public:
 	static inline void Tick(){
 		uptime += tickTime;
 	};
-	static tunit GetUptime(){
-		tunit now;
-		do{ now = uptime; }while(now != uptime);
-		return now;
+	static TIME& GetUptime(){
+		return uptime;
 	};
 };
 
 
 
 #endif
-
-
