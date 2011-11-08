@@ -218,14 +218,12 @@ void dprintf(const char* f, ...){
 				break;
 			case 't' : //tunitを時間で
 				{
-				const TIME& t(*va_arg(p, TIME*));
-				TIME::HMS hms;
-				t.Get(hms);
-				dprintf("%lld:%02d:%02d.%06d",
-					hms.hour,
-					hms.min,
-					hms.sec,
-					hms.usec);
+				const tunit now(va_arg(p, tunit));
+				dprintf("%llu:%02llu:%02llu.%06llu",
+					now / 3600000000ULL,
+					(now / 60000000ULL) % 60,
+					(now / 1000000) % 60,
+					now % 1000000);
 				}break;
 			default :
 				dputc(*f);

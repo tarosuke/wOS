@@ -6,20 +6,21 @@
 #include <time.h>
 
 
+#if 0
 tunit TIME::Get(DATE& date) const{
 	static const uint daysOfMonth[2][12] = {
 		{ 0, 31, 59, 90,120,151,181,212,243,273,304,334 },
 		{ 0, 31, 60, 91,121,152,182,213,244,274,305,335 } };
-	tunit now(Get());
+	tunit now(GetRaw());
 	tunit days(now / (24ULL * 3600 * 1000000));
 
 	date.dayOfWeek = (days + edow) / 7;
 
 	//年
 	tunit n;
-	n = days / (365 * 400 + 96);
+	n = days / (365 * 400 + 97);
 	date.year = n * 400;
-	days -= n * (365 * 400 + 96);
+	days -= n * (365 * 400 + 97);
 	n = days / (365 * 100 + 24);
 	date.year += n * 100;
 	days -= n * (365 * 100 + 24);
@@ -56,10 +57,11 @@ tunit TIME::Get(DATE& date) const{
 }
 
 tunit TIME::Get(HMS& hms) const{
-	tunit now(Get());
+	tunit now(GetRaw());
 	hms.hour = now / 3600000000ULL;
 	hms.min = (now / 60000000ULL) % 60;
 	hms.sec = (now / 1000000) % 60;
 	hms.usec = now % 1000000;
 	return now;
 }
+#endif

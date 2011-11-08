@@ -11,42 +11,54 @@
 
 class TIME{
 public:
-	static const tunit infinite = (tunit)-1LL;
-	static const tunit continuous = (tunit)-2LL;
-	struct HMS{
+	static const tunit infinite = -1ULL;
+	static const tunit continuous = -2ULL;
+	static const tunit underSec = 1000000ULL; // 1[tunit]=1[microseconds]
+	class HMS{
+	public:
 		tunit hour;
 		uint min;
 		uint sec;
 		uint usec;
+		HMS(TIME&);
+		HMS(uint hour, uint min, uint sec, uint usec) : hour(hour), min(min), sec(sec), usec(usec){};
 	};
-	struct DATE{
+	class DATE{
+	public:
 		tunit year;
 		uint month;
 		uint date;
-		uint dayOfWeek;
+		int dow;
 		uint hour;
 		uint min;
 		uint sec;
 		uint usec;
+		DATE(TIME&);
+		DATE(uint year, uint month, uint date, int dow, uint hour, uint min, uint sec, uint usec) :
+			year(year), month(month), date(date), dow(dow), hour(hour), min(min), sec(sec), usec(usec){};
 	};
-	TIME(tunit origin = 0, uint edow = 0) : time(origin), edow(edow){};
-	TIME(TIME& org) : time(org.Get()), edow(org.edow){};
+	TIME(tunit origin = 0, uint edow = 0) : time(0), epoc(origin), edow(edow){};
+	TIME(TIME& org) : time(org.GetRaw()), epoc(org.epoc), edow(org.edow){};
 	void operator=(TIME& org){
-		time = org.Get();
+		time = org.GetRaw();
 	};
-	tunit Get() const{
+	void operator=(DATE&);	//現在日時、時刻設定
+	void operator=(HMS&);		//現在時刻設定
+	inline tunit GetRaw() const{
 		tunit now(time);
 		while(now != time){ now = time; };
 		return now;
 	};
-	tunit Get(DATE&) const;
-	tunit Get(HMS&) const;
+	inline tunit Get() const{
+		return GetRaw() + epoc;
+	};
 	inline void operator+=(tunit n){
 		time += n;
 	};
 private:
-	tunit time;
-	const uint edow;
+	tunit time;	//起動時間
+	tunit epoc;	//時刻設定時の基準時刻からの時間-時刻設定時のuptime(time + epocが現在時刻)
+	uint edow;	//epocDayOfWeek：epocの日の曜日(現在時刻から逆算するが、設定時にdowが負数ならそのまま)
 };
 
 #endif

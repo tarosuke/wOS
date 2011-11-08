@@ -23,7 +23,7 @@ PU::PU() : CPU(NewID()), running(&idleTasks[CPU::cpuid]){
 	// 最初にタスクを分捕ってみる。暇ならhltして暇潰し
 	for(Dispatch();;){
 		CPU::Halt();
-		dprintf("uptime: %t\r", &CORE::GetUptime());
+		dprintf("uptime: %t\r", CORE::GetUptime().GetRaw());
 	}
 }
 
