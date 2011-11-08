@@ -6,10 +6,11 @@
 
 
 #include <interrupt.h>
-#include <core.h>
+#include <clock.h>
 #include <cpu/io.h>
 #include <arch/pic.h>
 #include <debug.h>
+
 
 static class TIMER{
 private:
@@ -38,6 +39,6 @@ public:
 }timer;
 
 void TIMER::Tick(){
-	CORE::Tick();
+	CLOCK::Tick();
 	PIC::EOI(timerIRQ);
 };

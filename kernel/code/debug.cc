@@ -7,7 +7,7 @@
 #include <types.h>
 #include <debug.h>
 #include <stdarg.h>
-#include <time.h>
+#include <clock.h>
 
 
 #if CF_DEBUG_LEVEL
@@ -219,11 +219,10 @@ void dprintf(const char* f, ...){
 			case 't' : //tunitを時間で
 				{
 				const tunit now(va_arg(p, tunit));
-				dprintf("%llu:%02llu:%02llu.%06llu",
-					now / 3600000000ULL,
-					(now / 60000000ULL) % 60,
-					(now / 1000000) % 60,
-					now % 1000000);
+				const CLOCK::DATE d(now);
+				dprintf("%llu/%02u/%02u %02u:%02u:%02u.%06u",
+					d.year, d.month, d.date,
+					d.hour, d.min, d.sec, d.usec);
 				}break;
 			default :
 				dputc(*f);

@@ -22,6 +22,7 @@ extern "C"{
 class TASK : public CPUTASK{
 	UNDEFAULT(TASK);
 	friend class PU;
+	friend class CLOCK;
 public:
 	enum PRIORITY{
 		PRI_REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
@@ -45,6 +46,7 @@ private:
 	static TASK* GetReadyOne(){
 		return readyQueue.Get();
 	};
+	static void Cron(tunit){};
 };
 
 #endif
