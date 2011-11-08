@@ -9,6 +9,9 @@
 tunit CLOCK::systemUptime(0);
 tunit CLOCK::baseTime(0);
 CLOCK::DOW CLOCK::baseDoW(dow_unknown);
+i64 CLOCK::timezone(CF_DEFAULT_TIMEZONE * underSec * 3600);
+bool CLOCK::RTCinLocal(false);
+LOCK CLOCK::lock;
 
 static CLOCK clock;
 static const uint dom[2][12] = {

@@ -34,6 +34,10 @@
 #	define CF_DEBUG_LEVEL 0
 #endif
 
+#ifndef CF_DEFAULT_TIMEZONE
+#	define CF_DEFAULT_TIMEZONE 9
+#endif
+
 
 
 #endif

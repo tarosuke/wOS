@@ -24,7 +24,7 @@ PU::PU() : CPU(NewID()), running(&idleTasks[CPU::cpuid]){
 	// 最初にタスクを分捕ってみる。暇ならhltして暇潰し
 	for(Dispatch();;){
 		CPU::Halt();
-		dprintf("[%t]\r", CLOCK::GetGlobalTime());
+		dprintf("[%t]\r", CLOCK::GetLocalTime());
 	}
 }
 

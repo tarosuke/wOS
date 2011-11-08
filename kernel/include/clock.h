@@ -8,7 +8,9 @@
 
 #include <types.h>
 #include <task.h>
-
+#include <config.h>
+#include <lock.h>
+//TODO:排他制御
 
 class CLOCK{
 	friend class TIMER;
@@ -40,13 +42,30 @@ public:
 		baseTime = Convert(d);
 		baseDoW = d.dow;
 	};
+	static void SetSystemTimezone(int tz){
+		timezone = tz * underSec * 3600;
+	};
+	static int GetSystemTimezone(){
+		return timezone / (underSec * 60);
+	};
 	static tunit Uptime(){
-		tunit u(systemUptime);
-		while(u != systemUptime){ u = systemUptime; };
-		return u;
+		return systemUptime;
 	};
 	static tunit GetGlobalTime(){
-		return Uptime() + baseTime;
+		return systemUptime + baseTime;
+	};
+	static tunit GetLocalTime(){
+		return systemUptime + baseTime + (RTCinLocal ? 0 : timezone);
+	};
+	static void SetRTCinLocal(){
+		if(!RTCinLocal){
+			baseTime -= timezone;
+		}
+	};
+	static void SetRTCinGlobal(){
+		if(RTCinLocal){
+			baseTime += timezone;
+		}
 	};
 	static tunit Convert(const DATE&);
 	static DATE Convert(tunit);
@@ -56,6 +75,9 @@ private:
 	static tunit systemUptime;	//起動時間
 	static tunit baseTime;		//設定時刻-その時の起動時間
 	static DOW baseDoW;		//時刻を設定した時の曜日
+	static i64 timezone;		//この機械のタイムゾーン
+	static bool RTCinLocal;		//RTCはローカルタイム
+	static LOCK lock;
 	static void Tick(){
 		systemUptime += tickTime;
 		TASK::Cron(systemUptime);
