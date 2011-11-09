@@ -11,7 +11,8 @@
 static class RTC{
 public:
 	RTC(){
-		const char* nodow[] = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
+		const char* nodow[] = {
+			"sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 		dputs("RTC..."INDENT);
 		do{
 			out8(0x70, 10);
@@ -22,21 +23,20 @@ public:
 				+ bcd2bin(ReadCMOS(0x32)) * 100,
 			bcd2bin(ReadCMOS(8)),
 			bcd2bin(ReadCMOS(7)),
-			(CLOCK::DOW)bcd2bin(ReadCMOS(6)),
+			(CLOCK::DOW)((bcd2bin(ReadCMOS(6)) + 6) % 7),
 			bcd2bin(ReadCMOS(4)),
 			bcd2bin(ReadCMOS(2)),
 			bcd2bin(ReadCMOS(0)),0);
 
 		CLOCK::SetGlobalTime(baseTime);
-		dprintf("baseTime: %04llu/%02u/%02u(%s) %02u:%02u:%02u.%06u.\n",
+		dprintf("baseTime: %04llu/%02u/%02u(%s) %02u:%02u:%02u.\n",
 			baseTime.year,
 			baseTime.month,
 			baseTime.date,
 			nodow[baseTime.dow],
 			baseTime.hour,
 			baseTime.min,
-			baseTime.sec,
-			baseTime.usec);
+			baseTime.sec);
 		dputs(UNINDENT"OK.\n");
 	};
 private:
