@@ -23,8 +23,22 @@ public:
 	};
 protected:
 	CPUTASK(){};
+	void DispatchTo(CPUTASK& to){
+		asm volatile(
+#if CF_AMD64
+			"mov %%rsp, %0;"
+			"mov %1, %%rsp;"
+#endif
+#if CF_IA32
+			"mov %%esp, %0;"
+			"mov %1, %%esp;"
+#endif
+			"mov %2, %%cr3"
+			: "=r"(stack) : "l"(to.stack), "r"(pageRoot));
+	};
 private:
 	void* stack;
+	munit pageRoot;
 };
 
 
