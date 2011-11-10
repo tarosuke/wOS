@@ -4,9 +4,12 @@
  */
 
 #include <map.h>
+#include <task.h>
 
 
-
+void MAP::SystemRequest(void* message){
+	//TODO:この「マップ関連のシステムコールメッセージを処理する」スタブを埋める。メッセージがマップ関連でない場合もあり得るが、その時はエラーコードを書きこんで終了する
+}
 
 
 
@@ -15,4 +18,9 @@ runit REALPAGEMAP::GetPage(punit index){
 		return 0;
 	}
 	return (start + index) * PAGESIZE;
+}
+
+
+runit COMMONMAP::GetPage(punit indek){
+	return 0; //TODO:スタブ:originTaskにページだけ切り替えてoriginPage+indexが指す内容を取ってくる
 }

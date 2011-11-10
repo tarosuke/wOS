@@ -16,6 +16,7 @@ class RESOURCE{
 public:
 	RESOURCE() : users(0){};
 	virtual ~RESOURCE(){};
+	virtual void SystemRequest(void* message) = 0;
 protected:
 private:
 	void Use();
@@ -31,11 +32,10 @@ public:
 	virtual ~HANDLER(){ org.Release(); };
 	uint GetID() const { return 0; };
 private:
-	RESOURCE& org;	
+	RESOURCE& org;
 };
 
 
 
 
 #endif
-
