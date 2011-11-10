@@ -15,7 +15,7 @@
 class MAP : public RESOURCE{
 	friend class MAPHANDLER;
 public:
-	virtual punit GetPage(punit entry) = 0;
+	virtual runit GetPage(punit) = 0;
 protected:
 private:
 };
