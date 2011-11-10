@@ -1,23 +1,38 @@
-/************************************************************ RESOURCE HANDLER
+/********************************************************** RESOURCE & HANDLER
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #ifndef _RESOURCE_
 #define _RESOURCE_
 
-/** リソースハンドラ
- * ユーザプロセスごとにインデクスされたリソースの管理
- * リソースはPOSIXで言えばファイルハンドルのようなもので、talosではメモリマップや他のサーバへの通信路などになる。
- */
+#include <types.h>
+#include <lock.h>
 
+
+/// MAPやソケットなどの抽象リソース
 class RESOURCE{
+	friend class HANDLER;
 public:
-	uint GetID() const { return 0; };
+	RESOURCE() : users(0){};
+	virtual ~RESOURCE(){};
+protected:
+private:
+	void Use();
+	void Release();
+	LOCK lock;
+	uint users;
 };
 
-
+/// ユーザプロセスからリソースへアクセスするための抽象ハンドラ
+class HANDLER{
+public:
+	HANDLER(RESOURCE& org) : org(org){ org.Use(); }
+	virtual ~HANDLER(){ org.Release(); };
+	uint GetID() const { return 0; };
+private:
+	RESOURCE& org;	
+};
 
 
 
