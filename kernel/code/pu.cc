@@ -11,32 +11,28 @@
 #include <clock.h>
 
 
-TASK PU::idleTasks[CF_MAX_PROCESSORs];
 uint PU::idPool(0);
 uint PU::poolPool(0);
 static char puPool[CF_MAX_PROCESSORs][sizeof(PU)] __attribute__((aligned(4)));
 
 
-PU::PU() : CPU(NewID()), running(&idleTasks[CPU::cpuid]){
-	(*running).owner = this;
+PU::PU() : CPU(NewID()), running(&kernelTask){
 	CPU::EnableInterrupt();
-
-	// 最初にタスクを分捕ってみる。暇ならhltして暇潰し
-	for(Dispatch();;){
-		CPU::Halt();
-		dprintf("[%t]\r", CLOCK::GetLocalTime());
-	}
+	Dispatch();
 }
 
 void PU::Dispatch(){
-	TASK* task(TASK::GetReadyOne());
-	if(task){
-		//今までのタスクを手放して新しいタスクを入手
-		(*running).owner = 0;
-		(*task).owner = this;
-		//TODO:コンテキストスイッチ
-		running = task;
+	TASK* task;
+	while(!(task = TASK::GetReadyOne())){
+		//実行すべきタスクができるまで暇潰し
+		CPU::Halt();
+		dprintf("[%t]\r", CLOCK::GetLocalTime());
 	}
+	//今までのタスクを手放して新しいタスクを入手
+	(*running).owner = 0;
+	(*task).owner = this;
+	//TODO:コンテキストスイッチ
+	running = task;
 }
 
 uint PU::NewID(){

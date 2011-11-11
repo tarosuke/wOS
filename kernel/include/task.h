@@ -20,7 +20,6 @@ extern "C"{
 
 
 class TASK : public CPUTASK{
-	UNDEFAULT(TASK);
 	friend class PU;
 	friend class CLOCK;
 public:
@@ -35,7 +34,9 @@ public:
 	typedef MULTIQUEUE<TASK, __pri_max> TASKQUEUE;
 	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
 	void Enqueue(MESSAGE*); //TODO:メッセージをタスクのキューに追加してタスクをreadyにする。もし既にタスクがreadyであり、かつメッセージ優先度がタスク優先度より高ければ優先度継承に従いタスク優先度をメッセージ優先度に変更し新しい優先度のレディキューに繋ぎ直す。
-	TASK(MAP&);
+	TASK();			//現在のコンテキストをこのタスクとする
+	TASK(MAP&);		//マップを0から配置してタスクとする
+	void* operator new(munit);
 private:
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
 	PU* owner;		//現在このタスクを実行しているプロセッサ
@@ -47,7 +48,10 @@ private:
 		return readyQueue.Get();
 	};
 	static void Cron(tunit){};
+	static const uint thisSizeIndex;
 };
+
+extern TASK kernelTask;
 
 #endif
 

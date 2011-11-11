@@ -22,7 +22,6 @@ private:
 	static uint idPool;
 	static uint poolPool;
 	static uint NewID();
-	static TASK idleTasks[];
 };
 
 

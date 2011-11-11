@@ -10,8 +10,6 @@
 
 
 class CPUTASK {
-	CPUTASK(CPUTASK&);
-	void operator=(CPUTASK&);
 public:
 	static inline runit GetPageRoot(){
 		runit r;
@@ -22,7 +20,8 @@ public:
 		asm volatile("mov %0, %%cr3" :: "r"(root));
 	};
 protected:
-	CPUTASK(){};
+	CPUTASK();
+	CPUTASK(void* stack);
 	void DispatchTo(CPUTASK& to){
 		asm volatile(
 #if CF_AMD64
@@ -38,7 +37,7 @@ protected:
 	};
 private:
 	void* stack;
-	munit pageRoot;
+	const runit pageRoot;
 };
 
 
