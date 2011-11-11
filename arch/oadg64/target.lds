@@ -40,11 +40,11 @@ SECTIONS {
 	__hiPageTable_VMA = ABSOLUTE(__hiPageTable) + __kernel_base;
 
 	/* VARIANT of ADDRESSSPACE */
-	__arch_LOMEM = __init_LMA +
-		SIZEOF(.init) +
+	__image_size = SIZEOF(.init) +
 		SIZEOF(.user) +
 		SIZEOF(.ulib) +
 		SIZEOF(.kernel);
+	__arch_LOMEM = __image_size + __init_LMA;
 
 	.init 0x10000 : {
 		LONG(ABSOLUTE(__init16));

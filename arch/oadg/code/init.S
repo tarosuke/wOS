@@ -8,17 +8,50 @@
 
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
-.extern __kernelBase_hi, __kernelBase_lo, __kernel_base
+.extern __kernelBase_hi, __kernelBase_lo, __kernel_base, __init_LMA
 .global __hiPageTable, __pageRoot
+.extern __image_size
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
 .code16
 .section .init
+.L_moveKernel:
+1:	rep movsb
+	test	%ecx, %ecx
+	je	__init16
+	sub	$0x10000, %ecx
+	jmp	1b
 __init16:
 	/***** LOCK THE SYSTEM */
 	cli
 
+	/***** CHECK LMA */
+	mov	$1f, %edi
+	mov	$__init_LMA, %edx
+	mov	%cs, %ax
+	shr	$4, %edx
+	mov	%dx, 2(%di)
+	cmp	%dx, %ax
+	je	.L_rightLMA
+	/* ILLIGAL LMA : MOVE KERNEL */
+	mov	$.L_moveKernel, %eax
+	mov	%ax, (%di)
+	mov	%ax, %es
+	mov	(%di), %di
+	mov	%cs, %ax
+	mov	%ax, %ds
+	mov	$__image_size, %ecx
+	xor	%di, %di
+	mov	%di, %si
+	movsb
+	movsb
+	.byte	0xea
+1:	.short	__LMA32_16
+	.short	TCSel
+
+
+.L_rightLMA:
 	/***** SETUP SEGMENTS */
 	movw	%cs, %ax
 	movw	%ax, %ds
