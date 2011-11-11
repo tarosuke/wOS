@@ -9,7 +9,7 @@
 #include <cpu/virtualPage.h>
 
 
-void (*Handlers[32])(u32 code) = {
+static EXCEPTION::HANDLER handlers[EXCEPTION::systemExceptions] = {
 	0, //0
 	0, //1
 	0, //2
@@ -48,8 +48,8 @@ void (*Handlers[32])(u32 code) = {
 
 extern "C"{
 	void __FAULT_Handler(uint num, uint err, EXCEPTION::FRAME* f){
-		if(Handlers[num]){
-			Handlers[num](err);
+		if(handlers[num]){
+			handlers[num](err, *f);
 		}else{
 			EXCEPTION::FRAME frame(*f);
 			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
@@ -78,6 +78,8 @@ EXCEPTION::EXCEPTION(){
 	dputs(UNINDENT "OK.\n");
 }
 
-void EXCEPTION::RegisterFault(uint num, void (*handler)(u32)){
+void EXCEPTION::RegisterFault(uint num, HANDLER handler){
+	assert(num < systemExceptions);
+	assert(!handlers[num]);
+	handlers[num] = handler;
 }
-

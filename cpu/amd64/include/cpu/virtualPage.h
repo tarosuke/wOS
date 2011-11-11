@@ -11,6 +11,7 @@
 #include <map.h>
 #include <lock.h>
 #include <debug.h>
+#include <cpu/exception.h>
 
 
 class VIRTUALPAGE{
@@ -38,7 +39,7 @@ public:
 	// ページ無効化・返却
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
-	static void Fault(const u32 code);
+	static void Fault(u32 code, EXCEPTION::FRAME&);
 	// カーネルヒープの末端
 	static runit* const pageTableArray;
 	VIRTUALPAGE();

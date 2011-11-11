@@ -98,7 +98,7 @@ void VIRTUALPAGE::Disable(void* start, munit pages){
 
 
 // ページフォルトハンドラ
-void VIRTUALPAGE::Fault(const u32 code){
+void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 	///// get targetaddress
 	munit addr;
 	asm volatile("mov %%cr2, %0" : "=r"(addr));

@@ -17,6 +17,7 @@ class EXCEPTION{
 	EXCEPTION(EXCEPTION&);
 	void operator=(EXCEPTION&);
 public:
+	static const uint systemExceptions = 32;
 	struct FRAME{
 		u16 es;
 		u16 ds;
@@ -47,11 +48,12 @@ public:
 		};
 	}__attribute__((packed));
 	EXCEPTION();
-	void RegisterFault(uint num, void (*handler)(u32));
+	typedef void (*HANDLER)(u32, FRAME&);
+	void RegisterFault(uint num, HANDLER);
 private:
-	static const uint systemExceptions = 32;
 	static u64 vector[];
-	static const struct IDTP{ u16 limit; u64* table; }__attribute__((packed)) idtp;
+	static const struct IDTP{
+		u16 limit; u64* table; }__attribute__((packed)) idtp;
 };
 
 
