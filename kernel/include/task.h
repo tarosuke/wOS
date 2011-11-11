@@ -41,13 +41,19 @@ private:
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
 	PU* owner;		//現在このタスクを実行しているプロセッサ
 	PRIORITY priority;	//現在の優先度
+	NODE<TASK> qNode;	//待ちやレディキューのためのノード
+	NODE<TASK> cronNode;	//時間管理のためのキューノード
+	tunit uptime;		//時間切れ時刻
+
+	void WakeUp(/*TODO:理由*/){};
 
 	///// 以下はシステム全体の話
 	static TASKQUEUE readyQueue; //レディキュー
 	static TASK* GetReadyOne(){
 		return readyQueue.Get();
 	};
-	static void Cron(tunit){};
+	static QUEUE<TASK> cronQueue;
+	static void Cron(tunit);
 	static const uint thisSizeIndex;
 };
 
