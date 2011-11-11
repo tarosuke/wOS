@@ -24,7 +24,7 @@ PU::PU() : CPU(NewID()), running(&kernelTask){
 void PU::Dispatch(){
 	TASK* task;
 	while(!(task = TASK::GetReadyOne())){
-		//実行すべきタスクができるまで暇潰し
+		//実行すべきタスクが登録されるまで暇潰し
 		CPU::Halt();
 		dprintf("[%t]\r", CLOCK::GetLocalTime());
 	}

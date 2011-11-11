@@ -31,29 +31,29 @@ public:
 		u32 eax;
 		union{
 			struct{
-				u32 rip;
+				u32 ip;
 				u32 cs;
-				u32 rflags;
-				u32 rsp;
+				u32 flags;
+				u32 sp;
 				u32 ss;
 			}noErrorCode;
 			struct{
 				u32 errorCode;
-				u32 rip;
+				u32 ip;
 				u32 cs;
-				u32 rflags;
-				u32 rsp;
+				u32 flags;
+				u32 sp;
 				u32 ss;
 			}withErrorCode;
 		};
 	}__attribute__((packed));
 	EXCEPTION();
 	typedef void (*HANDLER)(u32, FRAME&);
-	void RegisterFault(uint num, HANDLER);
+	static void RegisterHandler(uint num, HANDLER);
 private:
 	static u64 vector[];
 	static const struct IDTP{
-		u16 limit; u64* table; }__attribute__((packed)) idtp;
+		u16 limit; void* table; }__attribute__((packed)) idtp;
 };
 
 

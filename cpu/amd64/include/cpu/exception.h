@@ -35,25 +35,25 @@ public:
 		u64 rdi;
 		union{
 			struct{
-				u64 rip;
+				u64 ip;
 				u64 cs;
-				u64 rflags;
-				u64 rsp;
+				u64 flags;
+				u64 sp;
 				u64 ss;
 			}noErrorCode;
 			struct{
 				u64 errorCode;
-				u64 rip;
+				u64 ip;
 				u64 cs;
-				u64 rflags;
-				u64 rsp;
+				u64 flags;
+				u64 sp;
 				u64 ss;
 			}withErrorCode;
 		};
 	}__attribute__((packed));;
 	EXCEPTION();
 	typedef void (*HANDLER)(u32, FRAME&);
-	void RegisterFault(uint num, HANDLER);
+	static void RegisterHandler(uint num, HANDLER);
 private:
 	static u64 vector[][2];
 	static const struct IDTP{

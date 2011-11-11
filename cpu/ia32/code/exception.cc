@@ -53,10 +53,10 @@ extern "C"{
 		}else{
 			EXCEPTION::FRAME frame(*f);
 			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
-			dprintf("eip:%p.\n", frame.withErrorCode.rip);
+			dprintf("eip:%p.\n", frame.withErrorCode.ip);
 			dprintf(" cs:%llx.\n", frame.withErrorCode.cs);
-			dprintf("flg:%08llx.\n", frame.withErrorCode.rflags);
-			dprintf("esp:%p.\n", frame.withErrorCode.rsp);
+			dprintf("flg:%08llx.\n", frame.withErrorCode.flags);
+			dprintf("esp:%p.\n", frame.withErrorCode.sp);
 			dprintf(" ss:%llx.\n"UNINDENT, frame.withErrorCode.ss);
 			assert(false);
 		}
@@ -65,7 +65,7 @@ extern "C"{
 }
 
 u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs]__attribute__((aligned(8)));
-const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 8, vector };
+const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 8, (void*)vector };
 static EXCEPTION exeptionHandler;
 
 EXCEPTION::EXCEPTION(){
@@ -78,7 +78,7 @@ EXCEPTION::EXCEPTION(){
 	dputs(UNINDENT "OK.\n");
 }
 
-void EXCEPTION::RegisterFault(uint num, HANDLER handler){
+void EXCEPTION::RegisterHandler(uint num, HANDLER handler){
 	assert(num < systemExceptions);
 	assert(!handlers[num]);
 	handlers[num] = handler;

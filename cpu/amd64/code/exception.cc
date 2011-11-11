@@ -53,10 +53,10 @@ extern "C"{
 		}else{
 			EXCEPTION::FRAME frame(*f);
 			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
-			dprintf("rip:%p.\n", frame.withErrorCode.rip);
+			dprintf("rip:%p.\n", frame.withErrorCode.ip);
 			dprintf(" cs:%llx.\n", frame.withErrorCode.cs);
-			dprintf("flg:%08llx.\n", frame.withErrorCode.rflags);
-			dprintf("rsp:%p.\n", frame.withErrorCode.rsp);
+			dprintf("flg:%08llx.\n", frame.withErrorCode.flags);
+			dprintf("rsp:%p.\n", frame.withErrorCode.sp);
 			dprintf(" ss:%llx.\n"UNINDENT, frame.withErrorCode.ss);
 			assert(false);
 		}
@@ -81,7 +81,7 @@ EXCEPTION::EXCEPTION(){
 	dputs(UNINDENT "OK.\n");
 }
 
-void EXCEPTION::RegisterFault(uint num, HANDLER handler){
+void EXCEPTION::RegisterHandler(uint num, HANDLER handler){
 	assert(num < systemExceptions);
 	assert(!handlers[num]);
 	handlers[num] = handler;

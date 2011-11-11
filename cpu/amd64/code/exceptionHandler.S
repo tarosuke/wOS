@@ -16,7 +16,8 @@
 
 .text
 /***** フォルト専用ハンドラ(フラグを引数に) */
-.L_faultPad:
+/* エラーコード付き(8〜14,17) */
+.L_faultPad_withErrorcode:
 	push	%rax
 	push	%rbx
 	push	%rcx
@@ -62,6 +63,53 @@
 	pop	%rax
 	pop	%rdi
 	add	$8, %rsp
+	iretq
+/* エラーコードなし */
+.L_faultPad_withoutErrorcode:
+	push	%rax
+	push	%rbx
+	push	%rcx
+	push	%rdx
+	push	%rsi
+	push	%rbp
+	push	%r8
+	push	%r9
+	push	%r10
+	push	%r11
+	push	%r12
+	push	%r13
+	push	%r14
+	push	%r15
+	mov	%rsp, %rdx
+	mov	120(%rsp), %rsi
+	mov	%ds, %ax
+	push	%ax
+	mov	%es, %ax
+	push	%ax
+	mov	$KDSel, %ax
+	mov	%ax, %ds
+	mov	%ax, %es
+	mov	%rsp, %rbp
+	call	__FAULT_Handler
+	pop	%ax
+	mov	%ax, %es
+	pop	%ax
+	mov	%ax, %ds
+	pop	%r15
+	pop	%r14
+	pop	%r13
+	pop	%r12
+	pop	%r11
+	pop	%r10
+	pop	%r9
+	pop	%r8
+	pop	%rbp
+	pop	%rsi
+	pop	%rdx
+	pop	%rcx
+	pop	%rbx
+	pop	%rax
+	pop	%rdi
 	iretq
 
 /***** 割り込みハンドラ(共通部) */
@@ -124,7 +172,11 @@ __ExceptionTable:
 	jmp	.L_jumpPad
 	.else
 	/***** FAULT HANDLER */
-	jmp	.L_faultPad
+	.if	(8 <= \f && \f <= 14) || (17 == \f)
+	jmp	.L_faultPad_withErrorcode
+	.else
+	jmp	.L_faultPad_withoutErrorcode
+	.endif
 	.endif
 	.if	\t - \f
 	jumpers	"(\f+1)", \t
