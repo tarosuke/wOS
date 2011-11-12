@@ -6,6 +6,6 @@
 #ifndef _ULIB_RAW_
 #define _ULIB_RAW_
 
-extern void RawSystemcall(void);
+void RawSystemcall(void);
 
 #endif

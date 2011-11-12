@@ -5,7 +5,7 @@
 
 #include <userlib/raw.h>
 
-void RawSystemcall(void){
+void __RawSystemcall(void){
 	asm volatile("int $0x30");
 }
 

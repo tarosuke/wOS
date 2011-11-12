@@ -22,7 +22,6 @@ __TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
 /* utilities */
 __arch_CGA_VRAM = __kernel_base + 0xb8000;
-__kProcHeader_LMA = LOADADDR(.kProcHeader);
 __pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
 
 /* VARIANT of ADDRESSSPACE */
@@ -65,14 +64,9 @@ __arch_LOMEM = __image_size + __init_LMA;
 } AT > IMAGE
 
 .ulib __kernel_base : {
-	*(.ulib_h)
+	KEEP(*(.ulib_h))
 	*(.ulib_ro)
 	. = ALIGN(4096);
-} AT > IMAGE
-
-.kProcHeader 0 : {
-	*(.kp_def)
-	LONG(0);
 } AT > IMAGE
 
 .user 0 : {

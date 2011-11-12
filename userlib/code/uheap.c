@@ -39,7 +39,7 @@ static const munit sizes[32] = {
 
 
 #define HEAP UHEAP* const heap = taskHead.heap
-void	HEAP_Init(void){
+void	__HEAP_Init(void){
 	HEAP;
 	unsigned i;
 	(*heap).top = (punit)
@@ -119,7 +119,7 @@ static MEM Get(munit size){
 	return mem;
 }
 
-void* HEAP_Get(munit size){
+void* __HEAP_Get(munit size){
 	MEM mem = Get(size + sizeof(munit));
 	if(!mem.mem){ return 0; }
 	//TODO: ページイネーブル
@@ -127,7 +127,7 @@ void* HEAP_Get(munit size){
 	return &mem.mem[1];
 }
 
-void HEAP_Release(void* mem){
+void __HEAP_Release(void* mem){
 	HEAP;
 
 	//種別判定
@@ -159,5 +159,3 @@ void HEAP_Release(void* mem){
 		//TODO:マップの解放
 	}
 }
-
-
