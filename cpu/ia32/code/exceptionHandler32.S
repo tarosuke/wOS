@@ -1,10 +1,12 @@
 /**************************************************** PRIMER EXCEPTION HANDLER
  *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
  *	check LICENSE.txt. If you don't have the file, mail us.
- *	$Id$
  */
 
 #include <config.h>
+
+#if CF_IA32
+
 #include <arch/segments.h>
 
 .global __ExceptionTable
@@ -96,4 +98,4 @@ __ExceptionTable:
 	.endm
 
 	jumpers	0, (ARCH_BASE_VECTOR + CF_MAX_IRQs)
-
+#endif
