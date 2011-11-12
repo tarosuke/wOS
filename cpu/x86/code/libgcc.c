@@ -3,7 +3,10 @@
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
+#include <config.h>
 
+
+#if CF_IA32
 typedef unsigned long long u64;
 
 u64 __umoddi3(u64 n, u64 d){
@@ -39,4 +42,4 @@ u64 __udivdi3(u64 n, u64 d){
 
 	return r;
 }
-
+#endif

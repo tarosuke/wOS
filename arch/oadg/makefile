@@ -1,7 +1,8 @@
 ############################################################## MAKEFILE FOR OADG
 
 arch = oadg
-cpu = ia32
+cpu = x86
+gnuArch = i686
 base_ccopts = -m32
 
 include ../../makefile.in

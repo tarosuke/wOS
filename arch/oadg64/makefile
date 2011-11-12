@@ -1,7 +1,8 @@
 ############################################################## MAKEFILE FOR OADG
 
 arch = oadg
-cpu = amd64
+cpu = x86
+gnuArch = amd64
 base_ccopts = -m64 -mcmodel=large
 
 include ../../makefile.in

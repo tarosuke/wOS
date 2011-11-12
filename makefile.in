@@ -192,7 +192,6 @@ upload-drafts:
 
 gccVer = 4.6.2
 binutilsVer = 2.21.1
-gnuArch = $(subst ia32,i686,$(cpu))
 toolPath = $(shell pwd)/../tools
 buildDir = $(toolPath)/$(gnuArch)
 
