@@ -48,11 +48,12 @@ SECTIONS {
 	.init 0x10000 : {
 		LONG(ABSOLUTE(__init16));
 		LONG(__arch_LOMEM);
-		KEEP(*(.init))
+		KEEP(*(.init16))
 		. = ALIGN(4);
 		__kernelProcessDefs16 = .;
 		KEEP(*(.pdef16))
 		LONG(0);
+		KEEP(*(.init))
 	} AT > IMAGE
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {

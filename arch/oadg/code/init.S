@@ -15,7 +15,7 @@
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
 .code16
-.section .init
+.section .init16
 .L_moveKernel:
 1:	rep movsb
 	test	%ecx, %ecx
@@ -201,6 +201,7 @@ __ARCH_MemoryBlocks:
 
 
 /************************************* SET SEGMENTS & GET TRUE CODE SEGMENT */
+.section .init
 .code32
 __LMA32:
 	mov	$KDSel, %ax

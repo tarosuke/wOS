@@ -10,7 +10,7 @@
 .global __ARCH_SayHello, __putc16, __puts16, __hex16
 .extern __version_LMA
 
-.section .init
+.section .init16
 
 /*********************************************** CONVERT VMA(in EBX) TO LMA */
 /*.L_GetUserLMA:

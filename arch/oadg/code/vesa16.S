@@ -10,7 +10,7 @@
 .section .pdef16
 	.long	.L_Init
 
-.section .init
+.section .init16
 .L_Init:
 #if !CF_VESA_MODE
 	// 有効モードの取得
