@@ -39,8 +39,7 @@ ldopts = -N --cref -nostdlib -z nodefaultlib --gc-sections
 
 ################################################################# SOURCE PATHs
 VPATH =
-VPATH += ../../arch/$(arch)/code ../../arch/$(arch)/kernel
-VPATH += ../../cpu/$(cpu)/code ../../kernel/code
+VPATH += ../../arch/$(arch)/code ../../cpu/$(cpu)/code ../../kernel/code
 VPATH += ../../userlib/code
 
 
@@ -49,7 +48,6 @@ VPATH += ../../userlib/code
 # kernel modules
 ksrcs = $(wildcard ../../kernel/code/*)\
 	$(wildcard ../../cpu/$(cpu)/code/*)\
-	$(wildcard ../../arch/$(arch)/kernel/*)\
 	$(wildcard ../../arch/$(arch)/code/*)
 kmods = $(basename $(notdir $(ksrcs)))
 kobjs = $(addsuffix .o, $(kmods))
