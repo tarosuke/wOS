@@ -12,5 +12,7 @@
  * CF_VESA_MODE		：VESA VBEの画面モード(0)。0にすると自動検出
  */
 
+#define CF_IA32 1
+
 #define CF_DEBUG_LEVEL		5
 #define CF_VESA_MODE		0x10e

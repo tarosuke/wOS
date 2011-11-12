@@ -12,7 +12,6 @@
 
 #include "config"
 #include <arch/config.h>
-#include <cpu/config.h>
 
 
 #ifndef CF_HZ
