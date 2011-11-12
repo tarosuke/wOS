@@ -11,13 +11,21 @@
 extern "C"{
 	extern uchar __kernel_base[];
 	extern runit __pageRoot[];
+#if CF_AMD64
+	extern runit __hiPageTable_VMA[]; //カーネルが収まってるページのテーブル
+#endif
 }
 
 // ページテーブルが丸見えという便利な配列。
+#if CF_IA32
 #if CF_PAE
 runit* const VIRTUALPAGE::pageTableArray((runit*)0xff800000);
 #else
 runit* const VIRTUALPAGE::pageTableArray((runit*)0xffc00000);
+#endif
+#endif
+#if CF_AMD64
+runit* const VIRTUALPAGE::pageTableArray((runit* const)~0ULL);
 #endif
 
 // カーネル領域とユーザ領域を分ける値
@@ -31,7 +39,9 @@ static VIRTUALPAGE vpage;
 
 VIRTUALPAGE::VIRTUALPAGE(){
 	dputs("virtual pages..." INDENT);
+#if CF_IA32
 	dprintf("pageTableArray: %p.\n", pageTableArray);
+#endif
 	dprintf("kernelPageDir: %p.\n", __pageRoot);
 	dputs(UNINDENT "OK.\n");
 }
@@ -54,7 +64,7 @@ void VIRTUALPAGE::Enable(void* start, munit pages){
 	}
 }
 
-void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, u32 attr){
+void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, runit attr){
 	const munit p((munit)start / PAGESIZE);
 	mapID <<= 12;
 	KEY key(lock);
@@ -171,5 +181,3 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
 	}
 }
-
-

@@ -17,23 +17,26 @@
 class VIRTUALPAGE{
 public:
 	// ページ属性
-	static const u32 present = 0x01;
-	static const u32 readOnly = 0x02;
-	static const u32 user = 0x04;
-	static const u32 wrightThorugh = 0x08;
-	static const u32 disableCache = 0x10;
-	static const u32 accessed = 0x20;
-	static const u32 dirty = 0x40;
-	static const u32 pageAttributeIndex = 0x80;
-	static const u32 bigPage = 0x80;
-	static const u32 global = 0x100;
-	static const u32 valid = 0x200;
-	static const u32 maped = 0x400;
-	static const u32 copyOnWrite = 0x800;
-	static const u32 pageAttributeIndex4M = 0x1000;
+	static const runit present = 0x01;
+	static const runit readOnly = 0x02;
+	static const runit user = 0x04;
+	static const runit wrightThorugh = 0x08;
+	static const runit disableCache = 0x10;
+	static const runit accessed = 0x20;
+	static const runit dirty = 0x40;
+	static const runit pageAttributeIndex = 0x80;
+	static const runit bigPage = 0x80;
+	static const runit global = 0x100;
+	static const runit valid = 0x200;
+	static const runit maped = 0x400;
+	static const runit copyOnWrite = 0x800;
+	static const runit pageAttributeIndex4M = 0x1000;
+#if CF_AMD64
+	static const runit noExec = 0x8000000000000000ULL;
+#endif
 	// ページ有効化(あるいは実ページ／マップ割り当て)
 	static void Enable(void*, munit pages = 1);
-	static void Enable(void*, uint mapID, munit pages, u32 attr = 0);
+	static void Enable(void*, uint mapID, munit pages, runit attr = 0);
 	static void Enable(void*, runit pa, punit pages);
 	// ページ無効化・返却
 	static void Disable(void*, munit pages);
