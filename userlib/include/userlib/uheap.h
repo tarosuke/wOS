@@ -6,7 +6,7 @@
 #ifndef _ULIB_HEAP_
 #define _ULIB_HEAP_
 
-#include <userlib/types.h>
+#include <types.h>
 
 
 void HEAP_Init(void);

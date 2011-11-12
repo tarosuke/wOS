@@ -6,7 +6,7 @@
 #ifndef _ULIB_MESSAGE_
 #define _ULIB_MESSAGE_
 
-#include <userlib/types.h>
+#include <types.h>
 
 
 typedef struct _MESSAGE{
