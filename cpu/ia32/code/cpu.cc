@@ -11,7 +11,12 @@
 
 
 extern "C"{
+#if CF_IA32
 	extern u64 __TSSPH[];
+#endif
+#if CF_AMD64
+	extern u64 __TSSPH[][2];
+#endif
 };
 
 
@@ -24,12 +29,26 @@ CPU::CPU(uint id) : cpuid(id), tss(tsss[cpuid]){
 	//  当該プロセッサ用のTSSを設定
 	dprintf("selector: %d.\n", TSSSel + cpuid);
 	const u64 p((munit)&tss);
+#if CF_IA32
 	__TSSPH[cpuid] = 0x000089000000006c |
 		((p & 0x00ffffff) << 16) |
 		((p & 0xff000000) << 32);
 	dprintf("tss: %p.\n", &tss);
 	dprintf("desc: %016llx.\n", __TSSPH[cpuid]);
+	asm volatile(
+		"ltr %%ax; mov %%ss, %0"
+		: "=r"(tss.ss0) : "a"(TSSSel + cpuid));
+#endif
+#if CF_AMD64
+	__TSSPH[cpuid][0] = 0x000089000000006c |
+		((p & 0x00ffffff) << 16) |
+		((p & 0xff000000) << 32);
+	__TSSPH[cpuid][1] = p >> 32;
+	dprintf("tss: %p.\n", &tss);
+	dprintf("desc(0): %016llx.\n", __TSSPH[cpuid][0]);
+	dprintf("desc(1): %016llx.\n", __TSSPH[cpuid][1]);
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
+#endif
 
 	dputs(UNINDENT"OK.\n");
 }

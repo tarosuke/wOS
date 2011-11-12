@@ -3,38 +3,4 @@
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
-#include <config.h>
-#include <cpu/cpu.h>
-#include <arch/segments.h>
-#include <debug.h>
-#include <arch/pic.h>
-#include <lock.h>
-
-
-extern "C"{
-	extern u64 __TSSPH[][2];
-};
-
-
-CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
-
-
-CPU::CPU(uint id) : cpuid(id), tss(tsss[cpuid]){
-	dprintf("cpu(%d)..."INDENT, cpuid);
-
-	//  当該プロセッサ用のTSSを設定
-	dprintf("selector: %d.\n", TSSSel + cpuid);
-	const u64 p((munit)&tss);
-	__TSSPH[cpuid][0] = 0x000089000000006c |
-		((p & 0x00ffffff) << 16) |
-		((p & 0xff000000) << 32);
-	__TSSPH[cpuid][1] = p >> 32;
-	dprintf("tss: %p.\n", &tss);
-	dprintf("desc(0): %016llx.\n", __TSSPH[cpuid][0]);
-	dprintf("desc(1): %016llx.\n", __TSSPH[cpuid][1]);
-	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
-
-	dputs(UNINDENT"OK.\n");
-}
-
-
+#include "../../cpu/ia32/code/cpu.cc"
