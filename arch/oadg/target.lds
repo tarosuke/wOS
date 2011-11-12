@@ -6,7 +6,7 @@
 
 OUTPUT_FORMAT("elf32-i386")
 ENTRY(__init16)
-GROUP(kproc.o ulib.o libuser.a)
+GROUP(ulib.o libuser.a)
 
 MEMORY {
 	IMAGE (wxi) : ORIGIN = 0x10000, LENGTH = 0x80000
@@ -48,10 +48,11 @@ SECTIONS {
 	.init 0x10000 : {
 		LONG(ABSOLUTE(__init16));
 		LONG(__arch_LOMEM);
-		KEEP(*(.kp_init))
-		KEEP(*(.kp_ro))
-		KEEP(*(.kp_rw))
-		KEEP(*(.kp_def))
+		KEEP(*(.init))
+		. = ALIGN(4);
+		__kernelProcessDefs16 = .;
+		KEEP(*(.pdef16))
+		LONG(0);
 	} AT > IMAGE
 
 	.kernel (. + ABSOLUTE(__kernel_base)) : {

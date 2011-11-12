@@ -47,14 +47,12 @@ VPATH += ../../userlib/code
 ###################################################################### MODULES
 
 # kernel modules
-ksrcs = $(wildcard ../../kernel/code/*) $(wildcard ../../cpu/$(cpu)/code/*) $(wildcard ../../arch/$(arch)/kernel/*)
+ksrcs = $(wildcard ../../kernel/code/*)\
+	$(wildcard ../../cpu/$(cpu)/code/*)\
+	$(wildcard ../../arch/$(arch)/kernel/*)\
+	$(wildcard ../../arch/$(arch)/code/*)
 kmods = $(basename $(notdir $(ksrcs)))
 kobjs = $(addsuffix .o, $(kmods))
-
-# kernel servers
-kpsrcs = $(wildcard ../../arch/$(arch)/code/*)
-kpmods = $(basename $(notdir $(kpsrcs)))
-kpobjs = $(addsuffix .o, $(kpmods))
 
 # user library modules
 ulsrcs = $(wildcard ../../userlib/code/*)
@@ -99,11 +97,6 @@ endif
 
 
 ############################################################### EXPLICIT RULES
-kproc.o : $(kpobjs) $(keyfiles) ../../arch/$(arch)/kproc.lds
-	@echo $@
-	@$(LD) -N --cref -nostdlib -r -T ../../arch/$(arch)/kproc.lds -o $@ -Map kproc.map $(kpobjs)
-	@$(prefix)objdump -xdS kproc.o > kproc.dis
-
 ulib.o : $(ulobjs) $(keyfiles) ../../userlib/userlib.lds
 	@echo $@
 	@$(LD) -N --cref -nostdlib -r -T ../../userlib/userlib.lds -o $@ -Map ulib.map $(ulobjs)
@@ -113,7 +106,7 @@ libuser.a : $(uobjs) $(keyfiles)
 	@echo $@
 	@$(AR) -rc $@ $(uobjs)
 
-talos : kproc.o ulib.o libuser.a target.lds $(kobjs) $(keyfiles)
+talos : ulib.o libuser.a target.lds $(kobjs) $(keyfiles)
 	@echo $@
 	@$(LD) $(ldopts) -T target.lds -o talos.elf -Map talos.map --start-group $(kobjs) --end-group
 	@$(OC) -O binary talos.elf talos

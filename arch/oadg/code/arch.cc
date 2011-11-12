@@ -25,14 +25,6 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		// staticなコンストラクタ呼び出し。ARCH関連はすべてこれで初期化する
-		//TODO:モジュールを追加すると死亡するので原因を探る
-		dputs("Initializing arch module..." INDENT);
-		for(const void (**cons)(void)(__ArchCons); *cons; cons++){
-			(*cons)();
-		}
-		dputs(UNINDENT "OK.\n");
-
 		new PU;
 
 		//ここには到達しないはず
