@@ -39,6 +39,6 @@ public:
 }timer;
 
 void TIMER::Tick(){
-	CLOCK::Tick();
 	PIC::EOI(timerIRQ);
+	CLOCK::Tick();
 };
