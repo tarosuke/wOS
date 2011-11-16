@@ -49,13 +49,17 @@ public:
 		return timezone / (underSec * 60);
 	};
 	static tunit Uptime(){
-		return systemUptime;
+		tunit t(systemUptime);
+		while(t != systemUptime){
+			t = systemUptime;
+		}
+		return t;
 	};
 	static tunit GetGlobalTime(){
-		return systemUptime + baseTime;
+		return Uptime() + baseTime;
 	};
 	static tunit GetLocalTime(){
-		return systemUptime + baseTime + (RTCinLocal ? 0 : timezone);
+		return Uptime() + baseTime + (RTCinLocal ? 0 : timezone);
 	};
 	static void SetRTCinLocal(){
 		if(!RTCinLocal){
