@@ -51,12 +51,44 @@ extern "C"{
 			handlers[num](err, *f);
 		}else{
 			EXCEPTION::FRAME frame(*f);
-			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
+#if CF_AMD64
+			dprintf("\nEXCEPTION(%d:%08x)."INDENT, num, err);
 			dprintf("ip:%p.\n", frame.withErrorCode.ip);
-			dprintf("cs:%llx.\n", frame.withErrorCode.cs);
+			dprintf("cs:%02llx.\n", frame.withErrorCode.cs);
 			dprintf("fl:%08llx.\n", frame.withErrorCode.flags);
 			dprintf("sp:%p.\n", frame.withErrorCode.sp);
-			dprintf("ss:%llx.\n"UNINDENT, frame.withErrorCode.ss);
+			dprintf("ss:%02llx.\n", frame.withErrorCode.ss);
+			dprintf("rax:%16llx.\n", frame.rax);
+			dprintf("rbx:%16llx.\n", frame.rbx);
+			dprintf("rcx:%16llx.\n", frame.rcx);
+			dprintf("rdx:%16llx.\n", frame.rdx);
+			dprintf("rdi:%16llx.\n", frame.rdi);
+			dprintf("rsi:%16llx.\n", frame.rsi);
+			dprintf("rbp:%16llx.\n", frame.rbp);
+			dprintf(" r8:%16llx.\n", frame.r8);
+			dprintf(" r9:%16llx.\n", frame.r9);
+			dprintf("r10:%16llx.\n", frame.r10);
+			dprintf("r11:%16llx.\n", frame.r11);
+			dprintf("r12:%16llx.\n", frame.r12);
+			dprintf("r13:%16llx.\n", frame.r13);
+			dprintf("r14:%16llx.\n", frame.r14);
+			dprintf("r15:%16llx.\n"UNINDENT, frame.r15);
+#endif
+#if CF_IA32
+			dprintf("EXCEPTION(%d:%08x)."INDENT, num, err);
+			dprintf("ip:%p.\n", frame.withErrorCode.ip);
+			dprintf("cs:%02x.\n", frame.withErrorCode.cs);
+			dprintf("fl:%08x.\n", frame.withErrorCode.flags);
+			dprintf("sp:%p.\n", frame.withErrorCode.sp);
+			dprintf("ss:%02x.\n", frame.withErrorCode.ss);
+			dprintf("rax:%8x.\n", frame.eax);
+			dprintf("rbx:%8x.\n", frame.ebx);
+			dprintf("rcx:%8x.\n", frame.ecx);
+			dprintf("rdx:%8x.\n", frame.edx);
+			dprintf("rdi:%8x.\n", frame.edi);
+			dprintf("rsi:%8x.\n", frame.esi);
+			dprintf("rbp:%8x.\n", frame.ebp);
+#endif
 			assert(false);
 		}
 	}
