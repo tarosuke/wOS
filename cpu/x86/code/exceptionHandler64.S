@@ -43,7 +43,6 @@
 	mov	$KDSel, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
-	mov	%rsp, %rbp
 	call	__FAULT_Handler
 	pop	%ax
 	mov	%ax, %es
@@ -91,7 +90,6 @@
 	mov	$KDSel, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
-	mov	%rsp, %rbp
 	call	__FAULT_Handler
 	pop	%ax
 	mov	%ax, %es
@@ -138,7 +136,6 @@
 	mov	%ax, %ds
 	mov	%ax, %es
 	sub	$ARCH_BASE_VECTOR, %rdi
-	mov	%rsp, %rbp
 	call	__INTERRUPT_Handler
 	pop	%ax
 	mov	%ax, %es
