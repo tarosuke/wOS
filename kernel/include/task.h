@@ -37,6 +37,9 @@ public:
 	TASK();			//現在のコンテキストをこのタスクとする
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
+	static void Dispatch(){
+		//TODO:必要ならタスクディスパッチ
+	}
 private:
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
 	PU* owner;		//現在このタスクを実行しているプロセッサ
