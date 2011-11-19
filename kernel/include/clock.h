@@ -10,7 +10,7 @@
 #include <task.h>
 #include <config.h>
 #include <lock.h>
-//TODO:排他制御
+
 
 class CLOCK{
 	friend class TIMER;

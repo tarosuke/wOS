@@ -31,6 +31,7 @@ void* TASK::operator new(munit contentSize){
 void TASK::Cron(tunit now){
 	QUEUE<TASK>::ITOR c(cronQueue);
 	for(TASK* t(0); !!(t = c++) && (*t).uptime <= now;){
+		c.Detach();
 		(*t).WakeUp(/*TODO:時間切れで*/);
 	}
 }
