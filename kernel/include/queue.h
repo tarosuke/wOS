@@ -10,6 +10,7 @@
 #include <config.h>
 #include <types.h>
 #include <lock.h>
+#include <debug.h>
 
 
 template<class T> class NODE{
@@ -18,13 +19,13 @@ public:
 	//thisをnの前に接続
 	void Insert(NODE& n){
 		prev = n.prev;
-		next = n;
+		next = &n;
 		n.prev = (*prev).next = this;
 	};
 	//thisをnの後に接続
 	void Attach(NODE& n){
 		next = n.next;
-		prev = n;
+		prev = &n;
 		n.next = (*next).prev = this;
 	};
 	//thisをどこかから外す(どこにも繋がっていなくてもおｋ)
@@ -33,7 +34,7 @@ public:
 		(*prev).next = next;
 		prev = next = this;
 	};
-	T* Owner(){ return owner; };
+	inline T* Owner(){ return owner; };
 	NODE* Next(){ return next; };
 	NODE* Prev(){ return prev; };
 protected:
@@ -48,20 +49,38 @@ template<class T> class QUEUE : public NODE<T>{
 	friend class ITOR;
 public:
 	class ITOR{
+		/** インスタンスが存在する間は対象キューが変化しないことが保証される
+		 * が、その間他の一切の操作はブロックされるのでキュー操作はすべて
+		 * ITORを通す必要がある */
 	public:
-		ITOR(QUEUE& q) : q(&q), n(&q), key(q.lock){};
+		ITOR(QUEUE& q) : q(&q), n(q.next), key(q.lock){};
 		T* operator++(int){
-			if((*n).Next() != q){
+			if(n != q){
+				T* t((*n).Owner());
 				n = (*n).Next();
-				return (*n).Owner();
+				return t;
 			}
 			return 0;
 		};
-		T* operator--(int){
-			if((*n).Prev() != q){
-				n = (*n).Prev();
-				return (*n).Owner();
+		inline T* Owner(){
+			return (*n).Owner();
+		}
+		void Insert(NODE<T>& node){
+			//ITORが指すノードの前にnodeを追加する
+			(*n).Insert(node);
+		};
+		void Add(NODE<T>& node){
+			//ITORが指すノードの後にnodeを追加する
+			(*n).Attach(node);
+		};
+		T* Detach(){
+			//ITORが指すノードを除去し、次の要素を指す
+			if(n != q){
+				T* const t((*n).Owner());
+				n = (*n).Next();
+				return t;
 			}
+			//ITORが何も指していなければ0を返す
 			return 0;
 		};
 	private:
@@ -69,26 +88,26 @@ public:
 		NODE<T>* n;
 		KEY key;
 	};
-	bool IsThere(KEY&){
+	bool IsThere(){ KEY key(lock); return IsThere(key); };
+	T* Get(){ KEY key(lock); return Get(key); };
+	void Add(NODE<T>& n){ KEY key(lock); Add(key, n); };
+private:
+	LOCK lock;
+	inline bool IsThere(KEY&){
 		return (*this).next != this;
 	};
-	T* Get(KEY&){
-		if(IsThere()){
+	T* Get(KEY& key){
+		if(IsThere(key)){
 			T* o((*this).owner);
 			(*(*this).next).Detach();
 			return o;
 		}
 		return 0;
 	};
-	void Add(KEY&, NODE<T>& n){
+	inline void Add(KEY&, NODE<T>& n){
 		//リンクは輪になっているのでアンカーであるキューの前は最後
 		Insert(n);
 	};
-	bool IsThere(){ KEY key(lock); return IsThere(key); };
-	T* Get(){ KEY key(lock); return Get(key); };
-	void Add(NODE<T>&){ KEY key(lock); Add(key); };
-private:
-	LOCK lock;
 };
 
 
@@ -97,12 +116,16 @@ public:
 	T* Get(){
 		KEY key(lock);
 		for(uint i(0); i < max; i++){
-			if(q[i].IsThere(key)){
-				return q[i].Get(key);
+			if(q[i].IsThere()){
+				return q[i].Get();
 			}
 		}
 		return 0;
 	};
+	void Add(uint index, T& node){
+		assert(index < max);
+		q[index].Add(node);
+	}
 private:
 	QUEUE<T> q[max];
 	LOCK lock;

@@ -11,11 +11,11 @@
 #include <config.h>
 #include <arch/pic.h>
 #include <cpu/exception.h>
+#include <task.h>
 #include <debug.h>
 
+
 class INTERRUPT{
-private:
-	static void (*handlers[])();
 public:
 	INTERRUPT(){
 		dputs("interrupt..." INDENT);
@@ -27,23 +27,42 @@ public:
 			assert(false);
 			return;
 		}
-		if(handlers[irq]){
-			handlers[irq](); //EOIはハンドラが出す
+		HANDLER& h(handlers[irq]);
+		if(h.handler){
+			h.handler(); //この場合EOIはハンドラが出す
 		}else{
 			PIC::Start(irq);
-			// TODO:タスクが登録されてたら起動する。全く登録されてなかったらFinish
+			h.rc = 0;
+			TASK* t;
+			for(QUEUE<TASK>::ITOR i(h.tasks); (t = i++); h.rc++){
+				(*t).Enqueue(irq);
+			}
 		}
-		//TODO:何も登録されていなかったらMaskしてFinish
+
+		//必要ならタスクディスパッチ
+		TASK::Dispatch();
 	};
 	static void Finish(uint irq){
-		//TODO:Handlerで起動した割り込み処理が全部終わったら呼ばれる
-		PIC::Finish(irq);
+		if(!--handlers[irq].rc){
+			PIC::Finish(irq);
+		}
 	};
 	static void RegisterHandler(uint irq, void (*handler)()){
 		// ハンドラの登録(タイマとシステムコールしか使わないけどなw)
-		handlers[irq] = handler;
+		handlers[irq].handler = handler;
 		PIC::Unmask(irq);
 	};
+	static void RegisterHandler(uint irq, NODE<TASK>& task){
+		// ハンドラタスクの登録
+		handlers[irq].tasks.Add(task);
+		PIC::Unmask(irq);
+	};
+private:
+	static struct HANDLER{
+		void (*handler)();
+		QUEUE<TASK> tasks;
+		uint rc; //現在実行中のハンドラタスクの数
+	}handlers[];
 };
 
 

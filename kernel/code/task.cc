@@ -18,7 +18,8 @@ TASK::TASK() :
 	owner(0),
 	priority(__pri_max),
 	qNode(this),
-	cronNode(this){}
+	cronNode(this),
+	irqNode(this){}
 
 
 void* TASK::operator new(munit contentSize){

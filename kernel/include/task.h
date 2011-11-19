@@ -22,6 +22,7 @@ extern "C"{
 class TASK : public CPUTASK{
 	friend class PU;
 	friend class CLOCK;
+	friend class INTERRUPT;
 public:
 	enum PRIORITY{
 		PRI_REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
@@ -34,12 +35,13 @@ public:
 	typedef MULTIQUEUE<TASK, __pri_max> TASKQUEUE;
 	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
 	void Enqueue(MESSAGE*); //TODO:メッセージをタスクのキューに追加してタスクをreadyにする。もし既にタスクがreadyであり、かつメッセージ優先度がタスク優先度より高ければ優先度継承に従いタスク優先度をメッセージ優先度に変更し新しい優先度のレディキューに繋ぎ直す。
+	void Enqueue(uint irq){
+		priority = PRI_INTERRUPT;
+		//TODO:irqに対応するフラグを立ててPRI_INTERRUPTでタスクを登録
+	};
 	TASK();			//現在のコンテキストをこのタスクとする
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
-	static void Dispatch(){
-		//TODO:必要ならタスクディスパッチ
-	}
 private:
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
 	PU* owner;		//現在このタスクを実行しているプロセッサ
@@ -47,17 +49,21 @@ private:
 	NODE<TASK> qNode;	//待ちやレディキューのためのノード
 	NODE<TASK> cronNode;	//時間管理のためのキューノード
 	tunit uptime;		//時間切れ時刻
+	NODE<TASK> irqNode;	//割り込みを使う場合のノード
 
 	void WakeUp(/*TODO:理由*/){};
 
 	///// 以下はシステム全体の話
-	static TASKQUEUE readyQueue; //レディキュー
-	static TASK* GetReadyOne(){
-		return readyQueue.Get();
-	};
+	static TASKQUEUE readyQueue;
 	static QUEUE<TASK> cronQueue;
 	static void Cron(tunit);
 	static const uint thisSizeIndex;
+	static TASK* GetReadyOne(){
+		return readyQueue.Get();
+	};
+	static inline void Dispatch(){
+		//TODO:必要ならタスクディスパッチ
+	}
 };
 
 extern TASK kernelTask;

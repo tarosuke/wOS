@@ -4,15 +4,13 @@
  */
 
 #include <interrupt.h>
-#include <task.h>
 
 
 static INTERRUPT interruptManipulator;
-void (*INTERRUPT::handlers[CF_MAX_IRQs])();
+INTERRUPT::HANDLER INTERRUPT::handlers[CF_MAX_IRQs];
 
 extern "C"{
 	void __INTERRUPT_Handler(uint irq){
 		INTERRUPT::Handler(irq);
-		TASK::Dispatch();
 	}
 }
