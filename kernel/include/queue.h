@@ -91,6 +91,7 @@ public:
 	bool IsThere(){ KEY key(lock); return IsThere(key); };
 	T* Get(){ KEY key(lock); return Get(key); };
 	void Add(NODE<T>& n){ KEY key(lock); Add(key, n); };
+	void Insert(NODE<T>& n){ KEY key(lock); Insert(key, n); };
 private:
 	LOCK lock;
 	inline bool IsThere(KEY&){
@@ -108,24 +109,44 @@ private:
 		//リンクは輪になっているのでアンカーであるキューの前は最後
 		Insert(n);
 	};
+	inline void Insert(KEY&, NODE<T>& n){
+		//リンクは輪になっているのでアンカーであるキューの後は最初
+		Attach(n);
+	};
 };
 
 
 template<typename T, uint max> class MULTIQUEUE{
 public:
-	T* Get(uint n = 0){
+	T* Get(uint e = max){
+		assert(e <= max);
 		KEY key(lock);
-		for(uint i(n); i < max; i++){
+		for(uint i(0); i < e; i++){
 			if(q[i].IsThere()){
 				return q[i].Get();
 			}
 		}
 		return 0;
 	};
-	void Add(uint index, T& node){
+	void Add(uint index, NODE<T>& node){
+		KEY key(lock);
 		assert(index < max);
 		q[index].Add(node);
-	}
+	};
+	void Insert(uint index, NODE<T>& node){
+		KEY key(lock);
+		assert(index < max);
+		q[index].Insert(node);
+	};
+	uint GetMax(){
+		KEY key(lock);
+		for(uint i(0); i < max; i++){
+			if(q[i].IsThere()){
+				return i;
+			}
+		}
+		return max;
+	};
 private:
 	QUEUE<T> q[max];
 	LOCK lock;

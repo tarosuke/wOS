@@ -39,9 +39,7 @@ public:
 		}
 
 		//必要ならタスクディスパッチ
-		if(PU::GetDispatchOrder()){
-			PU::Dispatch();
-		}
+		PU::Dispatch();
 	};
 	static void Finish(uint irq){
 		if(!--handlers[irq].rc){

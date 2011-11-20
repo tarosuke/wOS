@@ -20,7 +20,6 @@ public:
 	PU();
 	static void* operator new(munit);
 	static void Dispatch();
-	static inline bool GetDispatchOrder(){ return dispatchOrder; };
 private:
 	TASK* current;		//このプロセッサで実行中のタスク
 	static uint idPool;

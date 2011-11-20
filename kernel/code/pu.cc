@@ -17,36 +17,57 @@ uint PU::poolPool(0);
 PU* PU::pu[CF_MAX_PROCESSORs];
 TASK::TASKQUEUE PU::readyQueue;
 QUEUE<TASK> PU::cronQueue;
-bool PU::dispatchOrder(false);
+bool PU::dispatchOrder(true);
 
 
 PU::PU() : CPU(place.GetNumOf(this)), current(0){
 	pu[cpuid] = this;
-	EnableInterrupt();
 	Dispatch();
 }
 
 void PU::Dispatch(){
-	TASK* task;
-	while(!(task = readyQueue.Get())){
-		//実行すべきタスクが登録されるまで暇潰し
-		EnableInterrupt();
-		Halt();
-		dprintf("[%t]\r", CLOCK::GetLocalTime());
-	}
-	DisableInterrupt();
-assert(false);
+	if(!dispatchOrder){ return; }
+	dispatchOrder = false;
+
 #if CF_SMP
+	//TODO:cpuidを推測してPU& pを作る
 #else
 	PU& p(*pu[0]);
 #endif
 
+	const TASK::PRIORITY pri(
+		p.current ? (*p.current).priority : TASK::__pri_max);
+	TASK* task(0);
+	while(!(task = readyQueue.Get(pri)) && !p.current){
+#if CF_SMP
+		PU* lessPu(0);
+		uint less(0);
+		for(uint n(0); i < TASK::__pri_max; i++){
+			if(less < (uint)(*pu[i]).priority){
+				lessPu = pu[i];
+				less = (uint)(*pu[i]).priority;
+			}
+		}
+		if(lessPu){
+			//TODO:lessPuにディスパッチ要求
+		}
+#endif
+		//実行すべきタスクが登録されるまで暇潰し
+		EnableInterrupt();
+		Halt();
+		dprintf("[%t]\r", CLOCK::GetLocalTime());
+		DisableInterrupt();
+	}
 
-	//今までのタスクを手放して新しいタスクを入手
+	//タスクディスパッチ
 	(*p.current).owner = 0;
 	(*task).owner = &p;
-	//TODO:コンテキストスイッチ
-	p.current = task;
+	(*p.current).DispatchTo(*task);
+
+	//入れ替え
+	TASK* t(task);
+	task = p.current;
+	p.current = t;
 }
 
 void* PU::operator new(munit size){
