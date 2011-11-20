@@ -5,11 +5,10 @@
 
 #include <task.h>
 #include <heap.h>
+#include <pu.h>
 #include <debug.h>
 
 
-TASK::TASKQUEUE TASK::readyQueue;
-QUEUE<TASK> TASK::cronQueue;
 const uint TASK::thisSizeIndex(HEAP::GetBlockIndex(PAGESIZE));
 TASK kernelTask;
 
@@ -32,10 +31,3 @@ void TASK::operator delete(void* mem){
 	HEAP::Release(mem, thisSizeIndex);
 }
 
-void TASK::Cron(tunit now){
-	QUEUE<TASK>::ITOR c(cronQueue);
-	for(TASK* t(0); !!(t = c++) && (*t).uptime <= now;){
-		c.Detach();
-		(*t).WakeUp(RS_TIMEUP);
-	}
-}

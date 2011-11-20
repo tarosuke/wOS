@@ -64,6 +64,7 @@ void operator delete(void*);
 template<class T, uint elements = 1> class PLACER{
 public:
 	void* Place(uint index = 0){ return (void*)thePlace[index]; };
+	uint GetNumOf(T* t){ return t - (T*)thePlace; };
 private:
 	char thePlace[elements][sizeof(T)];
 };

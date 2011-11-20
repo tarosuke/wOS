@@ -113,9 +113,9 @@ private:
 
 template<typename T, uint max> class MULTIQUEUE{
 public:
-	T* Get(){
+	T* Get(uint n = 0){
 		KEY key(lock);
-		for(uint i(0); i < max; i++){
+		for(uint i(n); i < max; i++){
 			if(q[i].IsThere()){
 				return q[i].Get();
 			}

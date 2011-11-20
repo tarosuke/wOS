@@ -9,7 +9,6 @@
 #include <types.h>
 #include <config.h>
 #include <queue.h>
-#include <pu.h>
 #include <map.h>
 #include <cpu/task.h>
 
@@ -21,13 +20,11 @@ extern "C"{
 
 class TASK : public CPUTASK{
 	friend class PU;
-	friend class CLOCK;
-	friend class INTERRUPT;
 public:
 	enum PRIORITY{
 		/** 優先度
 		 * 値が小さいほうが優先度が高い
-		 * 新規タスク生成時には現在の優先度が最高として継承される */
+		 * 新規タスク生成時には現在の優先度を限度として継承される */
 		PRI_REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
 		PRI_INTERRUPT,	//割り込みハンドラ
 		PRI_UI,		//ユーザインターフェイス(ボタンに反応するとか)
@@ -38,7 +35,7 @@ public:
 	union CAPABILITIES{
 		/** いわゆるCapability
 		 * ビットが1ならリソース生成許可。0なら使用許可。
-		 * 同一のタスクでリソースの生成と消費の両方は不可能
+		 * 同一のタスクでリソースの生成と消費の両方はできない
 		 * 新規タスク生成時にビットを0にするのは可能という形で継承される */
 		struct{
 			u32 display : 1;
@@ -58,11 +55,14 @@ public:
 	};
 	typedef MULTIQUEUE<TASK, __pri_max> TASKQUEUE;
 	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
+	void Enqueue(){
+		//TODO:単純にタスクをレディキューに繋ぐ
+	};
 	void Enqueue(MESSAGE*); //TODO:メッセージをタスクのキューに追加してタスクをreadyにする。もし既にタスクがreadyであり、かつメッセージ優先度がタスク優先度より高ければ優先度継承に従いタスク優先度をメッセージ優先度に変更し新しい優先度のレディキューに繋ぎ直す。
 	void Enqueue(uint irq){
+		//TODO:タスクがPRI_INTERRUPT未満の優先度なら起動登録
 		priority = PRI_INTERRUPT;
 		(*this).irq = irq;
-		//TODO:タスクを起動登録
 	};
 	TASK();			//現在のコンテキストをこのタスクとする
 	TASK(MAP&);		//マップを0から配置してタスクとする
@@ -70,7 +70,7 @@ public:
 	void operator delete(void* mem);
 private:
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
-	PU* owner;		//現在このタスクを実行しているプロセッサ
+	class PU* owner;	//現在このタスクを実行しているプロセッサ
 	PRIORITY priority;	//現在の優先度
 	NODE<TASK> qNode;	//待ちやレディキューのためのノード
 	NODE<TASK> cronNode;	//時間管理のためのキューノード
@@ -80,19 +80,14 @@ private:
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
 
-	void WakeUp(REASON r){};
+	void WakeUp(REASON r = RS_FINE){
+		reason = r;
+		Enqueue();
+	};
 
 	///// 以下はシステム全体の話
-	static TASKQUEUE readyQueue;
-	static QUEUE<TASK> cronQueue;
-	static void Cron(tunit);
 	static const uint thisSizeIndex;
-	static TASK* GetReadyOne(){
-		return readyQueue.Get();
-	};
-	static inline void Dispatch(){
-		//TODO:必要ならタスクディスパッチ
-	}
+	static inline void DispatchTo(TASK& next){};
 };
 
 extern TASK kernelTask;

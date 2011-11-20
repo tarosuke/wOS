@@ -9,19 +9,28 @@
 #include <config.h>
 #include <types.h>
 #include <cpu/cpu.h>
+#include <task.h>
+#include <heap.h>
 
 
 class TASK;
 class PU : public CPU{
+	friend class CLOCK;
 public:
 	PU();
-	void* operator new(munit);
-	void Dispatch();
+	static void* operator new(munit);
+	static void Dispatch();
+	static inline bool GetDispatchOrder(){ return dispatchOrder; };
 private:
-	TASK* running;		//このプロセッサで実行中のタスク
+	TASK* current;		//このプロセッサで実行中のタスク
 	static uint idPool;
 	static uint poolPool;
 	static uint NewID();
+	static void Cron(tunit);
+	static PU* pu[];
+	static TASK::TASKQUEUE readyQueue;
+	static QUEUE<TASK> cronQueue;
+	static bool dispatchOrder;
 };
 
 

@@ -38,5 +38,7 @@
 #endif
 
 
+#define CF_SMP (1 < CF_MAX_PROCESSORs)
+
 
 #endif

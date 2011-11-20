@@ -7,7 +7,7 @@
 #define _CLOCK_
 
 #include <types.h>
-#include <task.h>
+#include <pu.h>
 #include <config.h>
 #include <lock.h>
 
@@ -84,7 +84,7 @@ private:
 	static LOCK lock;
 	static void Tick(){
 		systemUptime += tickTime;
-		TASK::Cron(systemUptime);
+		PU::Cron(systemUptime);
 	};
 };
 

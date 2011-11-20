@@ -10,7 +10,7 @@
 #include <config.h>
 #include <arch/pic.h>
 #include <cpu/exception.h>
-#include <task.h>
+#include <pu.h>
 #include <debug.h>
 
 
@@ -39,7 +39,9 @@ public:
 		}
 
 		//必要ならタスクディスパッチ
-		TASK::Dispatch();
+		if(PU::GetDispatchOrder()){
+			PU::Dispatch();
+		}
 	};
 	static void Finish(uint irq){
 		if(!--handlers[irq].rc){
