@@ -25,13 +25,14 @@ void dputc(char);
 void dputs(const char*);
 void dprintf(const char*, ...);
 void Panic(const char*);
-#define assert(c) {\
+#define ASSERT(c) {\
 	if(!(c)){\
 		__AssertionFailed(__FILE__, __LINE__);\
 	}else{\
 		__AssertionPassed(__FILE__, __LINE__);\
 	}\
 }
+#define assert(c) { if(!(c)){ __AssertionFailed(__FILE__, __LINE__); } }
 #define ORIGIN "\033[0m"
 #define LIGHTWHITE "\033[1;37m"
 #define LIGHTYELLOW "\033[1;33m"

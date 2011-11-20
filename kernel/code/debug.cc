@@ -266,10 +266,8 @@ void __AssertionFailed(const char* file, const unsigned line){
 	dprintf(LIGHTRED "Assertion FAILED at %s:%u" ORIGIN, file, line);
 	Panic("");
 }
-#if 5 <= CF_DEBUG_LEVEL
 void __AssertionPassed(const char* file, const unsigned line){
 	dprintf("Assertion passed at %s:%u\n", file, line);
 }
-#endif
 
 #endif
