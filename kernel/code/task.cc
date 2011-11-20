@@ -28,10 +28,14 @@ void* TASK::operator new(munit contentSize){
 	return r;
 }
 
+void TASK::operator delete(void* mem){
+	HEAP::Release(mem, thisSizeIndex);
+}
+
 void TASK::Cron(tunit now){
 	QUEUE<TASK>::ITOR c(cronQueue);
 	for(TASK* t(0); !!(t = c++) && (*t).uptime <= now;){
 		c.Detach();
-		(*t).WakeUp(/*TODO:時間切れで*/);
+		(*t).WakeUp(RS_TIMEUP);
 	}
 }
