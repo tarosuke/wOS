@@ -22,7 +22,6 @@ public:
 	static void Dispatch();
 private:
 	TASK* current;		//このプロセッサで実行中のタスク
-	static uint idPool;
 	static uint poolPool;
 	static uint NewID();
 	static void Cron(tunit);

@@ -12,7 +12,6 @@
 
 static PLACER<PU, CF_MAX_PROCESSORs> place;
 
-uint PU::idPool(0);
 uint PU::poolPool(0);
 PU* PU::pu[CF_MAX_PROCESSORs];
 TASK::TASKQUEUE PU::readyQueue;
@@ -40,17 +39,7 @@ void PU::Dispatch(){
 	TASK* task(0);
 	while(!(task = readyQueue.Get(pri)) && !p.current){
 #if CF_SMP
-		PU* lessPu(0);
-		uint less(0);
-		for(uint n(0); i < TASK::__pri_max; i++){
-			if(less < (uint)(*pu[i]).priority){
-				lessPu = pu[i];
-				less = (uint)(*pu[i]).priority;
-			}
-		}
-		if(lessPu){
-			//TODO:lessPuにディスパッチ要求
-		}
+		//TODO:暇プロセッサかtaskより低い最低優先度タスクを実行中のプロセッサにDispatch要求を出す。
 #endif
 		//実行すべきタスクが登録されるまで暇潰し
 		EnableInterrupt();
