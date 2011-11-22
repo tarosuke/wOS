@@ -1,5 +1,5 @@
 
-/************************************************************** VESA-VBE初期化 */
+/************************************************************ VESA-VBE初期化 */
 #include <config.h>
 
 .code16
@@ -81,8 +81,12 @@
 	jae	1f //有効なモードを取得できたので設定しに行く
 #endif
 4:
-#if CF_VESA_MODE
+#if CF_VESA_MODE || CF_FORCE_VESA_MODE
+#if CF_FORCE_VESA_MODE
+	mov	$CF_FORCE_VESA_MODE, %bx
+#else
 	mov	$CF_VESA_MODE, %bx
+#endif
 	and	$0x1ff, %bx
 #else
 	jmp	.L_failed
