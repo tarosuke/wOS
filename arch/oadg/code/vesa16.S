@@ -12,7 +12,7 @@
 
 .section .init16
 .L_Init:
-#if !CF_VESA_MODE
+#if !CF_FORCE_VESA_MODE
 	// 有効モードの取得
 	mov	%cs, %ax
 	mov	%ax, %ds
@@ -27,6 +27,8 @@
 	xor	%edx, %edx
 	push	%ds
 	mov	$.L_videoModes, %ebx
+	test	%ebx, %ebx
+	jz	4f
 	mov	(%bx), %si
 	mov	2(%bx), %ds
 	xor	%bx, %bx
@@ -76,13 +78,17 @@
 	jmp	1b
 1:	pop	%ds
 	cmp	$0x010d, %bx
-	jb	.L_failed //有効なモードを取得できていないので失敗
-#else
+	jae	1f //有効なモードを取得できたので設定しに行く
+#endif
+4:
+#if CF_VESA_MODE
 	mov	$CF_VESA_MODE, %bx
 	and	$0x1ff, %bx
+#else
+	jmp	.L_failed
 #endif
 	// 画面モードを設定
-	or	$0xc000, %bx
+1:	or	$0xc000, %bx
 	mov	$0x4f02, %ax
 	int	$0x10
 	cmp	$0x004f, %ax

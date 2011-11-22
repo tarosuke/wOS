@@ -26,6 +26,9 @@
 #ifndef CF_VESA_MODE
 #	define CF_VESA_MODE 0 //自動取得
 #endif
+#ifndef CF_FORCE_VESA_MODE
+#	define CF_FORCE_VESA_MODE 0
+#endif
 
 
 #endif

@@ -93,6 +93,7 @@ void VESA_Check(){
 	dprintf("     venderName:%s\n", Get16(__VESA_InfoBlock.venderName));
 	dprintf("    productName:%s\n", Get16(__VESA_InfoBlock.productName));
 	dprintf("productRevision:%s\n", Get16(__VESA_InfoBlock.productRevision));
+	dprintf("     videoModes:%08x.\n", __VESA_InfoBlock.videoModes);
 	dprintf("          width:%u.\n", __VESA_displayInfo.xResolution);
 	dprintf("         height:%u.\n", __VESA_displayInfo.yResolution);
 	dprintf("            bpp:%u.\n", __VESA_displayInfo.bitPerPixel);
