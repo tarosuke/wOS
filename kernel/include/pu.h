@@ -28,7 +28,7 @@ private:
 	static PU* pu[];
 	static TASK::TASKQUEUE readyQueue;
 	static QUEUE<TASK> cronQueue;
-	static bool dispatchOrder;
+	static bool dispatchRequest;
 };
 
 

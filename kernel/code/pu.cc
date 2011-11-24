@@ -16,7 +16,7 @@ uint PU::poolPool(0);
 PU* PU::pu[CF_MAX_PROCESSORs];
 TASK::TASKQUEUE PU::readyQueue;
 QUEUE<TASK> PU::cronQueue;
-bool PU::dispatchOrder(true);
+bool PU::dispatchRequest(true);
 
 
 PU::PU() : CPU(place.GetNumOf(this)), current(0){
@@ -25,8 +25,8 @@ PU::PU() : CPU(place.GetNumOf(this)), current(0){
 }
 
 void PU::Dispatch(){
-	if(!dispatchOrder){ return; }
-	dispatchOrder = false;
+	if(!dispatchRequest){ return; }
+	dispatchRequest = false;
 
 #if CF_SMP
 	//TODO:cpuidを推測してPU& pを作る
