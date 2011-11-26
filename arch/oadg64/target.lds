@@ -17,6 +17,8 @@ SECTIONS {
 	__kernelBase_hi = __kernel_base >> 32;
 	__kernelBase_lo = __kernel_base & 0xffffffff;
 
+	__hiPageTable_VMA = __hiPageTable + __kernel_base;
+
 	INCLUDE ../../arch/oadg/common.lds
 }
 

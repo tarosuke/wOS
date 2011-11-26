@@ -10,7 +10,7 @@
 extern "C"{
 	extern uint __kernel_heap[];
 }
-static HEAP heap((munit)__kernel_heap, (munit)VIRTUALPAGE::pageTableArray);
+static HEAP heap((munit)__kernel_heap, VIRTUALPAGE::heapTop);
 HEAP::STACK HEAP::memoryPools[32];
 const munit HEAP::memoryPoolSizes[32] = {
 	64U, 128U, 256U, 512U, 1024U, 2048U, 4096U, 8192U, 16384U, 32768U,

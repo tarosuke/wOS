@@ -42,13 +42,52 @@ public:
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
 	static void Fault(u32 code, EXCEPTION::FRAME&);
-	// カーネルヒープの末端
-	static runit* const pageTableArray;
 	VIRTUALPAGE();
+#if CF_IA32
+#if CF_PAE
+	static const munit heapTop = 0xff800000;
+#else
+	static const munit heapTop = 0xffc00000;
+#endif
+#endif
+#if CF_AMD64
+	static const munit heapTop = 0xfffffffffffffffeULL;
+#endif
 private:
 	static const punit kernelStartPage;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
+#if CF_IA32
+	static class PTA{
+	public:
+		PTA(munit a) : array((runit*)a){};
+		inline runit& operator[](punit p){
+			return array[p];
+		};
+	private:
+		runit* const array;
+	}pageTableArray;
+#endif
+#if CF_AMD64
+	static class PTA{
+		friend class K;
+	public:
+		PTA(runit*);
+		runit& operator[](punit);
+	private:
+		inline runit GetCR3(){
+			runit r;
+			asm volatile("mov %%cr3, %0" : "=r"(r));
+			return r;
+		};
+		void Assign(runit r){
+			wcp = (r & ~(PAGESIZE - 1)) | present;
+			asm volatile("invlpg %0" :: "m"(pw));
+		};
+		runit* const pw; //窓
+		runit& wcp; //窓のアドレスを書く場所
+	}pageTableArray;
+#endif
 };
 
 

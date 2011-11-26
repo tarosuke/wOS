@@ -6,6 +6,7 @@
 #include <cpu/virtualPage.h>
 #include <realPage.h>
 #include <cpu/task.h>
+#include <heap.h>
 
 
 extern "C"{
@@ -18,14 +19,30 @@ extern "C"{
 
 // ページテーブルが丸見えという便利な配列。
 #if CF_IA32
-#if CF_PAE
-runit* const VIRTUALPAGE::pageTableArray((runit*)0xff800000);
-#else
-runit* const VIRTUALPAGE::pageTableArray((runit*)0xffc00000);
-#endif
+VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(heapTop);
 #endif
 #if CF_AMD64
-runit* const VIRTUALPAGE::pageTableArray((runit* const)~0ULL);
+VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(
+	(runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE)));
+
+VIRTUALPAGE::PTA::PTA(runit* pw) :
+	pw(pw),
+	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]){};
+
+runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
+	//rootを取得
+	Assign(GetCR3());
+
+	for(uint i(0); i < 3; i++, pageNum <<= 9){
+		runit& te(pw[(pageNum >> 27) & 511]);
+		if(!(te & present)){
+			//エントリの割り当て
+			te = REALPAGE::GetPages(1)*PAGESIZE | present;
+		}
+		Assign(te);
+	}
+	return pw[(pageNum >> 27) & 511];
+}
 #endif
 
 // カーネル領域とユーザ領域を分ける値
@@ -40,7 +57,7 @@ static VIRTUALPAGE vpage;
 VIRTUALPAGE::VIRTUALPAGE(){
 	dputs("virtual pages..." INDENT);
 #if CF_IA32
-	dprintf("pageTableArray: %p.\n", pageTableArray);
+	dprintf("pageTableArray: %p.\n", heapTop);
 #endif
 	dprintf("kernelPageDir: %p.\n", __pageRoot);
 	dputs(UNINDENT "OK.\n");
@@ -58,7 +75,7 @@ void VIRTUALPAGE::Enable(void* start, munit pages){
 	// ページイネーブル(普通)
 	for(munit v(p); v < p + pages; v++){
 		runit& pte(pageTableArray[v]);
-		if(!(pte & (present || valid))){
+		if(!(pte & (present | valid))){
 			pte = valid | (InKernel(v) ? 0x102 : 6);
 		}
 	}
