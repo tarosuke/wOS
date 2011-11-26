@@ -33,9 +33,10 @@
 	mov	2(%bx), %ds
 	xor	%bx, %bx
 1:	lodsw
-	cmp	$0xffff, %ax
+	cmp	$0xffff, %ax //終了
 	je	1f
-	and	$0x1ff, %ax
+	test	$0xfe00, %ax //異常値
+	jne	4f
 
 	pusha
 	push	%cs
@@ -80,7 +81,7 @@
 	cmp	$0x010d, %bx
 	jae	1f //有効なモードを取得できたので設定しに行く
 #endif
-4:
+4:	pop	%ds
 #if CF_VESA_MODE || CF_FORCE_VESA_MODE
 #if CF_FORCE_VESA_MODE
 	mov	$CF_FORCE_VESA_MODE, %bx
