@@ -86,6 +86,8 @@ private:
 		};
 		runit* const pw; //窓
 		runit& wcp; //窓のアドレスを書く場所
+		runit lcr3; // 最後に設定したCR3
+		runit lwcp; // 最後に設定したwcp
 	}pageTableArray;
 #endif
 };

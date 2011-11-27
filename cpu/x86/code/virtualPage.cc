@@ -27,7 +27,8 @@ VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(
 
 VIRTUALPAGE::PTA::PTA(runit* pw) :
 	pw(pw),
-	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]){
+	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]),
+	lcr3(0), lwcp(0){
 	dputs("pageTableArray..."INDENT);
 	dprintf("pw:%p.\n", pw);
 	dprintf("wcp:%p.\n", &wcp);
@@ -36,18 +37,25 @@ VIRTUALPAGE::PTA::PTA(runit* pw) :
 
 runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	//rootを取得
-	Assign(GetCR3());
+	const runit cr3(GetCR3());
+	if(cr3 != lcr3 && lwcp != (pageNum & ~511ULL)){
+		Assign(cr3);
 
-	for(uint i(0); i < 3; i++, pageNum <<= 9){
-		const uint en((pageNum >> 27) & 511);
-		runit e(pw[en]);
-		if(!(e & present)){
-			//エントリの割り当て
-			e = REALPAGE::GetPages(1) * PAGESIZE | present;
-			pw[en] = e;
+		for(uint i(0); i < 3; i++, pageNum <<= 9){
+			const uint en((pageNum >> 27) & 511);
+			runit e(pw[en]);
+			if(!(e & present)){
+				//エントリの割り当て
+				e = REALPAGE::GetPages(1) * PAGESIZE | present;
+				pw[en] = e;
+			}
+			gprintf("te:%r %r %p %u.\n", e, pw[en], wcp, en);
+			Assign(e);
 		}
-		gprintf("te:%r %r %p %u.\n", e, pw[en], wcp, en);
-		Assign(e);
+		lcr3 = cr3;
+		lwcp = pageNum & ~511ULL;
+	}else{
+		return pw[pageNum & 511];
 	}
 	return pw[(pageNum >> 27) & 511];
 }
