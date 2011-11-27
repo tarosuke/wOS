@@ -119,6 +119,38 @@ static inline void Dec(i64 val, char head, int chars){
 }
 
 
+static inline void Mem(u64 size){
+	static const u64 KiB(1024ULL);
+	static const u64 MiB(KiB*KiB);
+	static const u64 GiB(MiB*KiB);
+	static const u64 TiB(GiB*KiB);
+	static const u64 PiB(TiB*KiB);
+	static const struct SCALE{
+		u64 scale;
+		const char* name;
+	}scale[] = {
+		{ PiB, "[PiB]" },
+		{ TiB, "[TiB]" },
+		{ GiB, "[GiB]" },
+		{ MiB, "[MiB]" },
+		{ KiB, "[KiB]" },
+		{ 0, "[Byte(s)]" }, };
+	const SCALE* sc(scale);
+	for(; size < (*sc).scale; sc++);
+	if((*sc).scale){
+		UDec(size / (*sc).scale, ' ', ' ', 0);
+		dputc('.');
+		UDec((size & ((*sc).scale - 1)) * 100 / (*sc).scale, '0', ' ', 2);
+	}else{
+		UDec(size, ' ', ' ', 0);
+	}
+	dputs((*sc).name);
+}
+
+static inline void Str(const char* str){
+	dputs(str ? str : "(null)");
+}
+
 void dprintf(const char* f, ...){
 	va_list p;
 	va_start(p, f);
@@ -149,11 +181,8 @@ void dprintf(const char* f, ...){
 			switch(*f){
 			case 0 : return;
 			case 's' :
-				{
-				const char* str(va_arg(p, char*));
-				dputs(str ? str : "(null)");
+				Str(va_arg(p, char*));
 				longLevel = 0;
-				}
 				break;
 			case 'd' :
 				if(1 < longLevel){
@@ -186,35 +215,7 @@ void dprintf(const char* f, ...){
 				Hex(va_arg(p, runit), '0', sizeof(runit) * 2);
 				break;
 			case 'm' : //自動副単位メモリサイズ(u64で指定すること。//TODO:可変長整数にする)
-				{
-				static const u64 KiB(1024ULL);
-				static const u64 MiB(KiB*KiB);
-				static const u64 GiB(MiB*KiB);
-				static const u64 TiB(GiB*KiB);
-				static const u64 PiB(TiB*KiB);
-				const u64 size(va_arg(p, u64));
-				static const struct SCALE{
-					u64 scale;
-					const char* name;
-				}scale[] = {
-					{ PiB, "[PiB]" },
-					{ TiB, "[TiB]" },
-					{ GiB, "[GiB]" },
-					{ MiB, "[MiB]" },
-					{ KiB, "[KiB]" },
-					{ 0, "[Byte(s)]" },
-				};
-				const SCALE* sc(scale);
-				for(; size < (*sc).scale; sc++);
-				if((*sc).scale){
-					UDec(size / (*sc).scale, ' ', ' ', 0);
-					dputc('.');
-					UDec((size & ((*sc).scale - 1)) * 100 / (*sc).scale, '0', ' ', 2);
-				}else{
-					UDec(size, ' ', ' ', 0);
-				}
-				dputs((*sc).name);
-				}
+				Mem(va_arg(p, u64));
 				break;
 			case 't' : //tunitを時間で
 				{
