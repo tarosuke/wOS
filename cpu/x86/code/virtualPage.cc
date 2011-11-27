@@ -27,19 +27,24 @@ VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(
 
 VIRTUALPAGE::PTA::PTA(runit* pw) :
 	pw(pw),
-	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]){};
+	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]){
+	dputs("pageTableArray..."INDENT);
+	dprintf("pw:%p.\n", pw);
+	dprintf("wcp:%p.\n", &wcp);
+	dputs(UNINDENT "OK.\n");
+};
 
 runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	//rootを取得
 	Assign(GetCR3());
 
 	for(uint i(0); i < 3; i++, pageNum <<= 9){
-		runit& te(pw[(pageNum >> 27) & 511]);
-		if(!(te & present)){
+		const uint e((pageNum >> 27) & 511);
+		if(!(pw[e] & present)){
 			//エントリの割り当て
-			te = REALPAGE::GetPages(1)*PAGESIZE | present;
+			pw[e] = REALPAGE::GetPages(1)*PAGESIZE | present;
 		}
-		Assign(te);
+		gprintf("te:%r offset:%x.\n", pw[e], e);
 	}
 	return pw[(pageNum >> 27) & 511];
 }
@@ -51,7 +56,7 @@ const punit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 // ページテーブルのためのロック(他のプロセッサがページを埋めるのを阻止するため)
 LOCK VIRTUALPAGE::lock;
 
-static VIRTUALPAGE vpage;
+static VIRTUALPAGE vpage __attribute__((init_priority(6000)));
 
 
 VIRTUALPAGE::VIRTUALPAGE(){
@@ -60,6 +65,15 @@ VIRTUALPAGE::VIRTUALPAGE(){
 	dprintf("pageTableArray: %p.\n", heapTop);
 #endif
 	dprintf("kernelPageDir: %p.\n", __pageRoot);
+#if CF_AMD64
+	dputs("checking pageTableArray..."INDENT);
+	for(uint i(0); i < 16; i++){
+		const runit ra(i * PAGESIZE);
+		dprintf("%05x:%r.\n", ra,
+			pageTableArray[((runit)__kernel_base + ra) / PAGESIZE]);
+	}
+	dputs(UNINDENT "OK.\n");
+#endif
 	dputs(UNINDENT "OK.\n");
 }
 

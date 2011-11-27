@@ -51,7 +51,7 @@ public:
 #endif
 #endif
 #if CF_AMD64
-	static const munit heapTop = 0xfffffffffffffffeULL;
+	static const munit heapTop = -2ULL;
 #endif
 private:
 	static const punit kernelStartPage;
@@ -84,7 +84,7 @@ private:
 			wcp = (r & ~(PAGESIZE - 1)) | present;
 			asm volatile("invlpg %0" :: "m"(pw));
 		};
-		runit* const pw; //窓
+		runit* pw; //窓
 		runit& wcp; //窓のアドレスを書く場所
 	}pageTableArray;
 #endif
