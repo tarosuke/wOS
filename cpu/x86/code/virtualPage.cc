@@ -39,12 +39,15 @@ runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	Assign(GetCR3());
 
 	for(uint i(0); i < 3; i++, pageNum <<= 9){
-		const uint e((pageNum >> 27) & 511);
-		if(!(pw[e] & present)){
+		const uint en((pageNum >> 27) & 511);
+		runit e(pw[en]);
+		if(!(e & present)){
 			//エントリの割り当て
-			pw[e] = REALPAGE::GetPages(1)*PAGESIZE | present;
+			e = REALPAGE::GetPages(1) * PAGESIZE | present;
+			pw[en] = e;
 		}
-		gprintf("te:%r offset:%x.\n", pw[e], e);
+		gprintf("te:%r %r %p %u.\n", e, pw[en], wcp, en);
+		Assign(e);
 	}
 	return pw[(pageNum >> 27) & 511];
 }

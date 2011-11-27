@@ -80,11 +80,11 @@ private:
 			asm volatile("mov %%cr3, %0" : "=r"(r));
 			return r;
 		};
-		void Assign(runit r){
+		inline void Assign(runit r){
 			wcp = (r & ~(PAGESIZE - 1)) | present;
-			asm volatile("invlpg %0" :: "m"(pw));
+			asm volatile("invlpg (%0)" :: "r"(pw));
 		};
-		runit* pw; //窓
+		runit* const pw; //窓
 		runit& wcp; //窓のアドレスを書く場所
 	}pageTableArray;
 #endif
