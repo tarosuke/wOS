@@ -36,9 +36,11 @@ VIRTUALPAGE::PTA::PTA(runit* pw) :
 };
 
 runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
+	const runit page(pageNum);
+	
 	//rootを取得
 	const runit cr3(GetCR3());
-	if(cr3 != lcr3 && lwcp != (pageNum & ~511ULL)){
+	if(cr3 != lcr3 || ((lwcp ^ page) & ~511ULL)){
 		Assign(cr3);
 
 		for(uint i(0); i < 3; i++, pageNum <<= 9){
@@ -49,15 +51,13 @@ runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 				e = REALPAGE::GetPages(1) * PAGESIZE | present;
 				pw[en] = e;
 			}
-			gprintf("te:%r %r %p %u.\n", e, pw[en], wcp, en);
+			hprintf("te:%r %r %p %u.\n", e, pw[en], wcp, en);
 			Assign(e);
 		}
 		lcr3 = cr3;
-		lwcp = pageNum & ~511ULL;
-	}else{
-		return pw[pageNum & 511];
+		lwcp = page;
 	}
-	return pw[(pageNum >> 27) & 511];
+	return pw[page & 511];
 }
 #endif
 
@@ -76,9 +76,9 @@ VIRTUALPAGE::VIRTUALPAGE(){
 	dprintf("pageTableArray: %p.\n", heapTop);
 #endif
 	dprintf("kernelPageDir: %p.\n", __pageRoot);
-#if CF_AMD64
+#if CF_AMD64 && 5 <= CF_DEBUG_LEVEL
 	dputs("checking pageTableArray..."INDENT);
-	for(uint i(0); i < 16; i++){
+	for(uint i(0); i < 513; i++){
 		const runit ra(i * PAGESIZE);
 		dprintf("%05x:%r.\n", ra,
 			pageTableArray[((runit)__kernel_base + ra) / PAGESIZE]);
