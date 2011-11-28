@@ -83,7 +83,7 @@ void VESA_Check(){
 	dputs("enumlating supported display modes...\n");
 	for(u16* m((u16*)Get16(__VESA_InfoBlock.videoModes)); *m != 0xffff; m++){
 		if(0x10d <= (*m & 0x1ff)){
-			dprintf(" %04x\n", *m & 0x1ff);
+			dprintf(" %04x\n", *m);
 		}
 	}
 #endif
