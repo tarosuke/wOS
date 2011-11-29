@@ -20,7 +20,7 @@
 	mov	$0x4f00, %ax
 	int	$0x10
 	cmp	$0x004f, %ax
-	jne	.L_failed
+	jne	4f
 
 	// 画面情報を取得して有効モードの最大値をbxに取得
 	xor	%edx, %edx
