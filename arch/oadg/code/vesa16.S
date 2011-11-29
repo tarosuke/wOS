@@ -1,4 +1,3 @@
-
 /************************************************************ VESA-VBE初期化 */
 #include <config.h>
 
@@ -88,7 +87,6 @@
 #else
 	mov	$CF_VESA_MODE, %bx
 #endif
-	and	$0x1ff, %bx
 #else
 	jmp	.L_failed
 #endif
@@ -112,9 +110,26 @@
 	// 失敗メッセージの出力
 	mov	$1f, %esi
 	call	__puts16
-	hlt
+	// チェックしたデータを出力
+	xor	%eax, %eax
+	mov	$.L_videoModes, %ebx
+	test	%ebx, %ebx
+	jz	4f
+	mov	(%bx), %si
+	mov	2(%bx), %ds
+2:	lodsw
+	cmp	$0xffff, %ax
+	je	4f
+	test	$0xfe00, %ax
+	jnz	4f
+	call	__hex16
+	mov	$' ', %al
+	call	__putc16
+	jmp	2b
+4:	hlt
 
-1:	.asciz	"VESA-VBE initalize failed.\n"
+1:	.ascii	"VESA-VBE initalize failed.\n"
+	.asciz	"valid modes are looks like bellow.\n"
 
 
 /// VbeInfoBlock@VESA-VBE3.0
