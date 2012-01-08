@@ -5,7 +5,7 @@
 
 all: talos
 keyfiles = ../../makefile.in makefile config
-
+ldkeyfiles = $(keyfiles) ../../arch/$(arch)/common.lds
 
 
 ############################################################### BUILDING TOOLS
@@ -104,7 +104,7 @@ libuser.a : $(uobjs) $(keyfiles)
 	@echo $@
 	@$(AR) -rc $@ $(uobjs)
 
-talos : ulib.o libuser.a target.lds $(kobjs) $(keyfiles)
+talos : ulib.o libuser.a target.lds $(kobjs) $(ldkeyfiles)
 	@echo $@
 	@$(LD) $(ldopts) -T target.lds -o talos.elf -Map talos.map --start-group $(kobjs) --end-group
 	@$(OC) -O binary talos.elf talos
