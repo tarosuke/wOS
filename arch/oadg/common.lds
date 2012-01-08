@@ -47,6 +47,8 @@ __arch_LOMEM = __image_size + __init_LMA;
 	*(.text*)
 	. = ALIGN(4);
 	__KernelConstructor = .;
+	KEEP(heap.o(.ctors))
+	KEEP(pic.o(.ctors))
 	KEEP(*(.ctors))
 	KEEP(*(SORT(.ctors.*)))
 	QUAD(0);
