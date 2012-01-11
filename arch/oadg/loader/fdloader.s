@@ -1,7 +1,6 @@
 /***************************************************** KERNEL LOADER FROM FD
 	Copyright (C) 2004- project talos (http://talos-kernel.sf.net/)
 	check LICENSE.txt. If you don't have the file, mail us.
-	$Id: e345f8bc0b51db5b8cefc6ecba115ef7ad4b9862 $
 */
 
 
@@ -34,9 +33,9 @@
 	jc	SayError
 
 	///// check header
-	mov	%es:(0), %eax
+	mov	%es:(16), %eax
 	mov	%eax, (kentry)
-	mov	%es:(4), %eax
+	mov	%es:(20), %eax
 	add	$511, %eax
 	shr	$9, %eax
 	mov	%eax, (ksize)

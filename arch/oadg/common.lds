@@ -32,6 +32,8 @@ SIZEOF(.kernel);
 __arch_LOMEM = __image_size + __init_LMA;
 
 .init 0x10000 : {
+	KEEP(*(.prefix))
+	. = ALIGN(16);
 	LONG(ABSOLUTE(__init16));
 	LONG(__arch_LOMEM);
 	KEEP(*(.init16))

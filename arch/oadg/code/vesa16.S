@@ -3,7 +3,7 @@
 
 .code16
 
-.global __VESA_InfoBlock, __VESA_displayInfo
+.global __VESA_InfoBlock, __VESA_displayInfo, __VESA_Ready
 .extern __putc16, __puts16, __hex16
 
 .section .pdef16
@@ -104,9 +104,12 @@
 	int	$0x10
 	cmp	$0x004f, %ax
 	jne	.L_failed
+	mov	$__VESA_Ready, %ebx
+	cs movl	$0xffffffff, (%bx)
+.L_failed:
 	ret
 
-.L_failed:
+/*.L_failed:
 	// 失敗メッセージの出力
 	mov	$1f, %esi
 	call	__puts16
@@ -126,11 +129,12 @@
 	mov	$' ', %al
 	call	__putc16
 	jmp	2b
-4:	hlt
+4:	ret
 
 1:	.ascii	"VESA-VBE initalize failed.\n"
-	.asciz	"valid modes are looks like bellow.\n"
-
+	.asciz	"valid modes are looks like bellow.\n"*/
+__VESA_Ready:
+	.long	0
 
 /// VbeInfoBlock@VESA-VBE3.0
 .align 4

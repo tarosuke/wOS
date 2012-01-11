@@ -29,7 +29,6 @@
 	るはずです。そうでない場合は、Free Software Foundation, Inc., 675 Mass Ave,
 	Cambridge, MA 02139, USA へ手紙を書いてください。
 */
-// $Id: 9341f6e9caf9af7cac83b4fb068f99348bec10d9 $
 
 #include "config.h"
 
@@ -74,9 +73,9 @@
 	cmpw	$0x2000, (buff + 2)
 	jne	2f
 	/* GET KERNEL HEADER */
-	mov	%es:(0), %ecx
+	mov	%es:(16), %ecx
 	mov	%ecx, (kentry)
-	mov	%es:(4), %ecx
+	mov	%es:(20), %ecx
 	add	$65535, %ecx
 	shr	$16, %ecx
 	mov	%ecx, (ksize)
