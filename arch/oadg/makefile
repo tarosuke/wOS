@@ -71,7 +71,8 @@ qemuNic-rtl8139 :
 	echo -n '-net nic,model=rtl8139 ' > .qemu-nicopt
 
 
-
+talos.fd.gz : talos.fd
+	gzip -c talos.fd > talos.fd.gz
 talos.fd : talos fdloader
 	cat fdloader talos /dev/zero | dd of=talos.fd bs=1024 count=1440
 talos.iso : talos.fd
