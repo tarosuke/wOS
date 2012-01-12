@@ -10,8 +10,10 @@
 #include <config.h>
 
 
+class TASK;
 class CPU{
-	UNDEFAULT(CPU);
+	CPU(CPU&);
+	void operator=(CPU&);
 public:
 	static inline void EnableInterrupt(){
 		asm volatile("sti");
@@ -23,9 +25,28 @@ public:
 		asm volatile("hlt");
 	}
 protected:
-	CPU(uint id);
+	CPU();
 	const uint cpuid;
+	TASK* current;		//このプロセッサで実行中のタスク
+	TASK* haveToOwn;	//このプロセッサで実行すべきタスク
+	static inline uint GetID(){
+#if !CF_SMP
+	return 0;
+#else
+	//TODO: get processor ID from APIC
+#endif
+	};
+	inline void DispatchTo(){
+		asm volatile(
+#if !CF_SMP
+			"int %0;"
+#else
+			//TODO:IPIを自分に発行
+#endif
+			:: "i"(dispatchInterruptNumber));
+	};
 private:
+	static const uint dispatchInterruptNumber = 0x34;
 #if CF_IA32
 	struct TSS{
 		u32 link;

@@ -8,6 +8,7 @@
 #include <arch/segments.h>
 #include <debug.h>
 #include <arch/pic.h>
+#include <task.h>
 
 
 extern "C"{
@@ -23,7 +24,7 @@ extern "C"{
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 
 
-CPU::CPU(uint id) : cpuid(id), tss(tsss[cpuid]){
+CPU::CPU() : cpuid(GetID()), current(0), tss(tsss[cpuid]){
 	dprintf("cpu(%d)..."INDENT, cpuid);
 
 	//  当該プロセッサ用のTSSを設定

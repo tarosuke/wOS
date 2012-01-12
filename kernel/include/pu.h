@@ -13,19 +13,24 @@
 #include <heap.h>
 
 
-class TASK;
 class PU : public CPU{
 	friend class CLOCK;
 public:
-	PU();
-	static void* operator new(munit);
+	PU() __attribute__((noreturn));
 	static void Dispatch();
 private:
-	TASK* current;		//このプロセッサで実行中のタスク
-	static uint poolPool;
-	static uint NewID();
+	static inline PU& GetPU(){
+		return *pus[GetID()];
+	};
+	inline void GetNewOwn(){
+		const uint p(current ? (*current).priority : TASK::__pri_max);
+		if(!!(haveToOwn = readyQueue.Get(p))){
+			//ディスパッチが必要
+			DispatchTo();
+		}
+	};
 	static void Cron(tunit);
-	static PU* pu[];
+	static PU* pus[];
 	static TASK::TASKQUEUE readyQueue;
 	static QUEUE<TASK> cronQueue;
 	static bool dispatchRequest;
