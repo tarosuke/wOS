@@ -18,7 +18,6 @@ bool PU::dispatchRequest(true);
 
 PU::PU(){
 	pus[cpuid] = this;
-	for(;;Dispatch());
 }
 
 void PU::Dispatch(){

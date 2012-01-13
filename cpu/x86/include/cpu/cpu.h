@@ -47,6 +47,7 @@ protected:
 	};
 private:
 	static const uint dispatchInterruptNumber = 0x34;
+	static void Dispatcher();
 #if CF_IA32
 	struct TSS{
 		u32 link;

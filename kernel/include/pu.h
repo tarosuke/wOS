@@ -16,7 +16,7 @@
 class PU : public CPU{
 	friend class CLOCK;
 public:
-	PU() __attribute__((noreturn));
+	PU();
 	static void Dispatch();
 private:
 	static inline PU& GetPU(){

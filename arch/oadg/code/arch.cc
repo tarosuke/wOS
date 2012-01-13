@@ -9,6 +9,7 @@
 #include <pu.h>
 #include <cpu/virtualPage.h>
 #include <string.h>
+#include <clock.h>
 
 
 #if CF_DEBUG_LEVEL
@@ -66,12 +67,13 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		new PU;
+		static TASK idleTask;
+		static PU bsp;
 
-		//ここには到達しないはず
-		assert(false);
-		asm volatile("cli; hlt");
-		for(;;);
+		for(;;){
+			dprintf("[%t]\r", CLOCK::GetLocalTime());
+			asm volatile("hlt");
+		}
 	};
 }
 

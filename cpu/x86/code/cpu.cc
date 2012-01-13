@@ -51,7 +51,13 @@ CPU::CPU() : cpuid(GetID()), current(0), tss(tsss[cpuid]){
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
 #endif
 
+	asm volatile("sti");
+
 	dputs(UNINDENT"OK.\n");
 }
 
 
+
+void CPU::Dispatcher(){
+	//TODO:タスクディスパッチ
+}
