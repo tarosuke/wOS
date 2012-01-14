@@ -67,7 +67,6 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		static TASK idleTask;
 		static PU bsp;
 
 		for(;;){

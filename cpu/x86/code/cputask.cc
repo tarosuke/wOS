@@ -7,7 +7,7 @@
 #include <realPage.h>
 
 
-CPUTASK::CPUTASK() : pageRoot(GetPageRoot()){};
+CPUTASK::CPUTASK() : pageRoot(0){};
 
 CPUTASK::CPUTASK(void* stack) :
 	stack(stack),

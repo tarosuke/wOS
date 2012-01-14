@@ -64,11 +64,12 @@ public:
 		priority = PRI_INTERRUPT;
 		(*this).irq = irq;
 	};
-	TASK();			//現在のコンテキストをこのタスクとする
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
 	void operator delete(void* mem);
 private:
+	TASK();			//現在のコンテキストをこのタスクとする
+
 	MESSAGEQUEUE in;	//このタスクの受信メッセージ
 	class PU* owner;	//現在このタスクを実行しているプロセッサ
 	PRIORITY priority;	//現在の優先度
@@ -90,7 +91,6 @@ private:
 	static inline void DispatchTo(TASK& next){};
 };
 
-extern TASK kernelTask;
 
 #endif
 

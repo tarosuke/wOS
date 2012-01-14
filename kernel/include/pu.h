@@ -34,6 +34,7 @@ private:
 	static TASK::TASKQUEUE readyQueue;
 	static QUEUE<TASK> cronQueue;
 	static bool dispatchRequest;
+	TASK idleTask;
 };
 
 

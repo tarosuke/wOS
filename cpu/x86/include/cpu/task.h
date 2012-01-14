@@ -37,7 +37,8 @@ protected:
 	};
 private:
 	void* stack;
-	const runit pageRoot;
+	munit userStack;
+	const runit pageRoot;	//これが0ならアイドルタスクなのでタスク終了でない限り切り替えない。タスク終了ならどこか適当に。
 };
 
 

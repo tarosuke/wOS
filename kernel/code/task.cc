@@ -10,8 +10,6 @@
 
 
 const uint TASK::thisSizeIndex(HEAP::GetBlockIndex(PAGESIZE));
-TASK kernelTask;
-
 
 TASK::TASK() :
 	owner(0),
