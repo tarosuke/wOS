@@ -1,47 +1,4 @@
-############################################################## COMMON MAKEFILE
-
-.SUFFIXES :
-.SUFFIXES : .a .o .i .s .S .c .cc .h
-
-all: talos
-keyfiles = ../../makefile.in makefile config
-ldkeyfiles = $(keyfiles) ../../arch/$(arch)/common.lds
-
-
-############################################################### BUILDING TOOLS
-NLD := $(LD)
-NAS := $(AS)
-NCC := $(CC)
-
-CC = gcc
-CPP = $(prefix)cpp
-AS = $(prefix)as
-AR = $(prefix)ar
-LD = $(prefix)ld
-OC = $(prefix)objcopy
-LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/
-
-
-
-###################################################################### OPTIONS
-incs =  -I../../include -I../../kernel/include -I../../cpu/$(cpu)/include -I../../arch/$(arch)/include -I../../userlib/include -I../../objs/tools/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/include
-base_ccopts += -pipe -O2 -fomit-frame-pointer -Wall -Werror -g -nostdinc\
-	-nostdlib -fno-common -iquote. -fkeep-inline-functions\
-	-finline-functions-called-once $(incs)
-copts = $(base_ccopts) -ffreestanding
-ccopts = $(base_ccopts) -Wa,-W -nostdinc++ -fno-enforce-eh-specs\
-	-fno-threadsafe-statics -fno-check-new\
-	-fno-rtti -fno-exceptions -fno-unwind-tables -ffunction-sections
-aopts = $(incs)
-ldopts = -N --cref -nostdlib -z nodefaultlib --gc-sections
-
-
-
-################################################################# SOURCE PATHs
-VPATH =
-VPATH += ../../arch/$(arch)/code ../../cpu/$(cpu)/code ../../kernel/code
-VPATH += ../../userlib/code
-
+include ../../common.mk
 
 ###################################################################### MODULES
 
@@ -63,34 +20,18 @@ umods = $(basename $(notdir $(usrcs)))
 uobjs = $(addsuffix .o, $(umods))
 
 
+mods = $(kmods) $(umods)
 
-############################################################### IMPLICIT RULES
-ifneq ($(MAKECMDGOALS),gnutools)
--include $(addsuffix .d, $(kmods) $(umods))
-%.o : %.cc $(keyfiles)
-	@echo $@
-	@$(CC) $(ccopts) -c -o $@ $<
 
-%.o : %.c $(keyfiles)
-	@echo $@
-	@$(CC) $(copts) -c -o $@ $<
+################################################################# SOURCE PATHs
+VPATH =
+VPATH += ../../arch/$(arch)/code ../../cpu/$(cpu)/code ../../kernel/code
+VPATH += ../../userlib/code
 
-%.o : %.S $(keyfiles)
-	@echo $@
-	@$(CC) $(copts) -c -o $@ $<
 
-%.d : %.cc $(keyfiles)
-	@echo $@
-	@$(CPP) $(ccopts) -M -MG $< > $@
 
-%.d : %.c $(keyfiles)
-	@echo $@
-	@$(CPP) $(copts) -M -MG $< > $@
-
-%.d : %.S $(keyfiles)
-	@echo $@
-	@$(CPP) $(copts) -M -MG $< > $@
-endif
+################################################################# HEADER PATHs
+incs = ../../include ../../kernel/include ../../cpu/$(cpu)/include ../../arch/$(arch)/include ../../userlib/include
 
 
 
@@ -103,6 +44,8 @@ ulib.o : $(ulobjs) $(keyfiles) ../../userlib/userlib.lds
 libuser.a : $(uobjs) $(keyfiles)
 	@echo $@
 	@$(AR) -rc $@ $(uobjs)
+
+servers.a :
 
 talos : ulib.o libuser.a target.lds $(kobjs) $(ldkeyfiles)
 	@echo $@
