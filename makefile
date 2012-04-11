@@ -12,7 +12,7 @@ emu:
 	@for t in $(targets); do make -C $$t emu || exit -1; done
 
 all:
-	@for t in $(targets); do make -C $$t talos.fd.gz || exit -1; done
+	@for t in $(targets); do make -C $$t wOS.fd.gz || exit -1; done
 
 clean:
 	@for t in $(targets); do make -C $$t clean || exit -1; done

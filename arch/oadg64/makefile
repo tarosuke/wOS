@@ -18,10 +18,10 @@ qemuOpts = -no-kvm-irqchip -vga std -serial stdio -smp 8 -m 4096 $(shell cat $(q
 
 emu : emufd
 
-emufd : talos.fd hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -fda talos.fd -hda hddImage -boot a
-emucd : talos.iso hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -cdrom talos.iso -hda hddImage -boot d
+emufd : wOS.fd hddImage $(qemuOptFiles)
+	qemu $(qemuOpts) -fda wOS.fd -hda hddImage -boot a
+emucd : wOS.iso hddImage $(qemuOptFiles)
+	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d
 
 
 ##### qemu network options
@@ -71,15 +71,15 @@ qemuNic-rtl8139 :
 	echo -n '-net nic,model=rtl8139 ' > .qemu-nicopt
 
 
-talos.fd.gz : talos.fd
-	gzip -c talos.fd > talos.fd.gz
-talos.fd : talos fdloader
-	cat fdloader talos /dev/zero | dd of=talos.fd bs=1024 count=1440
-talos.iso : talos.fd
+wOS.fd.gz : wOS.fd
+	gzip -c wOS.fd > wOS.fd.gz
+wOS.fd : wOS fdloader
+	cat fdloader wOS /dev/zero | dd of=wOS.fd bs=1024 count=1440
+wOS.iso : wOS.fd
 	rm -rf tmp
 	mkdir tmp
-	cp talos.fd tmp
-	mkisofs -o talos.iso -b talos.fd tmp
+	cp wOS.fd tmp
+	mkisofs -o wOS.iso -b wOS.fd tmp
 	rm -rf tmp
 
 
@@ -90,8 +90,8 @@ talos.iso : talos.fd
 
 emuhd : pb=$(strip $(shell for p in 0x1be 0x1ce 0x1de 0x1ee; do if [ `od -An -tu1 -N1 -j $$(($$p + 4)) hddImage`"" = 32 ]; then echo $$p; break; fi; done))
 emuhd : pp=$(strip $(shell od -An -tu4 -N4 -j $$(($(pb) + 8)) hddImage))
-emuhd : talos hdloader hddImage
-	cat hdloader talos | dd of=hddImage bs=512 seek=$(pp) conv=notrunc
+emuhd : wOS hdloader hddImage
+	cat hdloader wOS | dd of=hddImage bs=512 seek=$(pp) conv=notrunc
 	echo -ne `od -An -txC -N4 -j $$(($(pb) + 8)) hddImage | sed -e ":r s/ /\\\\\\x/" -e "t r"` | dd of=hddImage seek=`echo "$$(($(pp) * 512 + 0x1f6))"` bs=1 conv=notrunc
 
 hddImage : mbr

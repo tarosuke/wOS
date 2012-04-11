@@ -47,11 +47,11 @@ libuser.a : $(uobjs) $(keyfiles)
 
 servers.a :
 
-talos : ulib.o libuser.a target.lds $(kobjs) $(ldkeyfiles)
+wOS : ulib.o libuser.a target.lds $(kobjs) $(ldkeyfiles)
 	@echo $@
-	@$(LD) $(ldopts) -T target.lds -o talos.elf -Map talos.map --start-group $(kobjs) --end-group
-	@$(OC) -O binary talos.elf talos
-	@$(prefix)objdump -xdS talos.elf > talos.dis
+	@$(LD) $(ldopts) -T target.lds -o wOS.elf -Map wOS.map --start-group $(kobjs) --end-group
+	@$(OC) -O binary wOS.elf wOS
+	@$(prefix)objdump -xdS wOS.elf > wOS.dis
 
 
 
@@ -84,7 +84,7 @@ endif
 
 reconf :
 	cp ../../arch/$(arch)/makefile .
-	cp ../../arch/$(arch)/talos.conf $@
+	cp ../../arch/$(arch)/wOS.conf $@
 
 indent :
 
@@ -98,16 +98,16 @@ count:
 		$(wildcard ../../arch/$(arch)/include/*.h) | wc -l
 
 clean :
-	rm -rf *.o *.ko *.d *.i *.s *.c *.bdf *.inc talos* *image *.a *loader* cnvfonts cnvimage cnvkeymap
+	rm -rf *.o *.ko *.d *.i *.s *.c *.bdf *.inc wOS* *image *.a *loader* cnvfonts cnvimage cnvkeymap
 
-conf: talos.conf
-	@$(EDITOR) talos.conf
+conf: wOS.conf
+	@$(EDITOR) wOS.conf
 
 
 
 ###################################################### DOCUMENT MAINTAIN RULES
 contents = ../../docs/htdocs/.htaccess $(wildcard ../../docs/htdocs/*)
-expath = $(USER)@shell.sf.net:/home/groups/t/ta/talos-kernel/htdocs
+expath = $(USER)@shell.sf.net:/home/groups/t/ta/wOS-kernel/htdocs
 datecode := $(shell date +%g%m%d%H)
 
 .PHONY: doxygen upload uploadBinaries upload-drafts
@@ -120,38 +120,38 @@ upload:
 	rsync --progress --exclude='.svn' -avzhe ssh $(contents) $(expath)
 
 uploadBinaries:
-	cp talos.fd /var/www/talos.tarosuke.net/binaries/$(datecode).fd
-	cp talos.iso /var/www/talos.tarosuke.net/binaries/$(datecode).iso
-	chmod 644 /var/www/talos.tarosuke.net/binaries/$(datecode).fd
-	chmod 644 /var/www/talos.tarosuke.net/binaries/$(datecode).iso
+	cp wOS.fd /var/www/wOS.tarosuke.net/binaries/$(datecode).fd
+	cp wOS.iso /var/www/wOS.tarosuke.net/binaries/$(datecode).iso
+	chmod 644 /var/www/wOS.tarosuke.net/binaries/$(datecode).fd
+	chmod 644 /var/www/wOS.tarosuke.net/binaries/$(datecode).iso
 
 upload-drafts:
-	rsync --progress --delete --exclude=".svn" -av $(wildcard ../../docs/htdocs/*) /var/www/talos.tarosuke.net/
+	rsync --progress --delete --exclude=".svn" -av $(wildcard ../../docs/htdocs/*) /var/www/wOS.tarosuke.net/
 
 
 
 ################################################### ENVIRONMENT BUILDING RULES
 .PHONY: gnutools gnutools-clean
 
-gccVer = 4.6.2
-binutilsVer = 2.21.1
+gccVer = 4.6.3
+binutilsVer = 2.22
 toolPath = $(shell pwd)/../tools
 buildDir = $(toolPath)/$(gnuArch)
 
-binutilsOptions = --target=$(gnuArch)-talos-elf --prefix=$(toolPath)\
+binutilsOptions = --target=$(gnuArch)-wOS-elf --prefix=$(toolPath)\
  --with-included-gettext --without-libintl-prefix\
  --disable-shared --disable-nls --disable-werror
-gccOptions = --target=$(gnuArch)-talos-elf --prefix=$(toolPath)\
+gccOptions = --target=$(gnuArch)-wOS-elf --prefix=$(toolPath)\
  --enable-languages=c,c++\
- --with-gnu-as=$(toolPath)/bin/$(gnuArch)-talos-elf-as\
- --with-gnu-ld=$(toolPath)/bin/$(gnuArch)-talos-elf-ld\
+ --with-gnu-as=$(toolPath)/bin/$(gnuArch)-wOS-elf-as\
+ --with-gnu-ld=$(toolPath)/bin/$(gnuArch)-wOS-elf-ld\
  --without-header --disable-shared --disable-nls --disable-__cxa_atexit\
  --disable-thread --disable-clocale --disable-multilib
 
 binutilsName = binutils-$(binutilsVer)
 gccName = gcc-$(gccVer)
 
-prefix = $(toolPath)/bin/$(gnuArch)-talos-elf-
+prefix = $(toolPath)/bin/$(gnuArch)-wOS-elf-
 
 gnutools: $(prefix)as $(prefix)gcc
 
