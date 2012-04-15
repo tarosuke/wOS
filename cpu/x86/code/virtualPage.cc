@@ -37,7 +37,7 @@ VIRTUALPAGE::PTA::PTA(runit* pw) :
 
 runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	const runit page(pageNum);
-	
+
 	//rootを取得
 	const runit cr3(GetCR3());
 	if(cr3 != lcr3 || ((lwcp ^ page) & ~511ULL)){
@@ -76,7 +76,7 @@ VIRTUALPAGE::VIRTUALPAGE(){
 	dprintf("pageTableArray: %p.\n", heapTop);
 #endif
 	dprintf("kernelPageDir: %p.\n", __pageRoot);
-#if CF_AMD64 && 5 <= CF_DEBUG_LEVEL
+#if CF_AMD64 && 6 <= CF_DEBUG_LEVEL
 	dputs("checking pageTableArray..."INDENT);
 	for(uint i(0); i < 513; i++){
 		const runit ra(i * PAGESIZE);

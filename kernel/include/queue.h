@@ -107,11 +107,11 @@ private:
 	};
 	inline void Add(KEY&, NODE<T>& n){
 		//リンクは輪になっているのでアンカーであるキューの前は最後
-		Insert(n);
+		NODE<T>::Insert(n);
 	};
 	inline void Insert(KEY&, NODE<T>& n){
 		//リンクは輪になっているのでアンカーであるキューの後は最初
-		Attach(n);
+		NODE<T>::Attach(n);
 	};
 };
 

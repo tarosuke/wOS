@@ -3,7 +3,7 @@
 .SUFFIXES :
 .SUFFIXES : .a .o .i .s .S .c .cc .h
 
-all: talos
+all: wOS
 keyfiles = ../../makefile.in makefile config
 ldkeyfiles = $(keyfiles) ../../arch/$(arch)/common.lds
 
@@ -19,7 +19,7 @@ AS = $(prefix)as
 AR = $(prefix)ar
 LD = $(prefix)ld
 OC = $(prefix)objcopy
-LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/
+LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-wOS-elf/$(gccVer)/
 
 
 
@@ -27,7 +27,7 @@ LIBPATH = $(toolPath)/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/
 base_ccopts += -pipe -O2 -fomit-frame-pointer -Wall -Werror -g -nostdinc\
 	-nostdlib -fno-common -iquote. -fkeep-inline-functions\
 	-finline-functions-called-once $(addprefix -I,$(incs))\
-	-I ../../objs/tools/lib/gcc/$(gnuArch)-talos-elf/$(gccVer)/include
+	-I ../../objs/tools/lib/gcc/$(gnuArch)-wOS-elf/$(gccVer)/include
 
 copts = $(base_ccopts) -ffreestanding
 ccopts = $(base_ccopts) -Wa,-W -nostdinc++ -fno-enforce-eh-specs\

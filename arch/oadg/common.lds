@@ -50,9 +50,13 @@ __arch_LOMEM = __image_size + __init_LMA;
 	. = ALIGN(4);
 	__KernelConstructor = .;
 	KEEP(heap.o(.ctors))
+	KEEP(heap.o(.init_array))
 	KEEP(pic.o(.ctors))
+	KEEP(pic.o(.init_array))
 	KEEP(*(.ctors))
+	KEEP(*(.init_array))
 	KEEP(*(SORT(.ctors.*)))
+	KEEP(*(SORT(.init_array.*)))
 	QUAD(0);
 	__KernelDestructor = .;
 	KEEP(*(.dtors))
