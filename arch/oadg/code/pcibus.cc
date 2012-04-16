@@ -8,7 +8,7 @@
 #include <debug.h>
 
 
-static PCIBUS pcibus __attribute__((init_priority(5000)));
+static PCIBUS pcibus __attribute__((init_priority(7000)));
 
 u32 PCIBUS::ReadConfig1(uint bus, uint dev, uint func, uint addr){
 	out32(CONFIG_ADDR, 0x80000000 | (bus << 16) |
