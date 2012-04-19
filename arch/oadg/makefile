@@ -23,6 +23,8 @@ emufd : wOS.fd hddImage $(qemuOptFiles)
 emucd : wOS.iso hddImage $(qemuOptFiles)
 	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d
 
+box : wOS.fd
+	bochs -q 'boot:a' 'floppya: 1_44=wOS.fd, status=inserted'
 
 ##### qemu network options
 .phony : qemu-tapnet qemu-usernet

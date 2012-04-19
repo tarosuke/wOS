@@ -11,6 +11,9 @@ help:
 emu:
 	@for t in $(targets); do make -C $$t emu || exit -1; done
 
+box:
+	@for t in $(targets); do make -C $$t box || exit -1; done
+
 all:
 	@for t in $(targets); do make -C $$t wOS.fd.gz || exit -1; done
 
