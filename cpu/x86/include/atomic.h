@@ -90,9 +90,7 @@ public:
 	};
 private:
 	u32 counter;
-	LOCK lock;
 };
-
 
 
 #endif
