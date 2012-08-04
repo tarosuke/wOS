@@ -11,6 +11,10 @@
 #	define CF_MAX_IRQs 17
 #endif
 
+#ifndef CF_KERNELSTACK_ENTRIES
+#	define CF_KERNELSTACK_ENTRIES 256
+#endif
+
 #ifndef CF_MAX_IRQ_SHAREs
 #	define CF_MAX_IRQ_SHAREs 4
 #endif

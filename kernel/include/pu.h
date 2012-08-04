@@ -31,10 +31,9 @@ private:
 	};
 	static void Cron(tunit);
 	static PU* pus[];
-	static TASK::TASKQUEUE readyQueue;
-	static QUEUE<TASK> cronQueue;
-	static bool dispatchRequest;
-	TASK idleTask;
+	static TASK::TASKQUEUE ready;
+	TASK* current;			//このプロセッサで実行中のタスク
+	TASK* haveToOwn;			//このプロセッサで実行すべきタスク
 };
 
 

@@ -33,13 +33,14 @@ public:
 		(*next).prev = prev;
 		(*prev).next = next;
 		prev = next = this;
+		owner = 0;
 	};
 	inline T* Owner(){ return owner; };
 	NODE* Next(){ return next; };
 	NODE* Prev(){ return prev; };
 protected:
 	NODE() : owner(0), next(this), prev(this){};
-	T* const owner;
+	T* owner;
 	NODE* next;
 	NODE* prev;
 };

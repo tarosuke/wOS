@@ -27,27 +27,17 @@ public:
 protected:
 	CPU();
 	const uint cpuid;
-	TASK* current;		//このプロセッサで実行中のタスク
-	TASK* haveToOwn;	//このプロセッサで実行すべきタスク
 	static inline uint GetID(){
 #if !CF_SMP
-	return 0;
+		return 0;
 #else
-	//TODO: get processor ID from APIC
+		//TODO: APICからプロセッサIDを読み出す
 #endif
-	};
-	inline void DispatchTo(){
-		asm volatile(
-#if !CF_SMP
-			"int %0;"
-#else
-			//TODO:IPIを自分に発行
-#endif
-			:: "i"(dispatchInterruptNumber));
 	};
 private:
-	static const uint dispatchInterruptNumber = 0x34;
-	static void Dispatcher();
+	inline void Dive(){
+		//TODO:TSSを設定してユーザモードに「戻る」
+	};
 #if CF_IA32
 	struct TSS{
 		u32 link;
@@ -91,8 +81,8 @@ private:
 #endif
 	TSS& tss;
 	static TSS tsss[];
+	munit stack[CF_KERNELSTACK_ENTRIES];
 };
 
 
 #endif
-

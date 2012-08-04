@@ -56,6 +56,7 @@ private:
 
 
 // 簡単なヒープ操作(要求サイズがページサイズの倍数だと無駄が出るので注意)
+// その場合は専用のクラスを用意してそのクラスで専用new/deleteを用意すること
 void* operator new(munit);
 void operator delete(void*);
 

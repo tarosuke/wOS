@@ -7,20 +7,15 @@
 #include <task.h>
 
 
-void MAP::SystemRequest(void* message){
-	//TODO:この「マップ関連のシステムコールメッセージを処理する」スタブを埋める。メッセージがマップ関連でない場合もあり得るが、その時はエラーコードを書きこんで終了する
-}
-
-
-
-runit REALPAGEMAP::GetPage(punit index){
-	if(pages <= index){
+runit FIXMAP::GetPage(punit page){
+	if(page < start){
+		// マップより手前
 		return 0;
 	}
-	return (start + index) * PAGESIZE;
-}
-
-
-runit COMMONMAP::GetPage(punit indek){
-	return 0; //TODO:スタブ:originTaskにページだけ切り替えてoriginPage+indexが指す内容を取ってくる
+	page -= start;
+	if(pages <= page){
+		// マップより先
+		return 0;
+	}
+	return start + page;
 }

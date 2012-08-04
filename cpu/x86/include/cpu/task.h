@@ -10,7 +10,11 @@
 
 
 class CPUTASK {
+	friend class VIRTUALPAGE;
 public:
+protected:
+	CPUTASK();
+	CPUTASK(void* stack);
 	static inline runit GetPageRoot(){
 		runit r;
 		asm volatile("mov %%cr3, %0" : "=r"(r));
@@ -19,28 +23,15 @@ public:
 	static inline void SetPageRoot(runit root){
 		asm volatile("mov %0, %%cr3" :: "r"(root));
 	};
-protected:
-	CPUTASK();
-	CPUTASK(void* stack);
-	void DispatchTo(CPUTASK& to){
-		asm volatile(
-#if CF_AMD64
-			"mov %%rsp, %0;"
-			"mov %1, %%rsp;"
-#endif
-#if CF_IA32
-			"mov %%esp, %0;"
-			"mov %1, %%esp;"
-#endif
-			"mov %2, %%cr3"
-			: "=r"(stack) : "l"(to.stack), "r"(pageRoot));
+	inline void DispatchTo(CPUTASK& to){
+		//このインスタンスが指しているタスクへ切り替える
+		SetPageRoot(pageRoot);
 	};
 private:
-	void* stack;
 	munit userStack;
-	const runit pageRoot;	//これが0ならアイドルタスクなのでタスク終了でない限り切り替えない。タスク終了ならどこか適当に。
+	munit userIP;
+	const runit pageRoot;
 };
-
 
 
 

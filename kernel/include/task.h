@@ -70,8 +70,8 @@ public:
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 
-	MESSAGEQUEUE in;	//このタスクの受信メッセージ
-	class PU* owner;	//現在このタスクを実行しているプロセッサ
+	MESSAGEQUEUE in;		//このタスクの受信メッセージ
+	class PU* owner;		//現在このタスクを実行しているプロセッサ
 	PRIORITY priority;	//現在の優先度
 	NODE<TASK> qNode;	//待ちやレディキューのためのノード
 	NODE<TASK> cronNode;	//時間管理のためのキューノード
@@ -91,6 +91,6 @@ private:
 	static inline void DispatchTo(TASK& next){};
 };
 
-
+//TODO:SwitchSpace,RestoreSpaceなどの一時的メモリ空間切り替えなど。
 #endif
 

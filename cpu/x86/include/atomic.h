@@ -7,14 +7,13 @@
 #define _ATOMIC_
 
 #include <types.h>
-#include <lock.h>
 
 
 class ATOMIC{
 public:
 	ATOMIC(u32 initalValue = 0) : counter(initalValue){};
 	u32 operator =(u32 newValue){
-		counter = newValue;
+		return counter = newValue;
 	};
 	u32 operator++(int){
 		u32 orgValue;
@@ -25,7 +24,6 @@ public:
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=a"(orgValue) :: "edx");
-		)
 		return orgValue;
 	};
 	u32 operator++(){
@@ -37,7 +35,6 @@ public:
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=d"(newValue));
-		)
 		return newValue;
 	};
 	u32 operator--(int){
@@ -45,11 +42,10 @@ public:
 		asm volatile(
 			"mov %0, %%eax;"
 			"1: mov %%eax, %%edx;"
-			"decc %%edx;"
+			"dec %%edx;"
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=a"(orgValue) :: "edx");
-		)
 		return orgValue;
 	};
 	u32 operator--(){
@@ -61,7 +57,6 @@ public:
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=d"(newValue));
-		)
 		return newValue;
 	};
 	u32 operator+=(u32 v){
@@ -73,7 +68,6 @@ public:
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=d"(newValue) : "r"(v));
-		)
 		return newValue;
 	};
 	u32 operator-=(u32 v){
@@ -85,7 +79,6 @@ public:
 			"lock cmpxchg %%edx, %0;"
 			"jnz 1b"
 			: "=m"(counter), "=d"(newValue) : "r"(v));
-		)
 		return newValue;
 	};
 private:

@@ -8,72 +8,67 @@
 
 #include <types.h>
 #include <resource.h>
-#include <lock.h>
+#include <reference.h>
+#include <resource.h>
 
 
-/// 抽象マップクラス
-class MAP : public RESOURCE{
-	friend class MAPHANDLER;
+
+/// 抽象マップ
+class MAP : public REFERENCE{
+	MAP();
+	void operator=(MAP&);
 public:
-	virtual runit GetPage(punit) = 0;
-	void SystemRequest(void*);
-protected:
-private:
-};
-
-/// ユーザプロセスごとのマップハンドラ
-class MAPHANDLER : public HANDLER{
-public:
-	MAPHANDLER(MAP& org, void* start) :
-		HANDLER(org), org(org), start((munit)start / PAGESIZE){};
-	runit GetPage(void* v){
-		return org.GetPage((munit)v / PAGESIZE);
+	MAP(BODY*) : REFERENCE(body), body(body){};
+	MAP(MAP& org) : REFERENCE(org.body), body(org.body){};
+	runit GetPage(punit p){
+		return body ? (*body).GetPage(p) : 0; };
+	class BODY : public REFERENCE::BODY{
+	protected:
+		BODY(void* start, munit size) :
+			startPage((munit)start / PAGESIZE),
+			pages(size / PAGESIZE){};
+		punit startPage;
+		punit pages;
+	public:
+		virtual runit GetPage(punit) = 0;
 	};
+protected:
+	BODY* const body;
 private:
-	MAP& org;
-	const punit start; //仮想ページで
 };
 
 
-
-/// マップのバリアント
-
-// 何もしないマップ
-class NULLMAP : public MAP{
+class FIXMAP : public MAP::BODY{
 public:
-	runit GetPage(punit){ return 0; };
-	NULLMAP(){};
-};
-
-// 実アドレス指定のマップ
-class REALPAGEMAP : public MAP{
-public:
-	runit GetPage(punit pageIndex);
-	REALPAGEMAP(runit start, punit pages) : start(start), pages(pages){};
+	FIXMAP(runit r, void* v, munit size) :
+		MAP::BODY(v,size),
+		start(r / PAGESIZE){};
+	runit GetPage(punit);
 private:
 	const runit start;
-	const punit pages;
 };
 
-// 共有メモリのマップ
-class TASK;
-class COMMONMAP : public MAP{
+
+class COMMONMAP : public MAP::BODY{
 public:
-	runit GetPage(punit pageIndex);
-	COMMONMAP(runit start,
-		punit pages,
-		TASK& originTask,
-		punit originPage) :
-		start(start),
-		pages(pages),
-		originTask(originTask),
-		originPage(originPage){};
+	COMMONMAP(void* v, munit size);
 private:
-	const runit start;
-	const punit pages;
-	TASK& originTask;
-	const punit originPage;
+	class TASK* master; //マスタータスク。終了したら共有メモリ自体が無効化する。
 };
 
+
+
+
+
+
+class USERMAP : public RESOURCE{
+	USERMAP();
+public:
+	USERMAP(void* v, MAP& map) :
+		map(map), startPage((munit)v / PAGESIZE){};
+private:
+	MAP map;
+	const punit startPage;
+};
 
 #endif
