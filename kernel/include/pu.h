@@ -18,19 +18,13 @@ class PU : public CPU{
 	PU(PU&);
 	void operator=(PU&);
 public:
-	PU() : current(0){};
+	PU() : current(&idle){};
 	void* operator new(munit){
-		const uint n(numOfPu++);
-		if(!n){
-			//最初のプロセッサなら誤ディスパッチを防ぐために初期化
-			///PUの初期化子作ってそれで初期化したほうがいいかも知れず
-			for(int m(0); m < CF_MAX_PROCESSORs; m++){
-				pus[m].priority = TASK::__pri_max;
-			}
-		}
-		return (void*)&pus[n];
+		return (void*)&GetPU();
 	};
-	static void Dispatch();
+	/// 全プロセッサを対象としてディスパッチ
+	static void Dispatch(){
+	};
 private:
 	static inline PU& GetPU(){
 #if CF_SMP
@@ -43,8 +37,9 @@ private:
 	static PUPLACER pus;
 	static ATOMIC numOfPu;
 	static TASK::TASKQUEUE ready;
+	static LOCK dispatching;
 	TASK* current;			//このプロセッサで実行中のタスク
-	TASK::PRIORITY priority;		//実行中の優先度
+	TASK idle;
 };
 
 

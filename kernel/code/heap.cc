@@ -44,15 +44,34 @@ void* HEAP::GetByIndex(uint index){
 	const munit size(memoryPoolSizes[index]);
 	if(!(r = memoryPools[index].Pop())){
 		KEY key(lock);
-		const munit newTop(top + size);
+		munit newTop(top + size);
 		if(limit <= newTop){
 			dputs("out of heap.\n");
 			return 0;
 		}
 		VIRTUALPAGE::Enable((void*)top, size / PAGESIZE);
 		r = (void*)top;
+		//ページ境界まで取得してプールに積む
+		for(;newTop < top + PAGESIZE; newTop += size){
+			Release((void*)newTop, index);
+		}
+		assert(!(newTop & (PAGESIZE - 1)));
 		top = newTop;
 	}
+	return r;
+}
+
+void* HEAP::Assign(runit start, munit size){
+	const punit pages((size + PAGESIZE - 1) / PAGESIZE);
+	KEY key(lock);
+	const munit newTop(top + (pages * PAGESIZE));
+	if(limit <= newTop){
+		dputs("out of heap.\n");
+		return 0;
+	}
+	VIRTUALPAGE::Enable((void*)top, start, pages);
+	void* const r((void*)top);
+	top = newTop;
 	return r;
 }
 

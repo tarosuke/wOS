@@ -49,12 +49,14 @@ static void ArchConsoleInit(){
 /// ARCH(プラットフォーム依存)コードの入り口
 extern "C"{
 	void Init(void)__attribute__((noreturn));
+	void APInit(void)__attribute__((noreturn));
 	extern const void (*__ArchCons[])(void);
 	extern const void (*__ArchDest[])(void);
 	extern const void (*__KernelConstructor[])(void);
 	extern runit __pageRoot_VMA[];
 	extern const bool __VESA_Ready;
 
+	//BSP用Init
 	void Init(void){
 		if(!__VESA_Ready){
 			//画面初期化に失敗したか、首なし設定
@@ -76,11 +78,15 @@ extern "C"{
 		// 最初のディスパッチ
 		PU::Dispatch();
 
-		// ここには来ないはず
-		assert(false);
-		for(;;){
-			asm volatile("hlt");
-		}
+		// ここはBSPのアイドルタスク
+		for(CPU::EnableInterrupt();; CPU::Idle()){
+			dprintf("[%t]\r", CLOCK::GetLocalTime());
+		};
+	};
+	//AP用Init
+	void APInit(void){
+		new PU;
+		for(CPU::EnableInterrupt();; CPU::Idle());
 	};
 }
 

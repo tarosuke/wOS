@@ -88,9 +88,11 @@ struct PMIB{
 
 
 
+#if 3 <= CF_DEBUG_LEVEL
 static void* Get16(munit p){
 	return (void*)(((p & 0xffff0000) >> 12) + (p & 0xffff));
 }
+#endif
 
 void VESA_Check(){
 #if 3 <= CF_DEBUG_LEVEL

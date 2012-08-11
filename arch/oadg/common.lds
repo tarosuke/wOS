@@ -23,6 +23,7 @@ __TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 /* utilities */
 __arch_CGA_VRAM = __kernel_base + 0xb8000;
 __pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;
+__preset_pages = (__kernel_heap - __kernel_base) / 4096;
 
 /* VARIANT of ADDRESSSPACE */
 __image_size = SIZEOF(.init) +

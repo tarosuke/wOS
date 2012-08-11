@@ -23,6 +23,7 @@ public:
 	static uint GetBlockIndex(munit size);
 	static void* GetByIndex(uint);
 	static BLOCK Get(munit);
+	static void* Assign(runit start, munit size);
 	static void Release(BLOCK&);
 	static void Release(void* mem, uint index){
 		BLOCK b = { mem, index };

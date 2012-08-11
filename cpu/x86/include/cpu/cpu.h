@@ -21,9 +21,10 @@ public:
 	static inline void DisableInterrupt(){
 		asm volatile("cli");
 	};
-	static inline void Halt(){
+	//暇なのでhltして待つ
+	static void Idle(){
 		asm volatile("hlt");
-	}
+	};
 	static inline void WakeupAP(){
 #if CF_SMP
 		//TODO:AP起動
@@ -39,20 +40,10 @@ protected:
 		//TODO: APICからプロセッサIDを読み出す
 #endif
 	};
-	//暇なのでスタックをプロセッサごとのidleStackに設定してhltして待つ
-	inline void Idle(){
-#if CF_IA32
-		asm volatile("mov %0, %%esp" :: "r"(idleStack));
-#endif
-#if CF_AMD64
-		asm volatile("mov %0, %%rsp" :: "r"(idleStack));
-#endif
-		asm volatile("sti; hlt");
-	};
 	void* const idleStack;	//アイドル時のスタック(初期化時に設定)
 private:
 	inline void Dive(){
-		//TODO:TSSを設定してユーザモードに「戻る」
+		//TODO:TSSを設定してユーザモードに「戻る」。TSSのカーネルスタックは初期値を設定
 	};
 	inline void* GetStack(){
 		void* stack;

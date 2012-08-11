@@ -106,33 +106,33 @@ void VIRTUALPAGE::Enable(void* start, munit pages){
 	}
 }
 
-void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, runit attr){
-	const munit p((munit)start / PAGESIZE);
-	mapID <<= 12;
-	KEY key(lock);
-
-	// ページイネーブル(マップ)
-	for(munit v(p); v < p + pages; v++){
-		runit& pte(pageTableArray[v]);
-		if(!(pte & (present || valid))){
-			pte = mapID | maped | valid | attr |
-				(InKernel(v) ? 0x102 : 6);
-		}
-	}
-}
+// void VIRTUALPAGE::Enable(void* start, uint mapID, munit pages, runit attr){
+// 	const munit p((munit)start / PAGESIZE);
+// 	mapID <<= 12;
+// 	KEY key(lock);
+//
+// 	// ページイネーブル(マップ)
+// 	for(munit v(p); v < p + pages; v++){
+// 		runit& pte(pageTableArray[v]);
+// 		if(!(pte & (present || valid))){
+// 			pte = mapID | maped | valid | attr |
+// 				(InKernel(v) ? 0x102 : 6);
+// 		}
+// 	}
+// }
 
 void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
 	const munit p((munit)start / PAGESIZE);
+	const runit pageMask(~(runit)(PAGESIZE - 1));
 	KEY key(lock);
 
 	// 実メモリ割り当て
-	runit rm(REALPAGE::GetPages(pages));
-	assert(rm);
-	for(munit v(p); v < p + pages; v++, rm++){
+	for(munit v(p); v < p + pages; v++, pa += PAGESIZE){
 		runit& pte(pageTableArray[v]);
-		assert(!(pte & (present || valid)));
-		pte = (rm * PAGESIZE) | valid | present |
-			(InKernel(v) ? 0x103 : 7);
+//TODO:初期ページ割り当てを__kernel_heapの前までにしとく。残りはちゃんと実ページに登録されてる
+dprintf("assigning realPage: %r -> %p(%r).\n", pa, v * PAGESIZE, pte);
+//		assert(!(pte & (present || valid)));
+		pte = (pa & pageMask) | (InKernel(v) ? 0x103 : 7);
 	}
 }
 

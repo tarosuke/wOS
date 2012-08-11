@@ -9,6 +9,7 @@
 #include <debug.h>
 #include <arch/pic.h>
 #include <task.h>
+#include <heap.h>
 
 
 extern "C"{
@@ -23,9 +24,18 @@ extern "C"{
 
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 
-
 CPU::CPU() : cpuid(GetID()), idleStack(GetStack()), tss(tsss[cpuid]){
 	dprintf("cpu(%d)..."INDENT, cpuid);
+#if 1
+	dputs("checking APIC..."INDENT);
+	u32* const apic((u32*)HEAP::Assign(0xfee00000U, PAGESIZE));
+	dprintf("mapped APIC register:%p.\n", apic);
+	dprintf("APIC ID: %x.\n", apic[8] >> 24);
+	dprintf("APIC ver: %x.\n", apic[12] & 255);
+	dprintf("APIC LVT timer: %x.\n", apic[0x320 / 4]);
+	dprintf("APIC LVT temp: %x.\n", apic[0x340 / 4]);
+	dputs(UNINDENT"OK.\n");
+#endif
 
 	//  当該プロセッサ用のTSSを設定
 	dprintf("selector: %d.\n", TSSSel + cpuid);

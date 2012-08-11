@@ -10,7 +10,7 @@
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
 .extern __kernelBase_hi, __kernelBase_lo, __kernel_base, __init_LMA
 .global __hiPageTable, __pageRoot
-.extern __image_size
+.extern __image_size, __preset_pages
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
