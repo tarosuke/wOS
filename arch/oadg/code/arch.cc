@@ -67,10 +67,18 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		static PU bsp;
+		// BSP関連を初期化
+		new PU;
 
+		// APを起動(もしあれば)
+		PU::WakeupAP();
+
+		// 最初のディスパッチ
+		PU::Dispatch();
+
+		// ここには来ないはず
+		assert(false);
 		for(;;){
-			dprintf("[%t]\r", CLOCK::GetLocalTime());
 			asm volatile("hlt");
 		}
 	};

@@ -24,6 +24,11 @@ public:
 	static inline void Halt(){
 		asm volatile("hlt");
 	}
+	static inline void WakeupAP(){
+#if CF_SMP
+		//TODO:AP起動
+#endif
+	};
 protected:
 	CPU();
 	const uint cpuid;
@@ -34,9 +39,30 @@ protected:
 		//TODO: APICからプロセッサIDを読み出す
 #endif
 	};
+	//暇なのでスタックをプロセッサごとのidleStackに設定してhltして待つ
+	inline void Idle(){
+#if CF_IA32
+		asm volatile("mov %0, %%esp" :: "r"(idleStack));
+#endif
+#if CF_AMD64
+		asm volatile("mov %0, %%rsp" :: "r"(idleStack));
+#endif
+		asm volatile("sti; hlt");
+	};
+	void* const idleStack;	//アイドル時のスタック(初期化時に設定)
 private:
 	inline void Dive(){
 		//TODO:TSSを設定してユーザモードに「戻る」
+	};
+	inline void* GetStack(){
+		void* stack;
+#if CF_IA32
+		asm volatile("mov %%esp, %0" : "=r"(stack));
+#endif
+#if CF_AMD64
+		asm volatile("mov %%rsp, %0" : "=r"(stack));
+#endif
+		return stack;
 	};
 #if CF_IA32
 	struct TSS{
@@ -81,7 +107,6 @@ private:
 #endif
 	TSS& tss;
 	static TSS tsss[];
-	munit stack[CF_KERNELSTACK_ENTRIES];
 };
 
 

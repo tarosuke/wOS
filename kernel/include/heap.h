@@ -62,12 +62,14 @@ void operator delete(void*);
 
 
 //HEAPではないけどplacement newのための領域確保
-template<class T, uint elements = 1> class PLACER{
+template<class T, uint elements = 1, typename E = u32> class PLACER{
 public:
-	void* Place(uint index = 0){ return (void*)thePlace[index]; };
+	T& operator[](uint index){
+		return *(T*)&thePlace[index][0];
+	};
 	uint GetNumOf(T* t){ return t - (T*)thePlace; };
 private:
-	char thePlace[elements][sizeof(T)];
+	E thePlace[elements][(sizeof(T) + sizeof(E) - 1) / sizeof(E)];
 };
 
 #endif

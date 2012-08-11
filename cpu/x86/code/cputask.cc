@@ -7,10 +7,8 @@
 #include <realPage.h>
 
 
-CPUTASK::CPUTASK() : pageRoot(0){};
-
-CPUTASK::CPUTASK(void* stack) :
-	stack(stack),
+CPUTASK::CPUTASK() :
+	stack((void*)&kernelStack[CF_KERNELSTACK_ENTRIES]),
 	pageRoot(REALPAGE::GetPages(1) * PAGESIZE){
 	//TODO:pageRootに仮想ページを割り当てて初期化
 };

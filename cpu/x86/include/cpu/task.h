@@ -6,15 +6,17 @@
 #ifndef _CPU_TASK_
 #define _CPU_TASK_
 
+#include <config.h>
 #include <types.h>
 
 
 class CPUTASK {
 	friend class VIRTUALPAGE;
+	CPUTASK(CPUTASK&);
+	void operator=(CPUTASK&);
 public:
 protected:
 	CPUTASK();
-	CPUTASK(void* stack);
 	static inline runit GetPageRoot(){
 		runit r;
 		asm volatile("mov %%cr3, %0" : "=r"(r));
@@ -28,9 +30,11 @@ protected:
 		SetPageRoot(pageRoot);
 	};
 private:
+	void* stack;
 	munit userStack;
 	munit userIP;
 	const runit pageRoot;
+	u32 kernelStack[CF_KERNELSTACK_ENTRIES];
 };
 
 

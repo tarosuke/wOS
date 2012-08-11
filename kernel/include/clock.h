@@ -7,7 +7,6 @@
 #define _CLOCK_
 
 #include <types.h>
-#include <pu.h>
 #include <config.h>
 #include <lock.h>
 
@@ -76,7 +75,7 @@ public:
 	CLOCK(){};
 private:
 	static const tunit tickTime = 1000000ULL / CF_HZ;
-	static tunit systemUptime;	//起動時間
+	static tunit systemUptime;		//起動時間
 	static tunit baseTime;		//設定時刻-その時の起動時間
 	static DOW baseDoW;		//時刻を設定した時の曜日
 	static i64 timezone;		//この機械のタイムゾーン
@@ -84,7 +83,7 @@ private:
 	static LOCK lock;
 	static void Tick(){
 		systemUptime += tickTime;
-		PU::Cron(systemUptime);
+//		PU::Cron(systemUptime);
 	};
 };
 

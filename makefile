@@ -4,21 +4,22 @@
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
+m := $(shell grep -c Hz /proc/cpuinfo)
 
 help:
 	@cat docs/make.txt
 
 emu:
-	@for t in $(targets); do make -C $$t emu || exit -1; done
+	@for t in $(targets); do make -j $(m) -C $$t emu || exit -1; done
 
 box:
-	@for t in $(targets); do make -C $$t box || exit -1; done
+	@for t in $(targets); do make -j $(m) -C $$t box || exit -1; done
 
 all:
-	@for t in $(targets); do make -C $$t wOS.fd.gz || exit -1; done
+	@for t in $(targets); do make -j $(m) -C $$t wOS.fd.gz || exit -1; done
 
 clean:
-	@for t in $(targets); do make -C $$t clean || exit -1; done
+	@for t in $(targets); do make -j $(m) -C $$t clean || exit -1; done
 
 tools:
 	@for t in $(targets); do make -C $$t gnutools || exit -1; done

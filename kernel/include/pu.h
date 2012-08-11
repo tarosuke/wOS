@@ -11,29 +11,40 @@
 #include <cpu/cpu.h>
 #include <task.h>
 #include <heap.h>
+#include <atomic.h>
 
 
 class PU : public CPU{
-	friend class CLOCK;
+	PU(PU&);
+	void operator=(PU&);
 public:
-	PU();
+	PU() : current(0){};
+	void* operator new(munit){
+		const uint n(numOfPu++);
+		if(!n){
+			//最初のプロセッサなら誤ディスパッチを防ぐために初期化
+			///PUの初期化子作ってそれで初期化したほうがいいかも知れず
+			for(int m(0); m < CF_MAX_PROCESSORs; m++){
+				pus[m].priority = TASK::__pri_max;
+			}
+		}
+		return (void*)&pus[n];
+	};
 	static void Dispatch();
 private:
 	static inline PU& GetPU(){
-		return *pus[GetID()];
+#if CF_SMP
+		return pus[GetID()];
+#else
+		return pus[0];
+#endif
 	};
-	inline void GetNewOwn(){
-		const uint p(current ? (*current).priority : TASK::__pri_max);
-		if(!!(haveToOwn = readyQueue.Get(p))){
-			//ディスパッチが必要
-			DispatchTo();
-		}
-	};
-	static void Cron(tunit);
-	static PU* pus[];
+	typedef PLACER<PU, CF_MAX_PROCESSORs> PUPLACER;
+	static PUPLACER pus;
+	static ATOMIC numOfPu;
 	static TASK::TASKQUEUE ready;
 	TASK* current;			//このプロセッサで実行中のタスク
-	TASK* haveToOwn;			//このプロセッサで実行すべきタスク
+	TASK::PRIORITY priority;		//実行中の優先度
 };
 
 
