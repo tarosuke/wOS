@@ -142,7 +142,7 @@ hex4:	rol	$16, %eax
 	mov	$4, %cx
 	jmp	1b
 
-#if 0
+.if 0
 rdump:	push	%ax
 	push	%bx
 	push	%cx
@@ -193,10 +193,10 @@ c:	.asciz	" cx:"
 d:	.asciz	" dx:"
 ds:	.asciz	" ds:"
 es:	.asciz	" es:"
-#endif
+.endif
 
 	/**** DUMP TARGET */
-#if 0
+.if 0
 dump:	mov	$128, %cx
 	mov	$0x1000, %ax
 	mov	%ax, %ds
@@ -222,7 +222,7 @@ dump:	mov	$128, %cx
 	pop	%cx
 	loop	1b
 	ret
-#endif
+.endif
 
 .data
 hello:	.ascii	"talosFDL ver 0.2.1\r\n"
@@ -239,7 +239,4 @@ rotate:	.ascii	"/-\\|"
 ksize:	.long	0
 kentry:	.long	0
 rotPos:	.short	0
-
-
-
 

@@ -1,5 +1,4 @@
 /******************************************** LDSCRIPT FOR OADG ARCHITECTURE */
-/* $Id: 204bed2aa35b4635c47708eeda13e5b38d3df5d4 $ */
 
 OUTPUT_FORMAT("elf32-i386")
 
