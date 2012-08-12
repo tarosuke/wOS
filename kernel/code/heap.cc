@@ -49,7 +49,7 @@ void* HEAP::GetByIndex(uint index){
 			dputs("out of heap.\n");
 			return 0;
 		}
-		VIRTUALPAGE::Enable((void*)top, size / PAGESIZE);
+		VIRTUALPAGE::Enable((void*)top, (size + PAGESIZE - 1) / PAGESIZE);
 		r = (void*)top;
 		//ページ境界まで取得してプールに積む
 		for(;newTop < top + PAGESIZE; newTop += size){
