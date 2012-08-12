@@ -12,6 +12,21 @@
 #include <cpu/virtualPage.h>
 #include <debug.h>
 
+/** HEAP：カーネルヒープの管理
+ * Get〜で取得、Releaseで返却する。
+ * 取得メモリサイズを記録しておく必要があるが、HEAP側では管理しない。
+ * 高速化のためサイズの代わりにブロックインデックスを使える。
+ * 標準のnew/deleteはサイズを記録してくれるが先頭数byteを消費する。
+ * なのでページ境界が必要なときはnew/deleteは使えない。
+ * なお、Assignは実メモリをヒープに割り当てるメソッド。
+ * 実メモリ管理が混乱するのでこれで取得した領域は返却してはならない。
+ * ユーザ領域で実メモリをマップするときはユーザヒープを操作すること。
+ *
+ * 基本的に各クラスにnew/deleteを用意してメモリ管理するために存在している。
+ * static constにブロックインデクスを用意し、GetBlockIndexで初期化しておく。
+ * そうすれば取得時も開放時もブロックインデクスで速やかに確保/開放できる。
+ * 面倒ならnew/deleteを作らなければいいが、前述の通りページ境界は無視される。
+ */
 
 class HEAP{
 public:
@@ -23,7 +38,7 @@ public:
 	static uint GetBlockIndex(munit size);
 	static void* GetByIndex(uint);
 	static BLOCK Get(munit);
-	static void* Assign(runit start, munit size);
+	static void* Assign(runit start, munit size); //NOTE:返却しないこと！
 	static void Release(BLOCK&);
 	static void Release(void* mem, uint index){
 		BLOCK b = { mem, index };
