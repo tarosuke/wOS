@@ -67,6 +67,8 @@ public:
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
 	void operator delete(void* mem);
+	void MapLock(){}; //TODO:メモリ空間の解放禁止
+	void MapUnlock(){}; //TODO:メモリ空間の解放許可。予約されてればその場で解放。
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 

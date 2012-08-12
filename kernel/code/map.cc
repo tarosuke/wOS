@@ -19,3 +19,18 @@ runit FIXMAP::GetPage(punit page){
 	}
 	return start + page;
 }
+
+
+COMMONMAP::COMMONMAP(void* start, munit size, TASK& master) :
+	MAP::BODY(start, size),
+	master(master){
+		master.MapLock(); //masterの空間解放を禁止する
+}
+
+runit COMMONMAP::GetPage(punit page){
+	return 0;
+}
+
+COMMONMAP::~COMMONMAP(){
+	master.MapUnlock(); //masterの空間解放を許可する
+}

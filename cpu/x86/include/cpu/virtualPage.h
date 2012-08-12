@@ -70,7 +70,6 @@ private:
 #endif
 #if CF_AMD64
 	static class PTA{
-		friend class K;
 	public:
 		PTA(runit*);
 		runit& operator[](punit);

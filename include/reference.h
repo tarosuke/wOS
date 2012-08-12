@@ -22,7 +22,7 @@ public:
 	class BODY{
 		friend class REFERENCE;
 	public:
-		virtual ~BODY() throw(){};
+		virtual ~BODY();
 	protected:
 		BODY() : users(1){};
 	private:
@@ -32,7 +32,7 @@ public:
 	REFERENCE(REFERENCE& ref) : body(ref.body){
 		(*body).users++;
 	};
-	virtual ~REFERENCE() throw(){
+	virtual ~REFERENCE(){
 		if(!--(*body).users){
 			delete body;
 		}

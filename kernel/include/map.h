@@ -27,6 +27,7 @@ public:
 		BODY(void* start, munit size) :
 			startPage((munit)start / PAGESIZE),
 			pages(size / PAGESIZE){};
+		virtual ~BODY() = 0;
 		punit startPage;
 		punit pages;
 	public:
@@ -43,17 +44,21 @@ public:
 	FIXMAP(runit r, void* v, munit size) :
 		MAP::BODY(v,size),
 		start(r / PAGESIZE){};
+	~FIXMAP(){};
 	runit GetPage(punit);
 private:
 	const runit start;
 };
 
 
+class TASK;
 class COMMONMAP : public MAP::BODY{
 public:
-	COMMONMAP(void* v, munit size);
+	COMMONMAP(void* start, munit size, TASK& master);
+	runit GetPage(punit);
+	~COMMONMAP();
 private:
-	class TASK* master; //マスタータスク。終了したら共有メモリ自体が無効化する。
+	TASK& master; //マスタータスク。ここにページ情報を取りに行く。マップが消滅するまでマスタータスクの消滅は許されない。
 };
 
 
