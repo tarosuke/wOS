@@ -20,11 +20,14 @@ class PU : public CPU{
 public:
 	PU() : current(&idle){};
 	void* operator new(munit){
-		return (void*)&GetPU();
+		const uint id(GetID());
+		assert(id < CF_MAX_PROCESSORs);
+		return (void*)&pus[id];
 	};
 	/// 全プロセッサを対象としてディスパッチ
 	static void Dispatch(){
 	};
+	static TASK& GetCurrentTask(){ return *GetPU().current; };
 private:
 	static inline PU& GetPU(){
 #if CF_SMP
