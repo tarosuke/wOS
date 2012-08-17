@@ -15,12 +15,12 @@
 #define UNDEFAULT(t) t(); t(t&); void operator=(t&);
 
 /// position & size of filesystem
-typedef u64 funit;
+typedef u128 funit;
 
 /// time(unit:microseconds)
 typedef u64 tunit;
 
-/// talos charactor
+/// wOS charactor
 typedef u32 tchar;
 
 
