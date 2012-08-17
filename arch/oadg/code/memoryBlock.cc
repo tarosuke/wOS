@@ -46,7 +46,7 @@ public:
 		}
 #if !CF_PAE && !CF_AMD64
 		if(needPAE){
-			dputs(LIGHTYELLOW"NOTE: PAE not available but there're over-4GiB memory.\nNOTE: Try PAE kernel if you want use their memory.\n"ORIGIN);
+			dputs(LIGHTYELLOW"NOTE: There're over-4GiB memory. But PAE is not available.\nNOTE: Try PAE kernel if you want to use their memory.\n"ORIGIN);
 		}
 #endif
 		dprintf(UNINDENT "OK(%m available).\n", totalSize);
