@@ -1,0 +1,71 @@
+/************************************************** SOMETHING VECTOR of POINTER
+ *	Copyright (C) 2012- project talos (http://talos-kernel.sf.net/)
+ *	check LICENSE.txt. If you don't have the file, mail us.
+ */
+
+#ifndef _VECTOR_
+#define _VECTOR_
+
+#include <types.h>
+#include <heap.h>
+#include <lock.h>
+
+/** VECTOR：ポインタのベクタテンプレート
+ * ベクタのサイズは事実上無制限
+ */
+
+template<class T, typename INDEX = u32> VECTOR{
+public:
+	VECTOR() : depth(0), entry(0){};
+	T* operator[](INDEX index){
+		KEY key(lock);
+		if(!!(index >> (depth * 8))){
+			//indexがディレクトリツリーより大きい
+			return 0;
+		}
+		void* p(entry);
+		for(uint d(depth); p && d; d--){
+			p = p[(index >> (d * 8)) & 255];
+		}
+		return (T*)p;
+	};
+	bool Set(INDEX index, T* value){
+		KEY key(lock);
+		//indexがディレクトリツリーに収まるまでディレクトリツリーを拡大
+		while(!!(index >> (depth * 8))){
+			void* const p(HEAP::Get(sizeof(void*) * 256).mem);
+			if(!p){
+				return false; //確保できなかったのでfalse
+			}
+			p[0] = entry;
+			entry = p;
+			depth++;
+		}
+
+		//indexが指すエントリを示す。パスがなければ作る。
+		void* p(entry);
+		for(uint d(depth); 1 < d; d--){
+			const uint i((index >> (d * 8)) & 255);
+			void* q(p[i]);
+			if(!q){
+				//indexまでのディレクトリパスがないので作る
+				q = HEAP::Get(sizeof(void*) * 256).mem;
+				if(!q){
+					//確保できなかったのでfalse
+					return false;
+				}
+				p[i] = q;
+			}
+			p = q;
+		}
+		//エントリに書き込んで正常終了
+		((T*)p)[index & 255] = value;
+		return true;
+	};
+private:
+	uint depth;
+	void* entry;
+	LOCK lock;
+}
+
+#endif
