@@ -14,7 +14,7 @@
  * ベクタのサイズは事実上無制限
  */
 
-template<class T, typename INDEX = u32> VECTOR{
+template<class T, typename INDEX = u32> class VECTOR{
 public:
 	VECTOR() : depth(0), entry(0){};
 	T* operator[](INDEX index){
@@ -32,21 +32,22 @@ public:
 	bool Set(INDEX index, T* value){
 		KEY key(lock);
 		//indexがディレクトリツリーに収まるまでディレクトリツリーを拡大
+		void* p(entry);
 		while(!!(index >> (depth * 8))){
 			void* const p(HEAP::Get(sizeof(void*) * 256).mem);
 			if(!p){
 				return false; //確保できなかったのでfalse
 			}
-			p[0] = entry;
+			((void**)p)[0] = entry;
 			entry = p;
 			depth++;
 		}
 
 		//indexが指すエントリを示す。パスがなければ作る。
-		void* p(entry);
+		p = entry;
 		for(uint d(depth); 1 < d; d--){
 			const uint i((index >> (d * 8)) & 255);
-			void* q(p[i]);
+			void* q(((void**)p)[i]);
 			if(!q){
 				//indexまでのディレクトリパスがないので作る
 				q = HEAP::Get(sizeof(void*) * 256).mem;
@@ -54,7 +55,7 @@ public:
 					//確保できなかったのでfalse
 					return false;
 				}
-				p[i] = q;
+				((void**)p)[i] = q;
 			}
 			p = q;
 		}
@@ -66,6 +67,6 @@ private:
 	uint depth;
 	void* entry;
 	LOCK lock;
-}
+};
 
 #endif
