@@ -23,65 +23,8 @@ typedef long i64;
 typedef unsigned long u64;
 #endif
 
-
-///128bits整数
-typedef struct{ u64 content[2]; } i128;
-#ifdef __cplusplus
-class u128{
-public:
-	operator u64(){ return v64[0]; };
-	operator u32(){ return v32[0]; };
-	const u128& operator+=(const u128& v){
-#if CF_IA32
-		asm volatile(
-			"add %4, %0;"
-			"adc %5, %1;"
-			"adc %6, %2;"
-			"adc %7, %3;"
-			: "=Q"(v32[0]), "=Q"(v32[1]),
-				"=Q"(v32[2]), "=Q"(v32[3])
-			: "g"(v.v32[0]), "g"(v.v32[1]),
-				"g"(v.v32[2]), "g"(v.v32[3]));
-#endif
-#if CF_AMD64
-		asm volatile(
-			"add %2, %0;"
-			"adc %3, %1"
-			: "=Q"(v64[0]), "=Q"(v64[1])
-			: "g"(v.v64[0]), "g"(v.v64[1]));
-#endif
-		return *this;
-	};
-	const u128& operator-=(const u128& v){
-#if CF_IA32
-		asm volatile(
-			"sub %4, %0;"
-			"sbb %5, %1;"
-			"sbb %6, %2;"
-			"sbb %7, %3;"
-			: "=Q"(v32[0]), "=Q"(v32[1]),
-				"=Q"(v32[2]), "=Q"(v32[3])
-			: "g"(v.v32[0]), "g"(v.v32[1]),
-				"g"(v.v32[2]), "g"(v.v32[3]));
-#endif
-#if CF_AMD64
-		asm volatile(
-			"sub %2, %0;"
-			"sbb %3, %1"
-			: "=Q"(v64[0]), "=Q"(v64[1])
-			: "g"(v.v64[0]), "g"(v.v64[1]));
-#endif
-		return *this;
-	};
-private:
-	union{
-		u32 v32[4];
-		u64 v64[2];
-	};
-};
-#else
-typedef struct{ u64 content[2]; } u128;
-#endif
+/// 128bits整数とか
+#include <cpu/long.h>
 
 /// position & size of virtual memory
 #if CF_IA32
