@@ -7,10 +7,7 @@
 #define _MAP_
 
 #include <types.h>
-#include <resource.h>
 #include <reference.h>
-#include <resource.h>
-
 
 
 /// 抽象マップ
@@ -61,19 +58,5 @@ private:
 	TASK& master; //マスタータスク。ここにページ情報を取りに行く。マップが消滅するまでマスタータスクの消滅は許されない。
 };
 
-
-
-
-
-
-class USERMAP : public RESOURCE{
-	USERMAP();
-public:
-	USERMAP(void* v, MAP& map) :
-		map(map), startPage((munit)v / PAGESIZE){};
-private:
-	MAP map;
-	const punit startPage;
-};
 
 #endif

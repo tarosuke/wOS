@@ -5,6 +5,7 @@
 
 #include <map.h>
 #include <task.h>
+#include <pu.h>
 
 
 runit FIXMAP::GetPage(punit page){

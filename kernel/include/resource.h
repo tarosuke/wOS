@@ -8,6 +8,7 @@
 
 #include <types.h>
 #include <lock.h>
+#include <reference.h>
 
 
 /// MAPやソケットなどの抽象リソース

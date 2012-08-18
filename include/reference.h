@@ -11,10 +11,11 @@
 /** REFERENCE
  * 参照カウンタ付き参照を実現する。
  * 具体的な使い方はkernel/include/map.hを参照のこと。
- * 1.抽象クラスでREFERENCEとREFERENCE::BODYの子クラスを作る。
- * 2.具象クラスでREFERENCE:;BODYの孫クラスを作る。
- * 3.REFERENCEの子クラスの構築子に具象クラスをnewしたものを与える。
- * 抽象クラスを使わない場合は抽象クラス=具象クラスとする。
+ * ・インターフェイスはREFERENCEの一種
+ * ・抽象クラスはREFERENCE::BODYの一種
+ * ・具象クラスは抽象クラスの一種
+ * ...として作ると機能するように作ってある。
+ * NOTE:循環参照には対応していない。
  */
 class REFERENCE{
 	REFERENCE();
