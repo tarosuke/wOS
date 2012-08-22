@@ -11,6 +11,8 @@
 #include <queue.h>
 #include <map.h>
 #include <cpu/task.h>
+#include <vector.h>
+#include <resource.h>
 
 extern "C"{
 #include <userlib/task.h>
@@ -82,6 +84,7 @@ private:
 	int irq;		//割り込みリクエスト(負数は無効)
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
+	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 
 	void WakeUp(REASON r = RS_FINE){
 		reason = r;

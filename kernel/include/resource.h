@@ -15,28 +15,24 @@
 class RESOURCE{
 	friend class HANDLER;
 public:
-	RESOURCE() : users(0){};
+	RESOURCE(){};
 	virtual ~RESOURCE(){};
-	virtual void SystemRequest(void* message) = 0;
+	virtual void SystemRequest(void* message);
+	virtual runit GetNewPage(void*);
 protected:
 private:
-	void Use();
-	void Release();
-	LOCK lock;
-	uint users;
+	static void IlligalOperation();
 };
 
-/// ユーザプロセスからリソースへアクセスするための抽象ハンドラ
-class HANDLER{
+
+class MAPRESOURCE : public RESOURCE{
 public:
-	HANDLER(RESOURCE& org) : org(org){ org.Use(); }
-	virtual ~HANDLER(){ org.Release(); };
-	uint GetID() const { return 0; };
+	MAPRESOURCE(punit start);
+	~MAPRESOURCE();
+	runit GetNewPage(void*);
 private:
-	RESOURCE& org;
+	punit start;
 };
-
-
 
 
 #endif

@@ -6,12 +6,26 @@
 #include <resource.h>
 
 
-void RESOURCE::Use(){
-	KEY key(lock); users++;
-};
-void RESOURCE::Release(){
-	{ KEY key(lock); users--; }
-	if(!users){
-		delete this;
-	}
-};
+// 抽象リソースクラス
+void RESOURCE::IlligalOperation(){
+	//TODO:不正動作処理：ログを出力してプロセスを再起動
+}
+
+void RESOURCE::SystemRequest(void* message){
+	IlligalOperation();
+}
+
+runit RESOURCE::GetNewPage(void*){
+	IlligalOperation();
+	return 0;
+}
+
+
+// マップリソース
+MAPRESOURCE::MAPRESOURCE(punit start) : start(start){}
+MAPRESOURCE::~MAPRESOURCE(){};
+runit MAPRESOURCE::GetNewPage(void* target){
+	const punit pageNum(((munit)target / PAGESIZE) - start);
+	return (runit)pageNum;
+}
+
