@@ -4,6 +4,7 @@
  */
 
 #include <resource.h>
+#include <pu.h>
 
 
 // 抽象リソースクラス
@@ -22,10 +23,16 @@ runit RESOURCE::GetNewPage(void*){
 
 
 // マップリソース
-MAPRESOURCE::MAPRESOURCE(punit start) : start(start){}
+MAPRESOURCE::MAPRESOURCE(void* start, munit size) :
+	map(new COMMONMAP(start, size, PU::GetCurrentTask())),
+	start((munit)start / PAGESIZE){}
+MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
+	map(map),
+	start((munit)start / PAGESIZE){}
+
 MAPRESOURCE::~MAPRESOURCE(){};
 runit MAPRESOURCE::GetNewPage(void* target){
 	const punit pageNum(((munit)target / PAGESIZE) - start);
-	return (runit)pageNum;
+	return map.GetPage(pageNum);
 }
 

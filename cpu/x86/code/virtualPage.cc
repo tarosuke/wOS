@@ -7,6 +7,7 @@
 #include <realPage.h>
 #include <cpu/task.h>
 #include <heap.h>
+#include <pu.h>
 
 
 extern "C"{
@@ -198,7 +199,7 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		Panic("");
 	}
 
-	if(pte & maped){
+	if(pte & mapped){
 		//TODO:マップによる割り当て
 		Panic("page mapping isn't available.");
 	}else{

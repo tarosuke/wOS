@@ -28,7 +28,7 @@ public:
 	static const runit bigPage = 0x80;
 	static const runit global = 0x100;
 	static const runit valid = 0x200;
-	static const runit maped = 0x400;
+	static const runit mapped = 0x400;
 	static const runit copyOnWrite = 0x800;
 	static const runit pageAttributeIndex4M = 0x1000;
 #if CF_AMD64

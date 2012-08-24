@@ -71,6 +71,7 @@ public:
 	void operator delete(void* mem);
 	void MapLock(){}; //TODO:メモリ空間の解放禁止
 	void MapUnlock(){}; //TODO:メモリ空間の解放許可。予約されてればその場で解放。
+	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 
@@ -84,7 +85,6 @@ private:
 	int irq;		//割り込みリクエスト(負数は無効)
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
-	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 
 	void WakeUp(REASON r = RS_FINE){
 		reason = r;

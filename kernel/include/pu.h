@@ -26,6 +26,7 @@ public:
 	};
 	/// 全プロセッサを対象としてディスパッチ
 	static void Dispatch(){
+		//TODO:全プロセッサを対象としてディスパッチ
 	};
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 private:

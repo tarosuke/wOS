@@ -16,7 +16,13 @@
 
 template<class T, typename INDEX = u32> class VECTOR{
 public:
-	VECTOR() : depth(0), entry(0){};
+	VECTOR() :
+		depth(0),
+		entry(0),
+		heapIndex(HEAP::GetBlockIndex(sizeof(void*) * 256)){};
+	~VECTOR(){
+		Free(entry, depth);
+	};
 	T* operator[](INDEX index){
 		KEY key(lock);
 		if(!!(index >> (depth * 8))){
@@ -34,7 +40,7 @@ public:
 		//indexがディレクトリツリーに収まるまでディレクトリツリーを拡大
 		void* p(entry);
 		while(!!(index >> (depth * 8))){
-			void* const p(HEAP::Get(sizeof(void*) * 256).mem);
+			void* const p(HEAP::GetByIndex(heapIndex));
 			if(!p){
 				return false; //確保できなかったのでfalse
 			}
@@ -50,7 +56,7 @@ public:
 			void* q(((void**)p)[i]);
 			if(!q){
 				//indexまでのディレクトリパスがないので作る
-				q = HEAP::Get(sizeof(void*) * 256).mem;
+				q = HEAP::GetByIndex(heapIndex);
 				if(!q){
 					//確保できなかったのでfalse
 					return false;
@@ -67,6 +73,26 @@ private:
 	uint depth;
 	void* entry;
 	LOCK lock;
+	const uint heapIndex;
+	void Free(void* e, uint d){
+		if(d){
+			for(uint i(0); i < 256; i++){
+				void* const f(((void**)e)[i]);
+				if(f){
+					Free(f, d - 1);
+				}
+			}
+			HEAP::Release(e, heapIndex);
+		}else{
+			for(uint i(0); i < 256; i++){
+				T* const t(((T**)e)[i]);
+				if(t){
+					delete t;
+				}
+			}
+			HEAP::Release(e, heapIndex);
+		}
+	};
 };
 
 #endif

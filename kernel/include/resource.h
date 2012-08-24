@@ -9,6 +9,7 @@
 #include <types.h>
 #include <lock.h>
 #include <reference.h>
+#include <map.h>
 
 
 /// MAPやソケットなどの抽象リソース
@@ -27,10 +28,12 @@ private:
 
 class MAPRESOURCE : public RESOURCE{
 public:
-	MAPRESOURCE(punit start);
+	MAPRESOURCE(void* start, MAP& map);
+	MAPRESOURCE(void* start, munit size);
 	~MAPRESOURCE();
 	runit GetNewPage(void*);
 private:
+	MAP map;
 	punit start;
 };
 
