@@ -211,11 +211,9 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		if(!newPage){
 			Panic("Out of map pages.");
 		}
-		// ページを割り当ててページをクリア
-		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
-		asm volatile(
-			"xor %%eax, %%eax;"
-			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+
+		// ページ割り当て
+		Assign(pte, addr, newPage);
 	}else{
 		if((munit)&pageTableArray[kernelStartPage] <= addr){
 			//カーネル領域のページテーブル要求なのでmasterを参照
@@ -233,10 +231,7 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 			Panic("Out of memory.");
 		}
 
-		// ページを割り当ててページをクリア
-		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
-		asm volatile(
-			"xor %%eax, %%eax;"
-			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+		// ページ割り当て
+		Assign(pte, addr, newPage);
 	}
 }

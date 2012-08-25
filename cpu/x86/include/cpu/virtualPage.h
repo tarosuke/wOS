@@ -90,6 +90,12 @@ private:
 		runit lwcp; // 最後に設定したwcp
 	}pageTableArray;
 #endif
+	static void Assign(runit& pte, munit addr, punit newPage){
+		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
+		asm volatile(
+			"xor %%eax, %%eax;"
+			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+	};
 };
 
 
