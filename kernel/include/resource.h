@@ -19,7 +19,7 @@ public:
 	RESOURCE(){};
 	virtual ~RESOURCE(){};
 	virtual void SystemRequest(void* message);
-	virtual runit GetNewPage(void*);
+	virtual runit GetPage(punit);
 protected:
 private:
 	static void IlligalOperation();
@@ -31,7 +31,7 @@ public:
 	MAPRESOURCE(void* start, MAP& map);
 	MAPRESOURCE(void* start, munit size);
 	~MAPRESOURCE();
-	runit GetNewPage(void*);
+	runit GetPage(punit);
 private:
 	MAP map;
 	punit start;

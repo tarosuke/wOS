@@ -200,8 +200,22 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 	}
 
 	if(pte & mapped){
-		//TODO:マップによる割り当て
-		Panic("page mapping isn't available.");
+		//マップから実ページを取得
+		RESOURCE* const map(PU::GetCurrentTask().resources[pte >> 12]);
+		if(!map){
+			//TODO:本来は異常動作としてプロセス再起動
+			Panic("No map found.");
+		}
+
+		const runit newPage((*map).GetPage(page));
+		if(!newPage){
+			Panic("Out of map pages.");
+		}
+		// ページを割り当ててページをクリア
+		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
+		asm volatile(
+			"xor %%eax, %%eax;"
+			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
 	}else{
 		if((munit)&pageTableArray[kernelStartPage] <= addr){
 			//カーネル領域のページテーブル要求なのでmasterを参照
@@ -215,7 +229,9 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 
 		// 普通のページ割り当て
 		const punit newPage(REALPAGE::GetPages());
-		assert(newPage);
+		if(!newPage){
+			Panic("Out of memory.");
+		}
 
 		// ページを割り当ててページをクリア
 		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;

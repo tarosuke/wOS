@@ -10,13 +10,14 @@
 // 抽象リソースクラス
 void RESOURCE::IlligalOperation(){
 	//TODO:不正動作処理：ログを出力してプロセスを再起動
+	Panic("Illigal rosource operation.");
 }
 
 void RESOURCE::SystemRequest(void* message){
 	IlligalOperation();
 }
 
-runit RESOURCE::GetNewPage(void*){
+runit RESOURCE::GetPage(punit){
 	IlligalOperation();
 	return 0;
 }
@@ -31,8 +32,7 @@ MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
 	start((munit)start / PAGESIZE){}
 
 MAPRESOURCE::~MAPRESOURCE(){};
-runit MAPRESOURCE::GetNewPage(void* target){
-	const punit pageNum(((munit)target / PAGESIZE) - start);
-	return map.GetPage(pageNum);
+runit MAPRESOURCE::GetPage(punit target){
+	return map.GetPage(target - start);
 }
 

@@ -31,7 +31,7 @@ public:
 		}
 		void* p(entry);
 		for(uint d(depth); p && d; d--){
-			p = p[(index >> (d * 8)) & 255];
+			p = ((void**)p)[(index >> (d * 8)) & 255];
 		}
 		return (T*)p;
 	};

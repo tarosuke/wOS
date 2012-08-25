@@ -29,7 +29,11 @@ COMMONMAP::COMMONMAP(void* start, munit size, TASK& master) :
 }
 
 runit COMMONMAP::GetPage(punit page){
-	return 0;
+	if(size <= page){
+		return 0;
+	}
+
+
 }
 
 COMMONMAP::~COMMONMAP(){
