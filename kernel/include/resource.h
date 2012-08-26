@@ -28,11 +28,15 @@ private:
 
 class MAPRESOURCE : public RESOURCE{
 public:
-	MAPRESOURCE(void* start, MAP& map);
+	//COMMONMAP用
 	MAPRESOURCE(void* start, munit size);
+	//実アドレス指定マップ用
+	MAPRESOURCE(void* start, runit pa, munit size);
+	//マップ利用者用
+	MAPRESOURCE(void* start, MAP& map);
 	~MAPRESOURCE();
 	runit GetPage(punit);
-private:
+protected:
 	MAP map;
 	punit start;
 };

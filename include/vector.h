@@ -66,7 +66,7 @@ public:
 			p = q;
 		}
 		//エントリに書き込んで正常終了
-		((T*)p)[index & 255] = value;
+		((T**)p)[index & 255] = value;
 		return true;
 	};
 private:

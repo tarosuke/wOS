@@ -6,32 +6,31 @@
 #include <map.h>
 #include <task.h>
 #include <pu.h>
+#include <realPage.h>
 
 
 runit FIXMAP::GetPage(punit page){
-	if(page < start){
-		// マップより手前
-		return 0;
-	}
-	page -= start;
-	if(pages <= page){
-		// マップより先
-		return 0;
-	}
-	return start + page;
+	return page < pages ? start + page : 0;
 }
 
-
-COMMONMAP::COMMONMAP(void* start, munit size, TASK& master) :
-	MAP::BODY(start, size),
-	master(master){
-		master.MapLock(); //masterの空間解放を禁止する
-}
 
 runit COMMONMAP::GetPage(punit page){
-	return 0;
-}
+	if(pages <= page){
+		return 0;
+	}
+	const uint branch(page >> 8);
+	LEAF* leaf(tree[branch]);
+	if(!leaf){
+		//割り当てられてないので新しく割り当てる
+		leaf = new LEAF;
+		tree.Set(branch, leaf);
+	}
+	runit& p((*leaf).pages[page & 255]);
+	if(!p){
+		//ページが割り当てられていないので割り当てる
+		p = REALPAGE::GetPages();
+		assert(p);
+	}
 
-COMMONMAP::~COMMONMAP(){
-	master.MapUnlock(); //masterの空間解放を許可する
+	return p;
 }

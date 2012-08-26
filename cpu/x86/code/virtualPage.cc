@@ -172,7 +172,6 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 
 		///// check kernel/user
 		if(code & ~pte & user){
-			//TODO:REBOOT ME
 			dprintf("Page protection violated at %p(%08x):%r.", addr, code, pte);
 			Panic("");
 		}
@@ -180,7 +179,6 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		///// check writable & not CoW
 		if(code & pte & readOnly){
 			if(~pte & copyOnWrite){
-				//TODO:REBOOT ME
 				dprintf("Page isn't writable at %p(%08x):%r.", addr, code, pte);
 				Panic("");
 			}else{

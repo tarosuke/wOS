@@ -4,7 +4,7 @@
  */
 
 #include <resource.h>
-#include <pu.h>
+#include <debug.h>
 
 
 // 抽象リソースクラス
@@ -25,7 +25,10 @@ runit RESOURCE::GetPage(punit){
 
 // マップリソース
 MAPRESOURCE::MAPRESOURCE(void* start, munit size) :
-	map(new COMMONMAP(start, size, PU::GetCurrentTask())),
+	map(new COMMONMAP(size)),
+	start((munit)start / PAGESIZE){}
+MAPRESOURCE::MAPRESOURCE(void* start, runit pa, munit size) :
+	map(new FIXMAP(pa, size)),
 	start((munit)start / PAGESIZE){}
 MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
 	map(map),

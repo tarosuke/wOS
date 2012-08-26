@@ -8,7 +8,6 @@
 
 #include <config.h>
 #include <types.h>
-#include <map.h>
 #include <lock.h>
 #include <debug.h>
 #include <cpu/exception.h>
