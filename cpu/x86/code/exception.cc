@@ -52,12 +52,12 @@ extern "C"{
 		}else{
 			EXCEPTION::FRAME frame(*f);
 #if CF_AMD64
-			dprintf("\nEXCEPTION(%d:%08x)."INDENT, num, err);
-			dprintf("ip:%p.\n", frame.withErrorCode.ip);
-			dprintf("cs:%02llx.\n", frame.withErrorCode.cs);
-			dprintf("fl:%08llx.\n", frame.withErrorCode.flags);
-			dprintf("sp:%p.\n", frame.withErrorCode.sp);
-			dprintf("ss:%02llx.\n", frame.withErrorCode.ss);
+			dprintf("\nEXCEPTION(%d:%016x)."INDENT, num, err);
+			dprintf("ip:%p.\n", frame.noErrorCode.ip);
+			dprintf("cs:%02llx.\n", frame.noErrorCode.cs);
+			dprintf("fl:%08llx.\n", frame.noErrorCode.flags);
+			dprintf("sp:%p.\n", frame.noErrorCode.sp);
+			dprintf("ss:%02llx.\n", frame.noErrorCode.ss);
 			dprintf("rax:%16llx.\n", frame.rax);
 			dprintf("rbx:%16llx.\n", frame.rbx);
 			dprintf("rcx:%16llx.\n", frame.rcx);
