@@ -24,18 +24,36 @@ extern "C"{
 
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 
-CPU::CPU() : cpuid(GetID()), idleStack(GetStack()), tss(tsss[cpuid]){
+CPU::APIC::APIC() : body((u32*)HEAP::Assign(0xfee00000U, PAGESIZE)){};
+
+
+CPU::CPU() :
+	cpuid(GetID()),
+	idleStack(GetStack()),
+	tss(tsss[cpuid]){
 	dprintf("cpu(%d)..."INDENT, cpuid);
-#if 1
-	dputs("checking APIC..."INDENT);
-	u32* const apic((u32*)HEAP::Assign(0xfee00000U, PAGESIZE));
-	dprintf("mapped APIC register:%p.\n", apic);
-	dprintf("APIC ID: %x.\n", apic[8] >> 24);
-	dprintf("APIC ver: %x.\n", apic[12] & 255);
-	dprintf("APIC LVT timer: %x.\n", apic[0x320 / 4]);
-	dprintf("APIC LVT temp: %x.\n", apic[0x340 / 4]);
-	dputs(UNINDENT"OK.\n");
-#endif
+
+	if(apic.IsReady()){
+		dputs("checking APIC..."INDENT);
+		dprintf("mapped APIC register:%p.\n", apic);
+		dprintf("APIC ID: %x.\n", apic.body[8] >> 24);
+		dprintf("APIC ver: %x.\n", apic.body[12] & 255);
+		dprintf("APIC LVT timer: %x.\n", apic.body[0x320 / 4]);
+		dprintf("APIC LVT temp: %x.\n", apic.body[0x340 / 4]);
+		dputs(UNINDENT"OK.\n");
+
+		if(!cpuid){
+			dputs("waking up APs...INIT...");
+			apic.body[0xc0] = 0xc4500;
+			while(apic.body[0xc0] & 0x1000);
+			dputs("SIPI(1)...");
+			apic.body[0xc0] = 0xc4600;
+			while(apic.body[0xc0] & 0x1000);
+			dputs("SIPI(2)...");
+			apic.body[0xc0] = 0xc4600;
+			dputs("OK.\n");
+		}
+	}
 
 	//  当該プロセッサ用のTSSを設定
 	dprintf("selector: %d.\n", TSSSel + cpuid);

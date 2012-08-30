@@ -32,6 +32,7 @@ __init16:
 	xor	%ax, %ax
 	movw	%ax, %ss
 	movw	%ax, %sp
+	movw	%ax, %gs
 
 	/***** enable A20 */
 	mov	$0x2401, %ax
@@ -179,7 +180,7 @@ __LMA32:
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-	mov	%ax, %gs
+//	mov	%ax, %gs
 	mov	%ax, %ss
 	mov	$.L_temporaryStackTop, %esp
 	ljmp	$KCSel, $.L_initPages
@@ -433,7 +434,7 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-	mov	%ax, %gs
+//	mov	%ax, %gs
 	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
 	mov	$__kernel_base, %rax
 	add	%rax, 2(%rdi)
