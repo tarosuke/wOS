@@ -16,6 +16,8 @@
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
 .code16
 .section .prefix
+	sti
+	hlt
 	jmp	__init16
 
 .section .init16
@@ -32,7 +34,39 @@ __init16:
 	xor	%ax, %ax
 	movw	%ax, %ss
 	movw	%ax, %sp
-	movw	%ax, %gs
+
+	/***** spinlock for stack */
+	mov	$.L_lock, %esi
+	mov	$1, %al
+1:	xchg	(%si), %al
+	cmp	%al, %al
+	jz	1f
+	pause
+	jmp	1b
+1:
+	/***** assign processor ID */
+	mov	$.L_processor, %esi
+	mov	(%si), %ax
+	incw	(%si)
+	mov	%ax, %gs
+
+	/***** check BSP/AP */
+	cmp	%ax, %ax
+	jz	1f		/* BSP */
+hlt
+	jmp	.L_getMode32	/* AP */
+1:
+	/***** setup vector #2(NMI) */
+	push	%ds
+	xor	%ax, %ax
+	mov	%ax, %ds
+	mov	$__init16, %eax
+	mov	%eax, %edx
+	shr	$4, %edx
+	and	$0xf000, %dx
+	mov	%ax, (8)
+	mov	%dx, (10)
+	pop	%ds
 
 	/***** enable A20 */
 	mov	$0x2401, %ax
@@ -145,9 +179,9 @@ __init16:
 .align 256
 1:	.quad	0
 	.quad	0x00cf9a000000ffff	// CS(kernel)
-	.quad	0x00cf92000000ffff	// DS/ES/FS/GS/SS(kernel)
+	.quad	0x00cf92000000ffff	// DS/ES/FS/SS(kernel)
 	.quad	0x00cff8000000ffff	// CS(user)
-	.quad	0x00cff2000000ffff	// DS/ES/FS/GS/SS(user)
+	.quad	0x00cff2000000ffff	// DS/ES/FS/SS(user)
 	.quad	0x00cf9a010000ffff	// TEMPORARY CS FROM 0x10000
 #if CF_IA32
 __LMA_TSSPH:
@@ -465,4 +499,19 @@ __LMA_TSSPH:
 	/***** スタックをカーネルイメージ内へ移動 */
 	mov	$__kernel_base, %xax
 	add	%xax, %xsp
+
+	/***** ロック解除、BSP/AP判定 */
+//	movb	$0, .L_lock
+	mov	%gs, %ax
+	cmp	$0, %ax
+	jne	1f
 	jmp	Init
+1:	jmp	APInit
+
+
+/*********************************************************** SMPのための領域 */
+.L_processor:
+	.word	0
+.L_lock:
+	.byte	0
+

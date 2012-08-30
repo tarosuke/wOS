@@ -43,14 +43,19 @@ CPU::CPU() :
 		dputs(UNINDENT"OK.\n");
 
 		if(!cpuid){
+#if 0
+			dputs("waking up APs...NMI...");
+			apic.body[0xc0] = 0xc4400;
+#else
 			dputs("waking up APs...INIT...");
 			apic.body[0xc0] = 0xc4500;
 			while(apic.body[0xc0] & 0x1000);
 			dputs("SIPI(1)...");
-			apic.body[0xc0] = 0xc4600;
+			apic.body[0xc0] = 0xc4610;
 			while(apic.body[0xc0] & 0x1000);
 			dputs("SIPI(2)...");
-			apic.body[0xc0] = 0xc4600;
+			apic.body[0xc0] = 0xc4610;
+#endif
 			dputs("OK.\n");
 		}
 	}
