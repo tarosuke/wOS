@@ -10,6 +10,7 @@
 #include <cpu/virtualPage.h>
 #include <string.h>
 #include <clock.h>
+#include <cpu/exception.h>
 
 
 #if CF_DEBUG_LEVEL
@@ -72,19 +73,17 @@ extern "C"{
 		// BSP関連を初期化
 		new PU;
 
-		// APを起動(もしあれば)
-		PU::WakeupAP();
-
 		// 最初のディスパッチ
 		PU::Dispatch();
 
 		// ここはBSPのアイドルタスク
 		for(CPU::EnableInterrupt();; CPU::Idle()){
-			dprintf("[%t]\r", CLOCK::GetLocalTime());
+//			dprintf("[%t]\r", CLOCK::GetLocalTime());
 		};
 	};
 	//AP用Init
 	void APInit(void){
+		EXCEPTION::LoadIDT();
 		new PU;
 		for(CPU::EnableInterrupt();; CPU::Idle());
 	};

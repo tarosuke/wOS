@@ -57,7 +57,6 @@ __init16:
 	/***** check BSP/AP */
 	test	%ax, %ax
 	jz	1f		/* BSP */
-hlt
 	jmp	.L_getMode32	/* AP */
 1:
 	/***** setup vector #2(NMI) */
@@ -218,17 +217,26 @@ __LMA32:
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-//	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$.L_temporaryStackTop, %esp
+	xor	%eax, %eax
+	mov	%gs, %ax
+	shl	$10, %eax
+	add	$.L_temporaryStackTop, %esp
+	sub	%eax, %esp
 	ljmp	$KCSel, $.L_initPages
-	.space	1024, 0
+	.space	1024 * CF_MAX_PROCESSORs, 0
 .L_temporaryStackTop:
 
 
 
 /******************************************************* INITIALIZE PAGEING */
 .L_initPages:
+	/***** BSPならページを初期化 */
+	mov	%gs, %ax
+	test	%ax, %ax
+	jz	1f
+	jmp	.L_SET_CR3
+1:
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
 	mov	$.L_RPDP, %edi
@@ -370,6 +378,7 @@ __LMA32:
 	mov	%eax, (.L_loPT)*/
 
 	/***** ページングをONにする */
+.L_SET_CR3:
 	mov	$__pageRoot, %eax
 	mov	%eax, %cr3
 	mov	%cr4, %eax
@@ -387,6 +396,7 @@ __LMA32:
 #endif
 	mov	%cr0, %eax
 	bts	$31, %eax
+	and	$0x9fffffff, %eax
 	mov	%eax, %cr0
 
 #if CF_IA32
@@ -444,11 +454,16 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 .L_initPagedSegments:
 #if CF_IA32
 	/***** カーネルイメージへミラーしたGDTを読み込む */
-	mov	$__kernelBase_lo, %eax
 	mov	$.L_GDTPT, %edi
+	/* APなら.L_GDTPTはそのまま */
+	mov	%gs, %ax
+	test	%ax,%ax
+	jnz	1f
+	/* BSPならミラーへアドレスを変更 */
+	mov	$__kernelBase_lo, %eax
 	add	%eax, 2(%edi)
 	add	%eax, %edi
-	lgdt	(%edi)
+1:	lgdt	(%edi)
 	mov	$KDSel, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
@@ -460,19 +475,26 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	.code64
 	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
+	mov	%rsp, %rax
 	push	$16
-	push	$.L_temporaryStackTop
+	push	%rax
 	pushf
 	push	$KCSel
 	push	$1f
 	lgdt	(%rdi)
+
+mov %gs, %ax
+test %ax,%ax
+jz 7f
+hlt
+7:
+
 	iret
 1:	mov	$KDSel, %ax
 	mov	%ax, %ss
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-//	mov	%ax, %gs
 	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
 	mov	$__kernel_base, %rax
 	add	%rax, 2(%rdi)
@@ -507,8 +529,8 @@ __LMA_TSSPH:
 	/***** ロック解除、BSP/AP判定 */
 	movb	$0, (.L_lock)
 	mov	%gs, %ax
-	cmp	$0, %ax
-	jne	1f
+	test	%ax, %ax
+	jnz	1f
 	jmp	Init
 1:	jmp	APInit
 

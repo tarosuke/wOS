@@ -88,6 +88,7 @@ public:
 	EXCEPTION();
 	typedef void (*HANDLER)(u32, FRAME&);
 	static void RegisterHandler(uint num, HANDLER);
+	static void LoadIDT();
 private:
 #if CF_IA32
 	static u64 vector[];
@@ -96,7 +97,9 @@ private:
 	static u64 vector[][2];
 #endif
 	static const struct IDTP{
-		u16 limit; void* table; }__attribute__((packed)) idtp;
+		u16 limit;
+		void* table;
+	}__attribute__((packed)) idtp;
 };
 
 

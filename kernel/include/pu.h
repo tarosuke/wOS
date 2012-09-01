@@ -21,7 +21,6 @@ public:
 	PU() : current(&idle){};
 	void* operator new(munit){
 		const uint id(GetID());
-dprintf("gs:%04x.\n", id);
 		assert(id < CF_MAX_PROCESSORs);
 		return (void*)&pus[id];
 	};

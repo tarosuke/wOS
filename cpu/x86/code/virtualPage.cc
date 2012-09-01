@@ -131,7 +131,6 @@ void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
 	for(munit v(p); v < p + pages; v++, pa += PAGESIZE){
 		runit& pte(pageTableArray[v]);
 //TODO:初期ページ割り当てを__kernel_heapの前までにしとく。残りはちゃんと実ページに登録されてる
-dprintf("assigning realPage: %r -> %p(%r).\n", pa, v * PAGESIZE, pte);
 //		assert(!(pte & (present || valid)));
 		pte = (pa & pageMask) | (InKernel(v) ? 0x103 : 7);
 	}

@@ -8,6 +8,7 @@
 
 #include <types.h>
 #include <config.h>
+#include <lock.h>
 
 
 class TASK;
@@ -24,11 +25,6 @@ public:
 	//暇なのでhltして待つ
 	static void Idle(){
 		asm volatile("hlt");
-	};
-	static inline void WakeupAP(){
-#if CF_SMP
-		//TODO:AP起動
-#endif
 	};
 protected:
 	CPU();
@@ -106,6 +102,7 @@ private:
 		APIC();
 		bool IsReady(){ return !!body; };
 	}apic;
+	static LOCK lock;
 };
 
 

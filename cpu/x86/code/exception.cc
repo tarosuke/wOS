@@ -128,3 +128,8 @@ void EXCEPTION::RegisterHandler(uint num, HANDLER handler){
 	assert(!handlers[num]);
 	handlers[num] = handler;
 }
+
+void EXCEPTION::LoadIDT(){
+	asm volatile("lidt %0" :: "m"(exeptionHandler.idtp));
+}
+
