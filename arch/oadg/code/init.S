@@ -221,7 +221,7 @@ __LMA32:
 	xor	%eax, %eax
 	mov	%gs, %ax
 	shl	$10, %eax
-	add	$.L_temporaryStackTop, %esp
+	mov	$.L_temporaryStackTop, %esp
 	sub	%eax, %esp
 	ljmp	$KCSel, $.L_initPages
 	.space	1024 * CF_MAX_PROCESSORs, 0
@@ -473,8 +473,12 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 #endif
 #if CF_AMD64
 	.code64
-	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
+	/***** 64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
+	/* 前に通ったプロセッサの初期化で書き換えられたのを戻す */
+	andl $0x0fffffff, 2(%rdi)
+	movl $0, 6(%rdi)
+
 	mov	%rsp, %rax
 	push	$16
 	push	%rax
@@ -482,13 +486,6 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	push	$KCSel
 	push	$1f
 	lgdt	(%rdi)
-
-mov %gs, %ax
-test %ax,%ax
-jz 7f
-hlt
-7:
-
 	iret
 1:	mov	$KDSel, %ax
 	mov	%ax, %ss

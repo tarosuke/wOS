@@ -78,7 +78,7 @@ extern "C"{
 
 		// ここはBSPのアイドルタスク
 		for(CPU::EnableInterrupt();; CPU::Idle()){
-//			dprintf("[%t]\r", CLOCK::GetLocalTime());
+			dprintf("[%t]\r", CLOCK::GetLocalTime());
 		};
 	};
 	//AP用Init
