@@ -16,9 +16,13 @@
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
 .code16
 .section .prefix
-	sti
-	hlt
 	jmp	__init16
+	/***** SMPのための領域 */
+.L_processor:
+	.word	0
+.L_lock:
+	.byte	0
+
 
 .section .init16
 __init16:
@@ -39,7 +43,7 @@ __init16:
 	mov	$.L_lock, %esi
 	mov	$1, %al
 1:	xchg	(%si), %al
-	cmp	%al, %al
+	test	%al, %al
 	jz	1f
 	pause
 	jmp	1b
@@ -51,7 +55,7 @@ __init16:
 	mov	%ax, %gs
 
 	/***** check BSP/AP */
-	cmp	%ax, %ax
+	test	%ax, %ax
 	jz	1f		/* BSP */
 hlt
 	jmp	.L_getMode32	/* AP */
@@ -501,17 +505,10 @@ __LMA_TSSPH:
 	add	%xax, %xsp
 
 	/***** ロック解除、BSP/AP判定 */
-//	movb	$0, .L_lock
+	movb	$0, (.L_lock)
 	mov	%gs, %ax
 	cmp	$0, %ax
 	jne	1f
 	jmp	Init
 1:	jmp	APInit
-
-
-/*********************************************************** SMPのための領域 */
-.L_processor:
-	.word	0
-.L_lock:
-	.byte	0
 
