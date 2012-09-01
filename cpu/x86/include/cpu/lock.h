@@ -59,15 +59,14 @@ private:
 			"test %%eax, %%eax;"
 			"jz 1f;"
 			"pause;"
-			"2: cmp $0, %0;"
-			"jnz 2b;"
+			"jmp 1b;"
 			"1:":
 			"=m"(lock) :: "eax");
 		#endif
 	};
 	inline void Unlock(){
 		#if 2 <= CF_MAX_PROCESSORs
-		asm volatile("movl $0, %0" :: "m"(lock));
+		lock = false;
 		#endif
 		ILOCK::Unlock();
 	};
