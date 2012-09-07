@@ -11,12 +11,38 @@
 
 PU::PUPLACER PU::pus;
 ATOMIC PU::numOfPu;
-LOCK PU::dispatching;
-TASK::TASKQUEUE PU::ready;
 
 extern "C"{
-	//ディスパッチャのエントリポイント(例外ハンドラの終了前に呼ばれる)
-	void __Dispatch(){
+	//割り込みorトラップハンドラの戻り先がユーザプロセスの時に呼ばれる
+	//呼ばれるのはレジスタを復帰する前
+	void Dispach(){
 		PU::Dispatch();
+	}
+}
+
+
+void PU::DispatchItsOwn(){
+	DisableInterrupt();
+	while(true){
+		next = ready.Get(current ? (*current).priority : TASK::__pri_max);
+		if(next){
+			(*current).SaveStack();
+			if((*next).newbie){
+				(*next).newbie = false;
+				(*next).DiveInto();
+			}else{
+				(*next).DispatchTo();
+			}
+			ready.Add(*current);
+			current = next;
+			next = 0;
+		}else if(!current){
+			//アイドル
+			//TODO:負荷測定とかもする
+			EnableInterrupt();
+			Idle();
+			DisableInterrupt();
+		}
+		break;
 	}
 }

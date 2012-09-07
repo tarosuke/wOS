@@ -13,10 +13,16 @@ const uint TASK::thisSizeIndex(HEAP::GetBlockIndex(PAGESIZE));
 
 TASK::TASK() :
 	owner(0),
+	originalPriority(__pri_max),
 	priority(__pri_max),
 	qNode(this),
 	cronNode(this),
-	irqNode(this){}
+	irqNode(this),
+	irq(-1),
+	reason(RS_FINE),
+	newbie(false){
+		capabilities.raw = 0;
+	}
 
 
 void* TASK::operator new(munit contentSize){

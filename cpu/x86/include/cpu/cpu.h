@@ -38,21 +38,7 @@ protected:
 		return id;
 #endif
 	};
-	void* const idleStack;	//アイドル時のスタック(初期化時に設定)
 private:
-	inline void Dive(){
-		//TODO:TSSを設定してユーザモードに「戻る」。TSSのカーネルスタックは初期値を設定
-	};
-	inline void* GetStack(){
-		void* stack;
-#if CF_IA32
-		asm volatile("mov %%esp, %0" : "=r"(stack));
-#endif
-#if CF_AMD64
-		asm volatile("mov %%rsp, %0" : "=r"(stack));
-#endif
-		return stack;
-	};
 #if CF_IA32
 	struct TSS{
 		u32 link;

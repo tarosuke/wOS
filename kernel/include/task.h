@@ -55,7 +55,15 @@ public:
 		RS_PERMITION,	//ユーザに権限がない
 		RS_TIMEUP,	//時間切れ
 	};
-	typedef MULTIQUEUE<TASK, __pri_max> TASKQUEUE;
+	class TASKQUEUE : public MULTIQUEUE<TASK, __pri_max>{
+	public:
+		inline void Add(TASK& task){
+			MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
+		};
+		inline void Insert(TASK& task){
+			MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
+		};
+	};
 	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
 	void Enqueue(){
 		//TODO:単純にタスクをレディキューに繋ぐ
@@ -69,14 +77,13 @@ public:
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
 	void operator delete(void* mem);
-	void MapLock(){}; //TODO:メモリ空間の解放禁止
-	void MapUnlock(){}; //TODO:メモリ空間の解放許可。予約されてればその場で解放。
 	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 
 	MESSAGEQUEUE in;		//このタスクの受信メッセージ
 	class PU* owner;		//現在このタスクを実行しているプロセッサ
+	PRIORITY originalPriority; //元の優先度
 	PRIORITY priority;	//現在の優先度
 	NODE<TASK> qNode;	//待ちやレディキューのためのノード
 	NODE<TASK> cronNode;	//時間管理のためのキューノード
@@ -85,6 +92,7 @@ private:
 	int irq;		//割り込みリクエスト(負数は無効)
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
+	bool newbie;		//新規作成タスク(カーネルスタックが無効)
 
 	void WakeUp(REASON r = RS_FINE){
 		reason = r;
@@ -93,7 +101,6 @@ private:
 
 	///// 以下はシステム全体の話
 	static const uint thisSizeIndex;
-	static inline void DispatchTo(TASK& next){};
 };
 
 //TODO:SwitchSpace,RestoreSpaceなどの一時的メモリ空間切り替えなど。

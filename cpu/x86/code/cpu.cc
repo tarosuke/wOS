@@ -30,7 +30,6 @@ LOCK CPU::lock;
 
 CPU::CPU() :
 	cpuid(GetID()),
-	idleStack(GetStack()),
 	tss(tsss[cpuid]){
 	KEY key(lock);
 #if CF_SMP

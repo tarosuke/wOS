@@ -24,10 +24,11 @@ public:
 		assert(id < CF_MAX_PROCESSORs);
 		return (void*)&pus[id];
 	};
-	/// 全プロセッサを対象としてディスパッチ
-	static void Dispatch(){
-		//TODO:全プロセッサを対象としてディスパッチ
+	/// ディスパッチ
+	static inline void Dispatch(){
+		GetPU().DispatchItsOwn();
 	};
+	/// 現在の状態を取得、など
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 private:
 	static inline PU& GetPU(){
@@ -37,12 +38,13 @@ private:
 		return pus[0];
 #endif
 	};
+	void DispatchItsOwn();
 	typedef PLACER<PU, CF_MAX_PROCESSORs> PUPLACER;
 	static PUPLACER pus;
 	static ATOMIC numOfPu;
-	static TASK::TASKQUEUE ready;
-	static LOCK dispatching;
+	TASK::TASKQUEUE ready;
 	TASK* current;			//このプロセッサで実行中のタスク
+	TASK* next;
 	TASK idle;
 };
 

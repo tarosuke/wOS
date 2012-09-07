@@ -81,6 +81,9 @@ public:
 			: "=m"(counter), "=d"(newValue) : "r"(v));
 		return newValue;
 	};
+	operator u32(){
+		return counter;
+	};
 private:
 	u32 counter;
 };
