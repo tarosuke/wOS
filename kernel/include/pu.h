@@ -32,11 +32,11 @@ public:
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 	/// タスク終了
 	static void Kill(){
-		//タスク終了時にいきなりタスク領域を解放すると現在使っているスタックまで開放してしまうことになって都合が悪いため、領域を開放するための待ち行列(grave)に投入する。また、カレントはディスパッチまでアイドルタスクとする。
+		//TODO:タスク終了時にいきなりタスク領域を解放すると現在使っているスタックまで開放してしまうことになって都合が悪いため、領域を開放するための待ち行列(grave)に投入し、ゾンビとする。
 		PU& pu(GetPU());
 		IKEY key;
 		grave.Add((*pu.current).qNode);
-		pu.current = &pu.idle;
+		(*pu.current).priority = TASK::__pri_max;
 	};
 private:
 	static inline PU& GetPU(){

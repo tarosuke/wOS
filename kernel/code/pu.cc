@@ -35,7 +35,10 @@ void PU::DispatchItsOwn(){
 			}else{
 				(*next).DispatchTo();
 			}
-			ready.Add(*current);
+			if((*current).priority < TASK::__pri_max){
+				//ゾンビやアイドルはレディキューには戻さない。
+				ready.Add(*current);
+			}
 			current = next;
 			next = 0;
 			break;
