@@ -7,10 +7,12 @@
 #include <lock.h>
 #include <debug.h>
 #include <core.h>
+#include <clock.h>
 
 
 PU::PUPLACER PU::pus;
 ATOMIC PU::numOfPu;
+QUEUE<TASK> PU::grave;
 
 extern "C"{
 	//割り込みorトラップハンドラの戻り先がユーザプロセスの時に呼ばれる
@@ -22,9 +24,9 @@ extern "C"{
 
 
 void PU::DispatchItsOwn(){
-	DisableInterrupt();
-	while(true){
-		next = ready.Get(current ? (*current).priority : TASK::__pri_max);
+	for(;;){
+		DisableInterrupt();
+		next = ready.Get((*current).priority);
 		if(next){
 			(*current).SaveStack();
 			if((*next).newbie){
@@ -36,13 +38,19 @@ void PU::DispatchItsOwn(){
 			ready.Add(*current);
 			current = next;
 			next = 0;
-		}else if(!current){
+			break;
+		}
+		if(current == &idle){
 			//アイドル
 			//TODO:負荷測定とかもする
+			#if 4 < CF_DEBUG_LEVEL
+			if(!cpuid){ hprintf("[%t]\r", CLOCK::GetLocalTime()); }
+			#endif
+			//;rave-keeping(graveに置いてある構造を解放)
+			for(TASK* t; (t = grave.Get()); delete t);
+			// 完全に休み TODO::CPUに移動するほうがよくない？
 			EnableInterrupt();
 			Idle();
-			DisableInterrupt();
 		}
-		break;
 	}
 }

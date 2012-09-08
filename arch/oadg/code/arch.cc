@@ -9,7 +9,6 @@
 #include <pu.h>
 #include <cpu/virtualPage.h>
 #include <string.h>
-#include <clock.h>
 #include <cpu/exception.h>
 
 
@@ -70,22 +69,18 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		// BSP関連を初期化
-		new PU;
-
-		// 最初のディスパッチ
-		PU::Dispatch();
-
-		// ここはBSPのアイドルタスク
-		for(CPU::EnableInterrupt();; CPU::Idle()){
-			dprintf("[%t]\r", CLOCK::GetLocalTime());
-		};
+		// BSPで実行
+		for(new PU;;){
+			PU::Dispatch();
+			assert(false);
+		}
 	};
 	//AP用Init
 	void APInit(void){
-		EXCEPTION::LoadIDT();
-		new PU;
-		for(CPU::EnableInterrupt();; CPU::Idle());
+		for(EXCEPTION::LoadIDT(), new PU;;){
+			PU::Dispatch();
+			assert(false);
+		}
 	};
 }
 

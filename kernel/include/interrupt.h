@@ -39,7 +39,8 @@ public:
 		}
 
 		//必要ならタスクディスパッチ
-		PU::Dispatch();
+		//TODO:呼び出すのは戻り先がユーザモードの時だけ
+//		PU::Dispatch();
 	};
 	static void Finish(uint irq){
 		if(!--handlers[irq].rc){
