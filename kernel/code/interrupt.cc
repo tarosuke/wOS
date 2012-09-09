@@ -10,7 +10,7 @@ static INTERRUPT interruptManipulator;
 INTERRUPT::HANDLER INTERRUPT::handlers[CF_MAX_IRQs];
 
 extern "C"{
-	void __INTERRUPT_Handler(uint irq){
-		INTERRUPT::Handler(irq);
+	void __INTERRUPT_Handler(uint irq, bool dispachable){
+		INTERRUPT::Handler(irq, dispachable);
 	}
 }

@@ -60,6 +60,9 @@
 .L_jumpPad:
 	push	%ds
 	push	%es
+	mov	%ds, %dx
+	and	$3, %edx
+	push	%edx
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
@@ -67,6 +70,7 @@
 	push	%eax
 	/***** ハンドラ実行 */
 	call	__INTERRUPT_Handler
+	pop	%eax
 	pop	%eax
 	/***** 終了 */
 3:	pop	%es
