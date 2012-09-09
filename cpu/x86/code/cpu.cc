@@ -24,8 +24,12 @@ extern "C"{
 
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 
-CPU::APIC::APIC() : body((u32*)HEAP::Assign(0xfee00000U, PAGESIZE)){};
 LOCK CPU::lock;
+CPU::APIC CPU::apic __attribute__((init_priority(59535)));
+
+
+CPU::APIC::APIC() :
+	body((u32*)HEAP::Assign(0xfee00000U, PAGESIZE)){};
 
 
 CPU::CPU() :

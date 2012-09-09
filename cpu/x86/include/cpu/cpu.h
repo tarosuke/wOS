@@ -82,7 +82,7 @@ private:
 #endif
 	TSS& tss;
 	static TSS tsss[];
-	class APIC{
+	static class APIC{
 	public:
 		volatile u32* const body;
 		APIC();
