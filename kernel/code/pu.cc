@@ -23,7 +23,7 @@ extern "C"{
 }
 
 
-void PU::DispatchItsOwn(){
+void PU::_Dispatch(){
 	for(;;){
 		DisableInterrupt();
 		next = ready.Get((*current).priority);
@@ -56,4 +56,7 @@ void PU::DispatchItsOwn(){
 			Idle();
 		}
 	}
+}
+
+void PU::_Wakeup(TASK& task){
 }

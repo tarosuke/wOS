@@ -34,7 +34,7 @@ public:
 			h.rc = 0;
 			TASK* t;
 			for(QUEUE<TASK>::ITOR i(h.tasks); (t = i++); h.rc++){
-				(*t).Enqueue(irq);
+				(*t).WakeupByInterrupt(irq);
 			}
 		}
 

@@ -14,11 +14,6 @@
 #include <vector.h>
 #include <resource.h>
 
-extern "C"{
-#include <userlib/task.h>
-#include <userlib/message.h>
-}
-
 
 class TASK : public CPUTASK{
 	friend class PU;
@@ -64,24 +59,30 @@ public:
 			MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
 		};
 	};
-	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
-	void Enqueue(){
-		//TODO:単純にタスクをレディキューに繋ぐ
-	};
-	void Enqueue(MESSAGE*); //TODO:メッセージをタスクのキューに追加してタスクをreadyにする。もし既にタスクがreadyであり、かつメッセージ優先度がタスク優先度より高ければ優先度継承に従いタスク優先度をメッセージ優先度に変更し新しい優先度のレディキューに繋ぎ直す。
-	void Enqueue(uint irq){
-		//TODO:タスクがPRI_INTERRUPT未満の優先度なら起動登録
-		priority = PRI_INTERRUPT;
-		(*this).irq = irq;
-	};
+
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
 	void operator delete(void* mem);
+
+	void WakeupByInterrupt(uint irq){
+		(*this).irq = irq;
+		reason = RS_FINE;
+		Wakeup(PRI_INTERRUPT);
+	};
+	void WakeupByTimeup(){
+		cronNode.Detach();
+		reason = RS_TIMEUP;
+		Wakeup(originalPriority);
+	};
+	void WakeupByMessage(class MESSAGE&);
+
 	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 
-	MESSAGEQUEUE in;		//このタスクの受信メッセージ
+	void Wakeup(PRIORITY);	//タスクを引数以上の優先度で起床
+
+	MULTIQUEUE<class MESSAGE, __pri_max> in; //このタスクの受信メッセージ
 	class PU* owner;		//現在このタスクを実行しているプロセッサ
 	PRIORITY originalPriority; //元の優先度
 	PRIORITY priority;	//現在の優先度
@@ -93,11 +94,6 @@ private:
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
 	bool newbie;		//新規作成タスク(カーネルスタックが無効)
-
-	void WakeUp(REASON r = RS_FINE){
-		reason = r;
-		Enqueue();
-	};
 
 	///// 以下はシステム全体の話
 	static const uint thisSizeIndex;

@@ -6,6 +6,7 @@
 #include <task.h>
 #include <heap.h>
 #include <pu.h>
+#include <message.h>
 #include <debug.h>
 
 
@@ -35,3 +36,17 @@ void TASK::operator delete(void* mem){
 	HEAP::Release(mem, thisSizeIndex);
 }
 
+
+void TASK::Wakeup(TASK::PRIORITY p){
+	if(p < priority){
+		//もしタスクが割り込み以上の優先度なら起動処理は不要
+		priority = p;
+		PU::WakeUp(*this);
+	}
+};
+
+void TASK::WakeupByMessage(MESSAGE& m){
+	reason = RS_FINE;
+	in.Add(m.priority, m.node);
+	Wakeup(m.priority);
+};

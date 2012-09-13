@@ -18,12 +18,18 @@ public:
 	NODE(T* owner) : owner(owner), next(this), prev(this){};
 	//thisをnの前に接続
 	void Insert(NODE& n){
+		if(prev != next){
+			Detach();
+		}
 		prev = n.prev;
 		next = &n;
 		n.prev = (*prev).next = this;
 	};
 	//thisをnの後に接続
 	void Attach(NODE& n){
+		if(prev != next){
+			Detach();
+		}
 		next = n.next;
 		prev = &n;
 		n.next = (*next).prev = this;

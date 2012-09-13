@@ -26,7 +26,7 @@ public:
 	};
 	/// ディスパッチ
 	static inline void Dispatch(){
-		GetPU().DispatchItsOwn();
+		GetPU()._Dispatch();
 	};
 	/// 現在の状態を取得、など
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
@@ -38,7 +38,19 @@ public:
 		grave.Add((*pu.current).qNode);
 		(*pu.current).priority = TASK::__pri_max;
 	};
+	/// タスクの起床
+	static void WakeUp(TASK& task){
+		(*task.owner).WakeUp(task);
+		RequestDispatch(*task.owner);
+	};
 private:
+	static inline void RequestDispatch(PU& pu){
+		#if CF_SMP
+		if(&pu != &GetPU()){
+			//TODO:(*task.owner)に対してIPI
+		}
+		#endif
+	};
 	static inline PU& GetPU(){
 #if CF_SMP
 		return pus[GetID()];
@@ -46,7 +58,8 @@ private:
 		return pus[0];
 #endif
 	};
-	void DispatchItsOwn();
+	void _Dispatch();
+	void _Wakeup(TASK&);
 	typedef PLACER<PU, CF_MAX_PROCESSORs> PUPLACER;
 	static PUPLACER pus;
 	static ATOMIC numOfPu;

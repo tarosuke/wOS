@@ -6,6 +6,14 @@
 #ifndef _MESSAGE_
 #define _MESSAGE_
 
+#include <task.h>
+#include <queue.h>
 
+
+class MESSAGE{
+public:
+	TASK::PRIORITY priority;
+	NODE<MESSAGE> node;
+};
 
 #endif
