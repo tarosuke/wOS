@@ -41,7 +41,7 @@ void TASK::Wakeup(TASK::PRIORITY p){
 	if(p < priority){
 		//もしタスクが割り込み以上の優先度なら起動処理は不要
 		priority = p;
-		PU::WakeUp(*this);
+		(*owner).WakeUp(*this);
 	}
 };
 

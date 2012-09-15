@@ -49,14 +49,16 @@ void PU::_Dispatch(){
 			#if 4 < CF_DEBUG_LEVEL
 			if(!cpuid){ hprintf("[%t]\r", CLOCK::GetLocalTime()); }
 			#endif
-			//;rave-keeping(graveに置いてある構造を解放)
+			//grave-keeping(graveに置いてある構造を解放)
 			for(TASK* t; (t = grave.Get()); delete t);
-			// 完全に休み TODO::CPUに移動するほうがよくない？
-			EnableInterrupt();
+			// 完全に休み
 			Idle();
 		}
 	}
 }
 
-void PU::_Wakeup(TASK& task){
+
+///TODO:仮想メモリを全解放する。後は言語がやってくれる
+TASK::~TASK(){
 }
+

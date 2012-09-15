@@ -24,7 +24,7 @@ public:
 	};
 	//暇なのでhltして待つ
 	static void Idle(){
-		asm volatile("hlt");
+		asm volatile("sti; hlt");
 	};
 protected:
 	CPU();
@@ -38,8 +38,20 @@ protected:
 		return id;
 #endif
 	};
+	inline void IssueIPI(){
+		while(apic.body[0xc0] & 0x1000);
+		apic.body[0xc1] = apicID << 24;
+		apic.body[0xc0] = 0x4000; //TODO:ベクタを設定
+	};
 private:
-#if CF_IA32
+	static inline uint GetAPICID(){
+		#if !CF_SMP
+		return 0;
+		#else
+		return apic.IsReady() ? apic.body[8] >> 24 : 0;
+		#endif
+	};
+	#if CF_IA32
 	struct TSS{
 		u32 link;
 		u32 esp0;
@@ -89,6 +101,7 @@ private:
 		bool IsReady(){ return !!body; };
 	}apic;
 	static LOCK lock;
+	const uint apicID;
 };
 
 

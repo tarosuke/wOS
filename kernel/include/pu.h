@@ -32,16 +32,19 @@ public:
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 	/// タスク終了
 	static void Kill(){
-		//TODO:タスク終了時にいきなりタスク領域を解放すると現在使っているスタックまで開放してしまうことになって都合が悪いため、領域を開放するための待ち行列(grave)に投入し、ゾンビとする。
+		//タスク終了時にいきなりdeleteするとその時点で使っているスタックまで開放してしまうことになって都合が悪いため、delete待ち行列(grave)に投入し、墓守がdeleteするまでゾンビとする。
 		PU& pu(GetPU());
 		IKEY key;
 		grave.Add((*pu.current).qNode);
 		(*pu.current).priority = TASK::__pri_max;
 	};
 	/// タスクの起床
-	static void WakeUp(TASK& task){
-		(*task.owner).WakeUp(task);
-		RequestDispatch(*task.owner);
+	void WakeUp(TASK& task){
+		ready.Add(task);
+		if(cpuid != GetID()){
+			//IPIを発行するのは対象が自分以外の場合だけ
+			IssueIPI();
+		}
 	};
 private:
 	static inline void RequestDispatch(PU& pu){
@@ -59,7 +62,6 @@ private:
 #endif
 	};
 	void _Dispatch();
-	void _Wakeup(TASK&);
 	typedef PLACER<PU, CF_MAX_PROCESSORs> PUPLACER;
 	static PUPLACER pus;
 	static ATOMIC numOfPu;

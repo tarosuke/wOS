@@ -53,10 +53,14 @@ public:
 	class TASKQUEUE : public MULTIQUEUE<TASK, __pri_max>{
 	public:
 		inline void Add(TASK& task){
-			MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
+			if(task.priority < __pri_max){
+				MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
+			}
 		};
 		inline void Insert(TASK& task){
-			MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
+			if(task.priority < __pri_max){
+				MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
+			}
 		};
 	};
 
@@ -79,6 +83,7 @@ public:
 	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
+	~TASK();			//タスクの完全解放。graveKeeperからしか呼べない
 
 	void Wakeup(PRIORITY);	//タスクを引数以上の優先度で起床
 
