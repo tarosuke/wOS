@@ -58,7 +58,3 @@ void PU::_Dispatch(){
 }
 
 
-///TODO:仮想メモリを全解放する。後は言語がやってくれる
-TASK::~TASK(){
-}
-

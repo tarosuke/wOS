@@ -50,3 +50,9 @@ void TASK::WakeupByMessage(MESSAGE& m){
 	in.Add(m.priority, m.node);
 	Wakeup(m.priority);
 };
+
+
+///TODO:仮想メモリを全解放する。後は言語がやってくれる
+TASK::~TASK(){
+}
+
