@@ -9,7 +9,7 @@
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
 .extern __kernelBase_hi, __kernelBase_lo, __kernel_base, __init_LMA
-.global __hiPageTable, __pageRoot
+.global __hiPageTable, __pageRoot, __LMA_BOOTLOCK
 .extern __image_size, __preset_pages
 
 
@@ -20,7 +20,7 @@
 	/***** SMPのための領域 */
 .L_processor:
 	.word	0
-.L_lock:
+__LMA_BOOTLOCK:
 	.byte	0
 
 
@@ -40,7 +40,7 @@ __init16:
 	movw	%ax, %sp
 
 	/***** spinlock for stack */
-	mov	$.L_lock, %esi
+	mov	$__LMA_BOOTLOCK, %esi
 	mov	$1, %al
 1:	xchg	(%si), %al
 	test	%al, %al
@@ -524,7 +524,6 @@ __LMA_TSSPH:
 	add	%xax, %xsp
 
 	/***** ロック解除、BSP/AP判定 */
-	movb	$0, (.L_lock)
 	mov	%gs, %ax
 	test	%ax, %ax
 	jnz	1f

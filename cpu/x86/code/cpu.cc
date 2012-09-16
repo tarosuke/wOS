@@ -19,6 +19,7 @@ extern "C"{
 #if CF_AMD64
 	extern u64 __TSSPH[][2];
 #endif
+	extern char __BOOTLOCK;
 };
 
 
@@ -89,6 +90,9 @@ CPU::CPU() :
 	hprintf("desc(1): %016llx.\n", __TSSPH[cpuid][1]);
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid * 16));
 #endif
+
+	//ロック解除
+	__BOOTLOCK = 0;
 
 	dputs(UNINDENT"OK.\n");
 }
