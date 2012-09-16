@@ -68,6 +68,7 @@ public:
 	void* operator new(munit);
 	void operator delete(void* mem);
 
+	/// タスクの起床
 	void WakeupByInterrupt(uint irq){
 		(*this).irq = irq;
 		reason = RS_FINE;
@@ -79,6 +80,9 @@ public:
 		Wakeup(originalPriority);
 	};
 	void WakeupByMessage(class MESSAGE&);
+
+	/// タスクを待ち状態にする
+	void Wait(TASKQUEUE* const wait = 0, tunit uptime = TIME::INFINITE);
 
 	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
