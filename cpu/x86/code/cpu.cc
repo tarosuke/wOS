@@ -34,8 +34,7 @@ CPU::APIC::APIC() :
 
 CPU::CPU() :
 	cpuid(GetID()),
-	tss(tsss[cpuid]),
-	apicID(GetAPICID()){
+	tss(tsss[cpuid]){
 	KEY key(lock);
 #if CF_SMP
 	dprintf("cpu(%d)..."INDENT, cpuid);
@@ -43,7 +42,6 @@ CPU::CPU() :
 	if(apic.IsReady()){
 		hputs("checking APIC..."INDENT);
 		hprintf("mapped APIC register:%p.\n", apic);
-		hprintf("APIC ID: %x/%x.\n", apicID, apic.body[8] >> 24);
 		hprintf("APIC ver: %x.\n", apic.body[12] & 255);
 		hprintf("APIC LVT timer: %x.\n", apic.body[0x320 / 4]);
 		hprintf("APIC LVT temp: %x.\n", apic.body[0x340 / 4]);

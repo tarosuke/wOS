@@ -30,27 +30,18 @@ protected:
 	CPU();
 	const uint cpuid;
 	static inline uint GetID(){
-#if !CF_SMP
-		return 0;
-#else
-		u16 id;
-		asm volatile("mov %%gs, %0" : "=r"(id));
-		return id;
-#endif
-	};
-	inline void IssueIPI(){
-		while(apic.body[0xc0] & 0x1000);
-		apic.body[0xc1] = apicID << 24;
-		apic.body[0xc0] = 0x4000; //TODO:ベクタを設定
-	};
-private:
-	static inline uint GetAPICID(){
 		#if !CF_SMP
 		return 0;
 		#else
 		return apic.IsReady() ? apic.body[8] >> 24 : 0;
 		#endif
 	};
+	inline void IssueIPI(){
+		while(apic.body[0xc0] & 0x1000);
+		apic.body[0xc1] = cpuid << 24;
+		apic.body[0xc0] = 0x4000; //TODO:ベクタを設定
+	};
+private:
 	#if CF_IA32
 	struct TSS{
 		u32 link;
@@ -101,7 +92,6 @@ private:
 		bool IsReady(){ return !!body; };
 	}apic;
 	static LOCK lock;
-	const uint apicID;
 };
 
 
