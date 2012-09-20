@@ -34,6 +34,14 @@ protected:
 		asm volatile("mov %%rsp, %0" : "=r"(stack));
 		#endif
 	};
+	inline void StoreStack(){
+		#if CF_IA32
+		asm volatile("mov %0, %%esp" :: "r"(stack));
+		#endif
+		#if CF_AMD64
+		asm volatile("mov %0, %%rsp" :: "r"(stack));
+		#endif
+	};
 	inline void DiveInto(){
 		//TODO:TSSをスタックの初期値に設定してユーザ空間へ降りる
 	};

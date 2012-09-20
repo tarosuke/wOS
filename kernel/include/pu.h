@@ -46,6 +46,10 @@ public:
 			IssueIPI();
 		}
 	};
+	/// アイドルスタックの設定
+	void SetupIdle(){
+		idle.StoreStack();
+	};
 private:
 	static inline void RequestDispatch(PU& pu){
 		#if CF_SMP

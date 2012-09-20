@@ -91,9 +91,11 @@ CPU::CPU() :
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid * 16));
 #endif
 
+	dputs(UNINDENT"OK.\n");
+}
+
+void CPU::ReleaseBootlock(){
 	//ロック解除
 	__BOOTLOCK = 0;
-
-	dputs(UNINDENT"OK.\n");
 }
 
