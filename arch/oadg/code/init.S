@@ -218,14 +218,8 @@ __LMA32:
 	mov	%ax, %es
 	mov	%ax, %fs
 	mov	%ax, %ss
-	xor	%eax, %eax
-	mov	%gs, %ax
-	shl	$10, %eax
-	mov	$.L_temporaryStackTop, %esp
-	sub	%eax, %esp
+	mov	$0x10000, %esp
 	ljmp	$KCSel, $.L_initPages
-	.space	1024 * CF_MAX_PROCESSORs, 0
-.L_temporaryStackTop:
 
 
 
