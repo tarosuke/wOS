@@ -19,6 +19,7 @@ extern "C"{
 #if CF_AMD64
 	extern u64 __TSSPH[][2];
 #endif
+	extern char __BOOTLOCK;
 };
 
 
@@ -91,5 +92,10 @@ CPU::CPU() :
 #endif
 
 	dputs(UNINDENT"OK.\n");
+}
+
+void CPU::ReleaseBootlock(){
+	//ロック解除
+	__BOOTLOCK = 0;
 }
 

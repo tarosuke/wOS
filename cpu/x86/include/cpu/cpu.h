@@ -26,6 +26,7 @@ public:
 	static void Idle(){
 		asm volatile("sti; hlt");
 	};
+	static void ReleaseBootlock();
 protected:
 	CPU();
 	const uint cpuid;

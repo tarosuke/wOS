@@ -20,6 +20,8 @@ __kernel_size = SIZEOF(.kernel);
 __LMA32_16 = ABSOLUTE(__LMA32) & 0xffff;
 __TSSPH = ABSOLUTE(__LMA_TSSPH) + __kernel_base;
 
+__BOOTLOCK = ABSOLUTE(__LMA_BOOTLOCK) + __kernel_base;
+
 /* utilities */
 __arch_CGA_VRAM = __kernel_base + 0xb8000;
 __pageRoot_VMA = ABSOLUTE(__pageRoot) + __kernel_base;

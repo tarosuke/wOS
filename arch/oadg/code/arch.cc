@@ -69,15 +69,17 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		// BSPで実行
-		for(new PU;;){
+		// BSPで実行(new PUは割り当てられないと戻らないのでこれでいい)
+		for((*(new PU)).SetupIdle(), CPU::ReleaseBootlock();;){
 			PU::Dispatch();
 			assert(false);
 		}
 	};
 	//AP用Init
 	void APInit(void){
-		for(EXCEPTION::LoadIDT(), new PU;;){
+		for(EXCEPTION::LoadIDT(),
+			(*(new PU)).SetupIdle(),
+			CPU::ReleaseBootlock();;){
 			PU::Dispatch();
 			assert(false);
 		}
