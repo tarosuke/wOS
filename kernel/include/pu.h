@@ -21,11 +21,13 @@ public:
 	PU() : current(&idle){};
 	void* operator new(munit){
 		const uint id(GetID());
+dprintf("gs:%04x.\n", id);
 		assert(id < CF_MAX_PROCESSORs);
 		return (void*)&pus[id];
 	};
 	/// 全プロセッサを対象としてディスパッチ
 	static void Dispatch(){
+		//TODO:全プロセッサを対象としてディスパッチ
 	};
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 private:

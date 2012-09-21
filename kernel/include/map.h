@@ -8,6 +8,8 @@
 
 #include <types.h>
 #include <reference.h>
+#include <debug.h>
+#include <vector.h>
 
 
 /// 抽象マップ
@@ -18,14 +20,13 @@ public:
 	MAP(BODY*) : REFERENCE(body), body(body){};
 	MAP(MAP& org) : REFERENCE(org.body), body(org.body){};
 	runit GetPage(punit p){
-		return body ? (*body).GetPage(p) : 0; };
+		assert(body);
+		return (*body).GetPage(p); };
 	class BODY : public REFERENCE::BODY{
 	protected:
-		BODY(void* start, munit size) :
-			startPage((munit)start / PAGESIZE),
+		BODY(munit size) :
 			pages(size / PAGESIZE){};
 		virtual ~BODY() = 0;
-		punit startPage;
 		punit pages;
 	public:
 		virtual runit GetPage(punit) = 0;
@@ -38,24 +39,29 @@ private:
 
 class FIXMAP : public MAP::BODY{
 public:
-	FIXMAP(runit r, void* v, munit size) :
-		MAP::BODY(v,size),
+	FIXMAP(runit r, munit size) :
+		MAP::BODY(size),
 		start(r / PAGESIZE){};
 	~FIXMAP(){};
 	runit GetPage(punit);
 private:
-	const runit start;
+	const punit start;
 };
 
 
 class TASK;
 class COMMONMAP : public MAP::BODY{
 public:
-	COMMONMAP(void* start, munit size, TASK& master);
+	COMMONMAP(munit size) :
+		MAP::BODY(size){};
 	runit GetPage(punit);
-	~COMMONMAP();
+	~COMMONMAP(){};
 private:
-	TASK& master; //マスタータスク。ここにページ情報を取りに行く。マップが消滅するまでマスタータスクの消滅は許されない。
+	class LEAF{
+	public:
+		runit pages[256];
+	};
+	VECTOR<LEAF> tree;
 };
 
 

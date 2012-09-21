@@ -8,7 +8,6 @@
 
 #include <config.h>
 #include <types.h>
-#include <map.h>
 #include <lock.h>
 #include <debug.h>
 #include <cpu/exception.h>
@@ -28,7 +27,7 @@ public:
 	static const runit bigPage = 0x80;
 	static const runit global = 0x100;
 	static const runit valid = 0x200;
-	static const runit maped = 0x400;
+	static const runit mapped = 0x400;
 	static const runit copyOnWrite = 0x800;
 	static const runit pageAttributeIndex4M = 0x1000;
 #if CF_AMD64
@@ -90,6 +89,12 @@ private:
 		runit lwcp; // 最後に設定したwcp
 	}pageTableArray;
 #endif
+	static void Assign(runit& pte, munit addr, punit newPage){
+		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
+		asm volatile(
+			"xor %%eax, %%eax;"
+			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+	};
 };
 
 

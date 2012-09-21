@@ -9,34 +9,37 @@
 #include <types.h>
 #include <lock.h>
 #include <reference.h>
+#include <map.h>
 
 
 /// MAPやソケットなどの抽象リソース
 class RESOURCE{
 	friend class HANDLER;
 public:
-	RESOURCE() : users(0){};
+	RESOURCE(){};
 	virtual ~RESOURCE(){};
-	virtual void SystemRequest(void* message) = 0;
+	virtual void SystemRequest(void* message);
+	virtual runit GetPage(punit);
 protected:
 private:
-	void Use();
-	void Release();
-	LOCK lock;
-	uint users;
+	static void IlligalOperation();
 };
 
-/// ユーザプロセスからリソースへアクセスするための抽象ハンドラ
-class HANDLER{
+
+class MAPRESOURCE : public RESOURCE{
 public:
-	HANDLER(RESOURCE& org) : org(org){ org.Use(); }
-	virtual ~HANDLER(){ org.Release(); };
-	uint GetID() const { return 0; };
-private:
-	RESOURCE& org;
+	//COMMONMAP用
+	MAPRESOURCE(void* start, munit size);
+	//実アドレス指定マップ用
+	MAPRESOURCE(void* start, runit pa, munit size);
+	//マップ利用者用
+	MAPRESOURCE(void* start, MAP& map);
+	~MAPRESOURCE();
+	runit GetPage(punit);
+protected:
+	MAP map;
+	punit start;
 };
-
-
 
 
 #endif

@@ -7,6 +7,7 @@
 #include <realPage.h>
 #include <cpu/task.h>
 #include <heap.h>
+#include <pu.h>
 
 
 extern "C"{
@@ -171,7 +172,6 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 
 		///// check kernel/user
 		if(code & ~pte & user){
-			//TODO:REBOOT ME
 			dprintf("Page protection violated at %p(%08x):%r.", addr, code, pte);
 			Panic("");
 		}
@@ -179,7 +179,6 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		///// check writable & not CoW
 		if(code & pte & readOnly){
 			if(~pte & copyOnWrite){
-				//TODO:REBOOT ME
 				dprintf("Page isn't writable at %p(%08x):%r.", addr, code, pte);
 				Panic("");
 			}else{
@@ -198,9 +197,21 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		Panic("");
 	}
 
-	if(pte & maped){
-		//TODO:マップによる割り当て
-		Panic("page mapping isn't available.");
+	if(pte & mapped){
+		//マップから実ページを取得
+		RESOURCE* const map(PU::GetCurrentTask().resources[pte >> 12]);
+		if(!map){
+			//TODO:本来は異常動作としてプロセス再起動
+			Panic("No map found.");
+		}
+
+		const runit newPage((*map).GetPage(page));
+		if(!newPage){
+			Panic("Out of map pages.");
+		}
+
+		// ページ割り当て
+		Assign(pte, addr, newPage);
 	}else{
 		if((munit)&pageTableArray[kernelStartPage] <= addr){
 			//カーネル領域のページテーブル要求なのでmasterを参照
@@ -214,12 +225,11 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 
 		// 普通のページ割り当て
 		const punit newPage(REALPAGE::GetPages());
-		assert(newPage);
+		if(!newPage){
+			Panic("Out of memory.");
+		}
 
-		// ページを割り当ててページをクリア
-		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
-		asm volatile(
-			"xor %%eax, %%eax;"
-			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+		// ページ割り当て
+		Assign(pte, addr, newPage);
 	}
 }

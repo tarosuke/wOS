@@ -11,6 +11,8 @@
 #include <queue.h>
 #include <map.h>
 #include <cpu/task.h>
+#include <vector.h>
+#include <resource.h>
 
 extern "C"{
 #include <userlib/task.h>
@@ -69,6 +71,7 @@ public:
 	void operator delete(void* mem);
 	void MapLock(){}; //TODO:メモリ空間の解放禁止
 	void MapUnlock(){}; //TODO:メモリ空間の解放許可。予約されてればその場で解放。
+	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 

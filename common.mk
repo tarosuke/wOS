@@ -13,7 +13,7 @@ NLD := $(LD)
 NAS := $(AS)
 NCC := $(CC)
 
-CC = gcc
+CC = $(prefix)gcc
 CPP = $(prefix)cpp
 AS = $(prefix)as
 AR = $(prefix)ar

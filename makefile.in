@@ -21,6 +21,7 @@ uobjs = $(addsuffix .o, $(umods))
 
 
 mods = $(kmods) $(umods)
+-include $(addsuffix .d, $(mods))
 
 
 ################################################################# SOURCE PATHs

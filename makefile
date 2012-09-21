@@ -1,6 +1,6 @@
 ################################################### MAKEFILE FOR WHOLE TARGETs
 
-.PHONY: help all clean configure tools emu confall todo cleantools erasetools
+.PHONY: help all clean configure tools emu confall todo cleantools erasetools test
 
 TARGET ?= $(ARCH)
 targets = $(dir $(shell ls objs/*/makefile))
@@ -46,3 +46,9 @@ confall:
 
 todo:
 	@grep -nrI --exclude-dir objs --exclude-dir .git --exclude-dir docs --exclude makefile 'TODO:' .
+
+
+test:
+	@if ! [ -d objs/test ]; then mkdir objs/test; fi
+	@gcc -I test/include -o objs/test/test $(wildcard test/*.cc)
+	@objs/test/test | tee objs/test/test.log

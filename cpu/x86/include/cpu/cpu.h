@@ -37,7 +37,9 @@ protected:
 #if !CF_SMP
 		return 0;
 #else
-		//TODO: APICからプロセッサIDを読み出す
+		u16 id;
+		asm volatile("mov %%gs, %0" : "=r"(id));
+		return id;
 #endif
 	};
 	void* const idleStack;	//アイドル時のスタック(初期化時に設定)
@@ -98,6 +100,12 @@ private:
 #endif
 	TSS& tss;
 	static TSS tsss[];
+	class APIC{
+	public:
+		volatile u32* const body;
+		APIC();
+		bool IsReady(){ return !!body; };
+	}apic;
 };
 
 

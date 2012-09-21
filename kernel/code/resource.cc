@@ -4,14 +4,38 @@
  */
 
 #include <resource.h>
+#include <debug.h>
 
 
-void RESOURCE::Use(){
-	KEY key(lock); users++;
-};
-void RESOURCE::Release(){
-	{ KEY key(lock); users--; }
-	if(!users){
-		delete this;
-	}
-};
+// 抽象リソースクラス
+void RESOURCE::IlligalOperation(){
+	//TODO:不正動作処理：ログを出力してプロセスを再起動
+	Panic("Illigal rosource operation.");
+}
+
+void RESOURCE::SystemRequest(void* message){
+	IlligalOperation();
+}
+
+runit RESOURCE::GetPage(punit){
+	IlligalOperation();
+	return 0;
+}
+
+
+// マップリソース
+MAPRESOURCE::MAPRESOURCE(void* start, munit size) :
+	map(new COMMONMAP(size)),
+	start((munit)start / PAGESIZE){}
+MAPRESOURCE::MAPRESOURCE(void* start, runit pa, munit size) :
+	map(new FIXMAP(pa, size)),
+	start((munit)start / PAGESIZE){}
+MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
+	map(map),
+	start((munit)start / PAGESIZE){}
+
+MAPRESOURCE::~MAPRESOURCE(){};
+runit MAPRESOURCE::GetPage(punit target){
+	return map.GetPage(target - start);
+}
+

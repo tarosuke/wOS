@@ -28,7 +28,7 @@ typedef unsigned long u64;
 
 /// position & size of virtual memory
 #if CF_IA32
-typedef u32 munit;
+typedef long unsigned int munit;
 #endif
 #if CF_AMD64
 typedef u64 munit;

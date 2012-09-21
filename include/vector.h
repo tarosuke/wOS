@@ -14,9 +14,15 @@
  * ベクタのサイズは事実上無制限
  */
 
-template<class T, typename INDEX = u32> VECTOR{
+template<class T, typename INDEX = u32> class VECTOR{
 public:
-	VECTOR() : depth(0), entry(0){};
+	VECTOR() :
+		depth(0),
+		entry(0),
+		heapIndex(HEAP::GetBlockIndex(sizeof(void*) * 256)){};
+	~VECTOR(){
+		Free(entry, depth);
+	};
 	T* operator[](INDEX index){
 		KEY key(lock);
 		if(!!(index >> (depth * 8))){
@@ -25,47 +31,68 @@ public:
 		}
 		void* p(entry);
 		for(uint d(depth); p && d; d--){
-			p = p[(index >> (d * 8)) & 255];
+			p = ((void**)p)[(index >> (d * 8)) & 255];
 		}
 		return (T*)p;
 	};
 	bool Set(INDEX index, T* value){
 		KEY key(lock);
 		//indexがディレクトリツリーに収まるまでディレクトリツリーを拡大
+		void* p(entry);
 		while(!!(index >> (depth * 8))){
-			void* const p(HEAP::Get(sizeof(void*) * 256).mem);
+			void* const p(HEAP::GetByIndex(heapIndex));
 			if(!p){
 				return false; //確保できなかったのでfalse
 			}
-			p[0] = entry;
+			((void**)p)[0] = entry;
 			entry = p;
 			depth++;
 		}
 
 		//indexが指すエントリを示す。パスがなければ作る。
-		void* p(entry);
+		p = entry;
 		for(uint d(depth); 1 < d; d--){
 			const uint i((index >> (d * 8)) & 255);
-			void* q(p[i]);
+			void* q(((void**)p)[i]);
 			if(!q){
 				//indexまでのディレクトリパスがないので作る
-				q = HEAP::Get(sizeof(void*) * 256).mem;
+				q = HEAP::GetByIndex(heapIndex);
 				if(!q){
 					//確保できなかったのでfalse
 					return false;
 				}
-				p[i] = q;
+				((void**)p)[i] = q;
 			}
 			p = q;
 		}
 		//エントリに書き込んで正常終了
-		((T*)p)[index & 255] = value;
+		((T**)p)[index & 255] = value;
 		return true;
 	};
 private:
 	uint depth;
 	void* entry;
 	LOCK lock;
-}
+	const uint heapIndex;
+	void Free(void* e, uint d){
+		if(d){
+			for(uint i(0); i < 256; i++){
+				void* const f(((void**)e)[i]);
+				if(f){
+					Free(f, d - 1);
+				}
+			}
+			HEAP::Release(e, heapIndex);
+		}else{
+			for(uint i(0); i < 256; i++){
+				T* const t(((T**)e)[i]);
+				if(t){
+					delete t;
+				}
+			}
+			HEAP::Release(e, heapIndex);
+		}
+	};
+};
 
 #endif
