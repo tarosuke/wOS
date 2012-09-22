@@ -34,5 +34,8 @@
 #	define CF_FORCE_VESA_MODE 0
 #endif
 
+#ifndef CF_SERIAL_DEBUG
+#	define CF_SERIAL_DEBUG 0
+#endif
 
 #endif

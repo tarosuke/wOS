@@ -100,6 +100,7 @@ static class ARCH{
 
 #if CF_DEBUG_LEVEL
 void __ARCH_putc(char c){
+#if CF_SERIAL_DEBUG
 	asm volatile(
 		"mov	$0x03fd, %%dx;"
 		"2: inb	%%dx, %%al;"
@@ -109,6 +110,7 @@ void __ARCH_putc(char c){
 		"mov	$0x03f8, %%dx;"
 		"outb	%%al, %%dx"
 		:: "c"(c) : "ax", "dx");
+#endif
 	if(!__VESA_Ready){
 		switch(c){
 			case '\n' :

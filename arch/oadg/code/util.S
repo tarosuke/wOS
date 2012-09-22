@@ -33,6 +33,7 @@
 /*********************************************************** 16BITS CONSOLE */
 .L_putc16_:
 #if CF_DEBUG_LEVEL
+#if CF_SERIAL_DEBUG
 	push	%dx
 	push	%ax
 	mov	$0x03fd, %dx
@@ -43,6 +44,7 @@
 	mov	$0x03f8, %dx
 	outb	%al, %dx
 	pop	%dx
+#endif
 #endif
 	movb	$0x0e, %ah
 	movb	$0x0f, %bl
@@ -81,6 +83,7 @@ __hex16:
 __ARCH_SayHello:
 	//初期化
 #if CF_DEBUG_LEVEL
+#if CF_SERIAL_DEBUG
 	mov	$0x03fa, %dx
 	mov	$0x07, %al
 	outb	%al, %dx
@@ -102,6 +105,7 @@ __ARCH_SayHello:
 	mov	$0xf9, %dl
 	mov	$0x00, %al
 	outb	%al, %dx
+#endif
 #endif
 	//初期メッセージの出力
 	mov	$1f, %esi
