@@ -47,7 +47,7 @@ void PU::_Dispatch(){
 			//アイドル
 			//TODO:負荷測定とかもする
 			#if 4 < CF_DEBUG_LEVEL
-			if(!cpuid){ hprintf("[%t]\r", CLOCK::GetLocalTime()); }
+			if(!cpuid && 10000000U <= CLOCK::Uptime()){ hprintf("[%t]\r", CLOCK::GetLocalTime()); }
 			#endif
 			//grave-keeping(graveに置いてある構造を解放)
 			for(TASK* t; (t = grave.Get()); delete t);
