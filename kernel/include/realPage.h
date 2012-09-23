@@ -17,13 +17,16 @@ class REALPAGE{
 public:
 	class MEMORYBLOCK{
 	public:
-		MEMORYBLOCK(){};
-		MEMORYBLOCK(runit start, runit size, runit used) : start(start / PAGESIZE), size(size / PAGESIZE), used(used / PAGESIZE), stack((punit*)HEAP::Get((size + PAGESIZE - 1) / PAGESIZE).mem), stackTop(0){
+		MEMORYBLOCK(runit start, runit size, runit used) :
+			start(start / PAGESIZE), size(size / PAGESIZE), used(used / PAGESIZE), stack((punit*)HEAP::Get((size + PAGESIZE - 1) / PAGESIZE).mem), stackTop(0){
 			assert(size);
 			assert(stack);
 		};
-		static void* operator new(munit size, void* place){
-			return place;
+		static void* operator new(munit size) throw(){
+			if(numOfBanks < CF_MAX_MEMORYBANKs){
+				return (void*)&memoryBanks[numOfBanks++];
+			}
+			return 0;
 		}
 		inline punit GetPages(punit pages){
 			punit page(0);
@@ -49,6 +52,7 @@ public:
 			stack[stackTop++] = page;
 			return true;
 		};
+		static uint numOfBanks;
 	private:
 		punit start;
 		punit size;
@@ -57,16 +61,14 @@ public:
 		uint stackTop;
 		LOCK lock;
 	};
+	typedef PLACER<MEMORYBLOCK, CF_MAX_MEMORYBANKs> MBPLACER;
 	static void NewMemoryBank(runit start, runit size, runit used){
-		if(numOfBanks < CF_MAX_MEMORYBANKs){
-			new(&memoryBanks[numOfBanks++]) MEMORYBLOCK(start, size, used + PAGESIZE - 1);
-		}
+		new MEMORYBLOCK(start, size, used + PAGESIZE - 1);
 	};
 	static punit GetPages(punit pages = 1);
 	static void ReleasePage(punit page);
 private:
-	static uint numOfBanks;
-	static MEMORYBLOCK memoryBanks[];
+	static MBPLACER memoryBanks;
 };
 
 

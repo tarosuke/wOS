@@ -254,7 +254,7 @@ void Dump(const void* start){
 
 void Panic(const char* message){
 	dputs(message);
-#if 3 <= CF_DEBUG_LEVEL
+#if CF_SERIAL_DEBUG
 	Dump((const void*)&message);
 #endif
 	for(;;){

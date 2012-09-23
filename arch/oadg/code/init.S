@@ -218,9 +218,10 @@ __LMA32:
 	mov	%ax, %es
 	mov	%ax, %fs
 	mov	%ax, %ss
-	mov	$0x10000, %esp
+	mov	$1f, %esp
 	ljmp	$KCSel, $.L_initPages
-
+	.space	1024, 0
+1:
 
 
 /******************************************************* INITIALIZE PAGEING */
