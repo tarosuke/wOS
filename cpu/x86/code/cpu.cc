@@ -19,73 +19,83 @@ extern "C"{
 #if CF_AMD64
 	extern u64 __TSSPH[][2];
 #endif
+	extern char __BOOTLOCK;
 };
 
 
 CPU::TSS CPU::tsss[CF_MAX_PROCESSORs]__attribute__((aligned(1024)));
 
-CPU::APIC::APIC() : body((u32*)HEAP::Assign(0xfee00000U, PAGESIZE)){};
+LOCK CPU::lock;
+CPU::APIC CPU::apic __attribute__((init_priority(59535)));
+
+
+CPU::APIC::APIC() :
+	body((u32*)HEAP::Assign(0xfee00000U, PAGESIZE)){};
 
 
 CPU::CPU() :
 	cpuid(GetID()),
-	idleStack(GetStack()),
 	tss(tsss[cpuid]){
+	KEY key(lock);
+#if CF_SMP
 	dprintf("cpu(%d)..."INDENT, cpuid);
 
 	if(apic.IsReady()){
-		dputs("checking APIC..."INDENT);
-		dprintf("mapped APIC register:%p.\n", apic);
-		dprintf("APIC ID: %x.\n", apic.body[8] >> 24);
-		dprintf("APIC ver: %x.\n", apic.body[12] & 255);
-		dprintf("APIC LVT timer: %x.\n", apic.body[0x320 / 4]);
-		dprintf("APIC LVT temp: %x.\n", apic.body[0x340 / 4]);
-		dputs(UNINDENT"OK.\n");
+		hputs("checking APIC..."INDENT);
+		hprintf("mapped APIC register:%p.\n", apic);
+		hprintf("APIC ver: %x.\n", apic.body[12] & 255);
+		hprintf("APIC LVT timer: %x.\n", apic.body[0x320 / 4]);
+		hprintf("APIC LVT temp: %x.\n", apic.body[0x340 / 4]);
+		hputs(UNINDENT"OK.\n");
 
 		if(!cpuid){
 #if 0
-			dputs("waking up APs...NMI...");
+			hputs("waking up APs...NMI...");
 			apic.body[0xc0] = 0xc4400;
 #else
-			dputs("waking up APs...INIT...");
+			hputs("waking up APs...INIT...");
 			apic.body[0xc0] = 0xc4500;
 			while(apic.body[0xc0] & 0x1000);
-			dputs("SIPI(1)...");
+			hputs("SIPI(1)...");
 			apic.body[0xc0] = 0xc4610;
 			while(apic.body[0xc0] & 0x1000);
-			dputs("SIPI(2)...");
+			hputs("SIPI(2)...");
 			apic.body[0xc0] = 0xc4610;
 #endif
-			dputs("OK.\n");
+			hputs("OK.\n");
 		}
 	}
+#endif
 
 	//  当該プロセッサ用のTSSを設定
-	dprintf("selector: %d.\n", TSSSel + cpuid);
+	hprintf("selector: %d.\n", TSSSel + cpuid * 8);
 	const u64 p((munit)&tss);
 #if CF_IA32
 	__TSSPH[cpuid] = 0x000089000000006c |
 		((p & 0x00ffffff) << 16) |
 		((p & 0xff000000) << 32);
-	dprintf("tss: %p.\n", &tss);
-	dprintf("desc: %016llx.\n", __TSSPH[cpuid]);
+	hprintf("tss: %p.\n", &tss);
+	hprintf("desc: %016llx.\n", __TSSPH[cpuid]);
 	asm volatile(
 		"ltr %%ax; mov %%ss, %0"
-		: "=r"(tss.ss0) : "a"(TSSSel + cpuid));
+		: "=r"(tss.ss0) : "a"(TSSSel + cpuid * 8));
 #endif
 #if CF_AMD64
 	__TSSPH[cpuid][0] = 0x000089000000006c |
 		((p & 0x00ffffff) << 16) |
 		((p & 0xff000000) << 32);
 	__TSSPH[cpuid][1] = p >> 32;
-	dprintf("tss: %p.\n", &tss);
-	dprintf("desc(0): %016llx.\n", __TSSPH[cpuid][0]);
-	dprintf("desc(1): %016llx.\n", __TSSPH[cpuid][1]);
-	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid));
+	hprintf("tss: %p.\n", &tss);
+	hprintf("desc(0): %016llx.\n", __TSSPH[cpuid][0]);
+	hprintf("desc(1): %016llx.\n", __TSSPH[cpuid][1]);
+	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid * 16));
 #endif
 
-	asm volatile("sti");
-
 	dputs(UNINDENT"OK.\n");
+}
+
+void CPU::ReleaseBootlock(){
+	//ロック解除
+	__BOOTLOCK = 0;
 }
 

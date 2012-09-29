@@ -9,7 +9,7 @@
 #include <pu.h>
 #include <cpu/virtualPage.h>
 #include <string.h>
-#include <clock.h>
+#include <cpu/exception.h>
 
 
 #if CF_DEBUG_LEVEL
@@ -69,24 +69,20 @@ extern "C"{
 		}
 		dputs(UNINDENT "OK.\n");
 
-		// BSP関連を初期化
-		new PU;
-
-		// APを起動(もしあれば)
-		PU::WakeupAP();
-
-		// 最初のディスパッチ
-		PU::Dispatch();
-
-		// ここはBSPのアイドルタスク
-		for(CPU::EnableInterrupt();; CPU::Idle()){
-			dprintf("[%t]\r", CLOCK::GetLocalTime());
-		};
+		// BSPで実行(new PUは割り当てられないと戻らないのでこれでいい)
+		for((*(new PU)).SetupIdle(), CPU::ReleaseBootlock();;){
+			PU::Dispatch();
+			assert(false);
+		}
 	};
 	//AP用Init
 	void APInit(void){
-		new PU;
-		for(CPU::EnableInterrupt();; CPU::Idle());
+		for(EXCEPTION::LoadIDT(),
+			(*(new PU)).SetupIdle(),
+			CPU::ReleaseBootlock();;){
+			PU::Dispatch();
+			assert(false);
+		}
 	};
 }
 
@@ -104,6 +100,7 @@ static class ARCH{
 
 #if CF_DEBUG_LEVEL
 void __ARCH_putc(char c){
+#if CF_SERIAL_DEBUG
 	asm volatile(
 		"mov	$0x03fd, %%dx;"
 		"2: inb	%%dx, %%al;"
@@ -113,6 +110,7 @@ void __ARCH_putc(char c){
 		"mov	$0x03f8, %%dx;"
 		"outb	%%al, %%dx"
 		:: "c"(c) : "ax", "dx");
+#endif
 	if(!__VESA_Ready){
 		switch(c){
 			case '\n' :

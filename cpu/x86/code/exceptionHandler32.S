@@ -60,6 +60,9 @@
 .L_jumpPad:
 	push	%ds
 	push	%es
+	mov	%ds, %dx
+	and	$3, %edx
+	push	%edx
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
@@ -68,11 +71,13 @@
 	/***** ハンドラ実行 */
 	call	__INTERRUPT_Handler
 	pop	%eax
+	pop	%eax
 	/***** 終了 */
 3:	pop	%es
 	pop	%ds
 	popal
 	iret
+//TODO:システムコールトラップ用のレジスタを保存しないハンドラを作る
 
 /***** 割り込みハンドラ(個別部) */
 	.align	16

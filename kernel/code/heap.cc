@@ -81,7 +81,8 @@ void HEAP::Release(HEAP::BLOCK& mb){
 
 uint HEAP::GetBlockIndex(munit size){
 	uint i(0);
-	for(; i < 32 && size < memoryPoolSizes[i]; i++);
+	for(; i < 32 && memoryPoolSizes[i] < size; i++);
+	assert(i < 32 && memoryPoolSizes[i]);
 	return i;
 }
 

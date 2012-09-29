@@ -20,7 +20,7 @@ public:
 		dputs("interrupt..." INDENT);
 		dputs(UNINDENT "OK.\n");
 	};
-	static inline void Handler(uint irq){
+	static inline void Handler(uint irq, bool dispatchable){
 		if(CF_MAX_IRQs <= irq){
 			dprintf("irq %d not supported.\n", irq);
 			assert(false);
@@ -34,12 +34,14 @@ public:
 			h.rc = 0;
 			TASK* t;
 			for(QUEUE<TASK>::ITOR i(h.tasks); (t = i++); h.rc++){
-				(*t).Enqueue(irq);
+				(*t).WakeupByInterrupt(irq);
 			}
 		}
 
 		//必要ならタスクディスパッチ
-		PU::Dispatch();
+		if(dispatchable){
+			PU::Dispatch();
+		}
 	};
 	static void Finish(uint irq){
 		if(!--handlers[irq].rc){

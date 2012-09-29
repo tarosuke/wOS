@@ -8,6 +8,7 @@
 
 #include <types.h>
 #include <config.h>
+#include <lock.h>
 
 
 class TASK;
@@ -23,41 +24,26 @@ public:
 	};
 	//暇なのでhltして待つ
 	static void Idle(){
-		asm volatile("hlt");
+		asm volatile("sti; hlt");
 	};
-	static inline void WakeupAP(){
-#if CF_SMP
-		//TODO:AP起動
-#endif
-	};
+	static void ReleaseBootlock();
 protected:
 	CPU();
 	const uint cpuid;
 	static inline uint GetID(){
-#if !CF_SMP
+		#if !CF_SMP
 		return 0;
-#else
-		u16 id;
-		asm volatile("mov %%gs, %0" : "=r"(id));
-		return id;
-#endif
+		#else
+		return apic.IsReady() ? apic.body[8] >> 24 : 0;
+		#endif
 	};
-	void* const idleStack;	//アイドル時のスタック(初期化時に設定)
+	inline void IssueIPI(){
+		while(apic.body[0xc0] & 0x1000);
+		apic.body[0xc1] = cpuid << 24;
+		apic.body[0xc0] = 0x4000; //TODO:ベクタを設定
+	};
 private:
-	inline void Dive(){
-		//TODO:TSSを設定してユーザモードに「戻る」。TSSのカーネルスタックは初期値を設定
-	};
-	inline void* GetStack(){
-		void* stack;
-#if CF_IA32
-		asm volatile("mov %%esp, %0" : "=r"(stack));
-#endif
-#if CF_AMD64
-		asm volatile("mov %%rsp, %0" : "=r"(stack));
-#endif
-		return stack;
-	};
-#if CF_IA32
+	#if CF_IA32
 	struct TSS{
 		u32 link;
 		u32 esp0;
@@ -100,12 +86,13 @@ private:
 #endif
 	TSS& tss;
 	static TSS tsss[];
-	class APIC{
+	static class APIC{
 	public:
 		volatile u32* const body;
 		APIC();
 		bool IsReady(){ return !!body; };
 	}apic;
+	static LOCK lock;
 };
 
 

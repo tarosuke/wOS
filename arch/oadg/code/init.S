@@ -9,16 +9,20 @@
 .global __init16, __LMA32, __ARCH_MemoryBlocks, __LMA_TSSPH
 .extern __kernelProcessDefs16, __InitConsole16, Init, __LMA32_16, __kProcHeader
 .extern __kernelBase_hi, __kernelBase_lo, __kernel_base, __init_LMA
-.global __hiPageTable, __pageRoot
+.global __hiPageTable, __pageRoot, __LMA_BOOTLOCK
 .extern __image_size, __preset_pages
 
 
 /********************************************** PREPAREING TO BOOTSTRAPS UP */
 .code16
 .section .prefix
-	sti
-	hlt
 	jmp	__init16
+	/***** SMPのための領域 */
+.L_processor:
+	.word	0
+__LMA_BOOTLOCK:
+	.byte	0
+
 
 .section .init16
 __init16:
@@ -36,10 +40,10 @@ __init16:
 	movw	%ax, %sp
 
 	/***** spinlock for stack */
-	mov	$.L_lock, %esi
+	mov	$__LMA_BOOTLOCK, %esi
 	mov	$1, %al
 1:	xchg	(%si), %al
-	cmp	%al, %al
+	test	%al, %al
 	jz	1f
 	pause
 	jmp	1b
@@ -51,9 +55,8 @@ __init16:
 	mov	%ax, %gs
 
 	/***** check BSP/AP */
-	cmp	%ax, %ax
+	test	%ax, %ax
 	jz	1f		/* BSP */
-hlt
 	jmp	.L_getMode32	/* AP */
 1:
 	/***** setup vector #2(NMI) */
@@ -214,17 +217,21 @@ __LMA32:
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-//	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$.L_temporaryStackTop, %esp
+	mov	$1f, %esp
 	ljmp	$KCSel, $.L_initPages
 	.space	1024, 0
-.L_temporaryStackTop:
-
+1:
 
 
 /******************************************************* INITIALIZE PAGEING */
 .L_initPages:
+	/***** BSPならページを初期化 */
+	mov	%gs, %ax
+	test	%ax, %ax
+	jz	1f
+	jmp	.L_SET_CR3
+1:
 #if CF_AMD64
 	/***** RPDPにPDPRを登録 */
 	mov	$.L_RPDP, %edi
@@ -366,6 +373,7 @@ __LMA32:
 	mov	%eax, (.L_loPT)*/
 
 	/***** ページングをONにする */
+.L_SET_CR3:
 	mov	$__pageRoot, %eax
 	mov	%eax, %cr3
 	mov	%cr4, %eax
@@ -383,6 +391,7 @@ __LMA32:
 #endif
 	mov	%cr0, %eax
 	bts	$31, %eax
+	and	$0x9fffffff, %eax
 	mov	%eax, %cr0
 
 #if CF_IA32
@@ -440,11 +449,16 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 .L_initPagedSegments:
 #if CF_IA32
 	/***** カーネルイメージへミラーしたGDTを読み込む */
-	mov	$__kernelBase_lo, %eax
 	mov	$.L_GDTPT, %edi
+	/* APなら.L_GDTPTはそのまま */
+	mov	%gs, %ax
+	test	%ax,%ax
+	jnz	1f
+	/* BSPならミラーへアドレスを変更 */
+	mov	$__kernelBase_lo, %eax
 	add	%eax, 2(%edi)
 	add	%eax, %edi
-	lgdt	(%edi)
+1:	lgdt	(%edi)
 	mov	$KDSel, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
@@ -454,10 +468,15 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 #endif
 #if CF_AMD64
 	.code64
-	/***** カーネルイメージへミラーした64bitsなGDTを読み込む */
+	/***** 64bitsなGDTを読み込む */
 	mov	$.L_GDTPT64, %rdi
+	/* 前に通ったプロセッサの初期化で書き換えられたのを戻す */
+	andl $0x0fffffff, 2(%rdi)
+	movl $0, 6(%rdi)
+
+	mov	%rsp, %rax
 	push	$16
-	push	$.L_temporaryStackTop
+	push	%rax
 	pushf
 	push	$KCSel
 	push	$1f
@@ -468,7 +487,6 @@ __hiPageTable: /* 各階層のページディレクトリを覗く穴を置く�
 	mov	%ax, %ds
 	mov	%ax, %es
 	mov	%ax, %fs
-//	mov	%ax, %gs
 	/***** ミラーのGDTを設定(内容は同一なので再設定はしない) */
 	mov	$__kernel_base, %rax
 	add	%rax, 2(%rdi)
@@ -501,17 +519,9 @@ __LMA_TSSPH:
 	add	%xax, %xsp
 
 	/***** ロック解除、BSP/AP判定 */
-//	movb	$0, .L_lock
 	mov	%gs, %ax
-	cmp	$0, %ax
-	jne	1f
+	test	%ax, %ax
+	jnz	1f
 	jmp	Init
 1:	jmp	APInit
-
-
-/*********************************************************** SMPのための領域 */
-.L_processor:
-	.word	0
-.L_lock:
-	.byte	0
 

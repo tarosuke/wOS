@@ -128,14 +128,16 @@
 	push	%r13
 	push	%r14
 	push	%r15
-	mov	%ds, %ax
+	mov	128(%rsp), %rsi	//dispatchable引数
+	and	$3, %rsi
+	mov	%ds, %ax		//セグメント保存
 	push	%ax
 	mov	%es, %ax
 	push	%ax
 	mov	$KDSel, %ax
 	mov	%ax, %ds
 	mov	%ax, %es
-	sub	$ARCH_BASE_VECTOR, %rdi
+	sub	$ARCH_BASE_VECTOR, %rdi //ベクタ番号を割り込み用に修正
 	call	__INTERRUPT_Handler
 	pop	%ax
 	mov	%ax, %es
@@ -157,7 +159,7 @@
 	pop	%rax
 	pop	%rdi
 	iretq
-
+//TODO:システムコールトラップ用のレジスタを保存しないハンドラを作る
 
 /***** 割り込みハンドラ(個別部) */
 	.align	16, 0x90

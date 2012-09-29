@@ -19,6 +19,15 @@ typedef u128 funit;
 
 /// time(unit:microseconds)
 typedef u64 tunit;
+#ifdef __cplusplus
+namespace TIME{
+	static const tunit INFINITE = ~(tunit)0;
+	static const tunit CONTINUE = (INFINITE - 1);
+};
+#else
+#define TIME_INFINITE = (~(tunit)0)
+#define TIME_CONTINUE = (TIME_INFINITE - 1)
+#endif
 
 /// wOS charactor
 typedef u32 tchar;

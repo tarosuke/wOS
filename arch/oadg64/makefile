@@ -19,9 +19,9 @@ qemuOpts = -no-kvm-irqchip -vga std -serial stdio -smp 8 -m 4096 $(shell cat $(q
 emu : emufd
 
 emufd : wOS.fd hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -fda wOS.fd -hda hddImage -boot a
+	qemu $(qemuOpts) -fda wOS.fd -hda hddImage -boot a&
 emucd : wOS.iso hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d
+	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d&
 
 
 ##### qemu network options

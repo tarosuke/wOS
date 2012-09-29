@@ -14,11 +14,6 @@
 #include <vector.h>
 #include <resource.h>
 
-extern "C"{
-#include <userlib/task.h>
-#include <userlib/message.h>
-}
-
 
 class TASK : public CPUTASK{
 	friend class PU;
@@ -55,28 +50,50 @@ public:
 		RS_PERMITION,	//ユーザに権限がない
 		RS_TIMEUP,	//時間切れ
 	};
-	typedef MULTIQUEUE<TASK, __pri_max> TASKQUEUE;
-	typedef MULTIQUEUE<MESSAGE, __pri_max> MESSAGEQUEUE;
-	void Enqueue(){
-		//TODO:単純にタスクをレディキューに繋ぐ
+	class TASKQUEUE : public MULTIQUEUE<TASK, __pri_max>{
+	public:
+		inline void Add(TASK& task){
+			if(task.priority < __pri_max){
+				MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
+			}
+		};
+		inline void Insert(TASK& task){
+			if(task.priority < __pri_max){
+				MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
+			}
+		};
 	};
-	void Enqueue(MESSAGE*); //TODO:メッセージをタスクのキューに追加してタスクをreadyにする。もし既にタスクがreadyであり、かつメッセージ優先度がタスク優先度より高ければ優先度継承に従いタスク優先度をメッセージ優先度に変更し新しい優先度のレディキューに繋ぎ直す。
-	void Enqueue(uint irq){
-		//TODO:タスクがPRI_INTERRUPT未満の優先度なら起動登録
-		priority = PRI_INTERRUPT;
-		(*this).irq = irq;
-	};
+
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
 	void operator delete(void* mem);
-	void MapLock(){}; //TODO:メモリ空間の解放禁止
-	void MapUnlock(){}; //TODO:メモリ空間の解放許可。予約されてればその場で解放。
+
+	/// タスクの起床
+	void WakeupByInterrupt(uint irq){
+		(*this).irq = irq;
+		reason = RS_FINE;
+		Wakeup(PRI_INTERRUPT);
+	};
+	void WakeupByTimeup(){
+		cronNode.Detach();
+		reason = RS_TIMEUP;
+		Wakeup(originalPriority);
+	};
+	void WakeupByMessage(class MESSAGE&);
+
+	/// タスクを待ち状態にする
+	void Wait(TASKQUEUE* const wait = 0, tunit uptime = TIME::INFINITE);
+
 	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
+	~TASK();			//タスクの完全解放。graveKeeperからしか呼べない
 
-	MESSAGEQUEUE in;		//このタスクの受信メッセージ
+	void Wakeup(PRIORITY);	//タスクを引数以上の優先度で起床
+
+	MULTIQUEUE<class MESSAGE, __pri_max> in; //このタスクの受信メッセージ
 	class PU* owner;		//現在このタスクを実行しているプロセッサ
+	PRIORITY originalPriority; //元の優先度
 	PRIORITY priority;	//現在の優先度
 	NODE<TASK> qNode;	//待ちやレディキューのためのノード
 	NODE<TASK> cronNode;	//時間管理のためのキューノード
@@ -85,15 +102,10 @@ private:
 	int irq;		//割り込みリクエスト(負数は無効)
 	REASON reason;		//処理再開時に返すための理由メモ
 	CAPABILITIES capabilities; //タスクの権限
-
-	void WakeUp(REASON r = RS_FINE){
-		reason = r;
-		Enqueue();
-	};
+	bool newbie;		//新規作成タスク(カーネルスタックが無効)
 
 	///// 以下はシステム全体の話
 	static const uint thisSizeIndex;
-	static inline void DispatchTo(TASK& next){};
 };
 
 //TODO:SwitchSpace,RestoreSpaceなどの一時的メモリ空間切り替えなど。

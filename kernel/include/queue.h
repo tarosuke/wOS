@@ -18,12 +18,18 @@ public:
 	NODE(T* owner) : owner(owner), next(this), prev(this){};
 	//thisをnの前に接続
 	void Insert(NODE& n){
+		if(prev != next){
+			Detach();
+		}
 		prev = n.prev;
 		next = &n;
 		n.prev = (*prev).next = this;
 	};
 	//thisをnの後に接続
 	void Attach(NODE& n){
+		if(prev != next){
+			Detach();
+		}
 		next = n.next;
 		prev = &n;
 		n.next = (*next).prev = this;
@@ -33,14 +39,13 @@ public:
 		(*next).prev = prev;
 		(*prev).next = next;
 		prev = next = this;
-		owner = 0;
 	};
 	inline T* Owner(){ return owner; };
 	NODE* Next(){ return next; };
 	NODE* Prev(){ return prev; };
 protected:
 	NODE() : owner(0), next(this), prev(this){};
-	T* owner;
+	T* const owner;
 	NODE* next;
 	NODE* prev;
 };

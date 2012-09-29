@@ -54,20 +54,19 @@ private:
 		ILOCK::Lock();
 		#if 2 <= CF_MAX_PROCESSORs
 		asm volatile(
-			"mov $1, %%eax;"
-			"1: xchg %0, %%eax;"
-			"test %%eax, %%eax;"
+			"mov $1, %%al;"
+			"1: xchg %0, %%al;"
+			"test %%al, %%al;"
 			"jz 1f;"
 			"pause;"
-			"2: cmp $0, %0;"
-			"jnz 2b;"
+			"jmp 1b;"
 			"1:":
 			"=m"(lock) :: "eax");
 		#endif
 	};
 	inline void Unlock(){
 		#if 2 <= CF_MAX_PROCESSORs
-		asm volatile("movl $0, %0" :: "m"(lock));
+		lock = false;
 		#endif
 		ILOCK::Unlock();
 	};

@@ -19,9 +19,9 @@ qemuOpts = -vga std -serial stdio -smp 8 -m 4096 $(shell cat $(qemuOptFiles))
 emu : emufd
 
 emufd : wOS.fd hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -fda wOS.fd -hda hddImage -boot a
+	qemu $(qemuOpts) -fda wOS.fd -hda hddImage -boot a&
 emucd : wOS.iso hddImage $(qemuOptFiles)
-	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d
+	qemu $(qemuOpts) -cdrom wOS.iso -hda hddImage -boot d&
 
 box : wOS.fd
 	bochs -q 'boot:a' 'floppya: 1_44=wOS.fd, status=inserted'
