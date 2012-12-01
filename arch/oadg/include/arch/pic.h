@@ -19,7 +19,7 @@ private:
 	static SBIO<0x4d0> elcr;
 	static uint irqMask;
 	static const uint levels;
-	static const uint irqBaseVector = 0x20;
+	static const uint irqBaseVector = CF_ARCH_BASE_VECTOR;
 	static const uint numOfIrq = 9;
 	static inline void UpdateMask(uint irq){
 		if(irq < 8){
@@ -52,7 +52,7 @@ public:
 	};
 	// 対象割り込みマスク、割り込み許可、エッジトリガならEOI発行
 	static void Start(uint irq){
-		if(16 <= irq){
+		if(CF_MAX_IRQs <= irq){
 			assert(false);
 			return;
 		}
@@ -66,7 +66,7 @@ public:
 	};
 	// 対象割り込みマスク解除、レベルトリガならEOI発行
 	static void Finish(uint irq){
-		if(16 <= irq){
+		if(CF_MAX_IRQs <= irq){
 			assert(false);
 			return;
 		}
@@ -79,7 +79,7 @@ public:
 		}
 	};
 	static inline void EOI(uint irq){
-		if(16 <= irq){
+		if(CF_MAX_IRQs <= irq){
 			return;
 		}
 		if(irq < 8){
@@ -89,14 +89,14 @@ public:
 		}
 	};
 	static void Mask(uint irq){
-		if(16 <= irq){
+		if(CF_MAX_IRQs <= irq){
 			return;
 		}
 		irqMask |= (1U << irq);
 		UpdateMask(irq);
 	};
 	static void Unmask(uint irq){
-		if(16 <= irq){
+		if(CF_MAX_IRQs <= irq){
 			return;
 		}
 		irqMask &= ~(1U << irq);

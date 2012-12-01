@@ -8,8 +8,23 @@
 
 
 #ifndef CF_MAX_IRQs
-#	define CF_MAX_IRQs 17
+#	define CF_MAX_IRQs 16
 #endif
+
+#define CF_ARCH_MAX_INTERRUPTs (CF_MAX_IRQs + 2)
+
+#ifndef CF_ARCH_BASE_VECTOR
+#	define CF_ARCH_BASE_VECTOR 32
+#endif
+
+#ifndef CF_ARCH_SYSTEMCALL_VECTOR
+#	define CF_ARCH_SYSTEMCALL_VECTOR (CF_ARCH_BASE_VECTOR + CF_MAX_IRQs - 1)
+#endif
+
+#ifndef CF_ARCH_IPI_IRQ
+#	define CF_ARCH_IPI_IRQ (CF_MAX_IRQs - 2)
+#endif
+
 
 #ifndef CF_KERNELSTACK_ENTRIES
 #	define CF_KERNELSTACK_ENTRIES 256

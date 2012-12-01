@@ -20,7 +20,7 @@ public:
 		dputs("interrupt..." INDENT);
 		dputs(UNINDENT "OK.\n");
 	};
-	static inline void Handler(uint irq, bool dispatchable){
+	static inline void Handler(uint irq){
 		if(CF_MAX_IRQs <= irq){
 			dprintf("irq %d not supported.\n", irq);
 			assert(false);
@@ -38,10 +38,8 @@ public:
 			}
 		}
 
-		//必要ならタスクディスパッチ
-		if(dispatchable){
-			PU::Dispatch();
-		}
+		//タスクディスパッチ
+		PU::Dispatch();
 	};
 	static void Finish(uint irq){
 		if(!--handlers[irq].rc){

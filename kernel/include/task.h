@@ -84,7 +84,6 @@ public:
 	/// タスクを待ち状態にする
 	void Wait(TASKQUEUE* const wait = 0, tunit uptime = TIME::INFINITE);
 
-	VECTOR<RESOURCE> resources; //タスクが使えるリソース(ファイルハンドルみたいなもん)
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 	~TASK();			//タスクの完全解放。graveKeeperからしか呼べない
@@ -92,6 +91,8 @@ private:
 	void Wakeup(PRIORITY);	//タスクを引数以上の優先度で起床
 
 	MULTIQUEUE<class MESSAGE, __pri_max> in; //このタスクの受信メッセージ
+	QUEUE<class RESOURCE> resources;
+
 	class PU* owner;		//現在このタスクを実行しているプロセッサ
 	PRIORITY originalPriority; //元の優先度
 	PRIORITY priority;	//現在の優先度

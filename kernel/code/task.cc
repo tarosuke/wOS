@@ -7,11 +7,14 @@
 #include <heap.h>
 #include <pu.h>
 #include <message.h>
+#include <realPage.h>
 #include <debug.h>
 
 
 const uint TASK::thisSizeIndex(HEAP::GetBlockIndex(PAGESIZE));
 
+
+/// 現在のコンテキストをタスクにする。アイドルタスクのためのタスク。
 TASK::TASK() :
 	owner(0),
 	originalPriority(__pri_max),
@@ -23,7 +26,27 @@ TASK::TASK() :
 	reason(RS_FINE),
 	newbie(false){
 		capabilities.raw = 0;
-	}
+}
+
+
+/// 実行形式ファイルやメモリの一部を指定する普通のタスク
+TASK::TASK(MAP& map) :
+	owner(0),
+	originalPriority(__pri_max),
+	priority(__pri_max),
+	qNode(this),
+	cronNode(this),
+	irqNode(this),
+	irq(-1),
+	reason(RS_FINE),
+	newbie(true){
+	// コードのための領域をマップとして用意する
+	RESOURCE const* code(new MAPRESOURCE(0, map));
+}
+
+
+
+
 
 
 void* TASK::operator new(munit contentSize){
@@ -52,7 +75,7 @@ void TASK::WakeupByMessage(MESSAGE& m){
 };
 
 
-///TODO:仮想メモリを全解放する。後は言語がやってくれる
 TASK::~TASK(){
+	///TODO:ユーザライブラリ内でユーザ空間とリソース類を解放
 }
 

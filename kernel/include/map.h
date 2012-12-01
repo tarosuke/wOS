@@ -7,40 +7,26 @@
 #define _MAP_
 
 #include <types.h>
-#include <reference.h>
 #include <debug.h>
 #include <vector.h>
 
 
 /// 抽象マップ
-class MAP : public REFERENCE{
+class MAP{
 	MAP();
-	void operator=(MAP&);
-public:
-	MAP(BODY*) : REFERENCE(body), body(body){};
-	MAP(MAP& org) : REFERENCE(org.body), body(org.body){};
-	runit GetPage(punit p){
-		assert(body);
-		return (*body).GetPage(p); };
-	class BODY : public REFERENCE::BODY{
-	protected:
-		BODY(munit size) :
-			pages(size / PAGESIZE){};
-		virtual ~BODY() = 0;
-		punit pages;
-	public:
-		virtual runit GetPage(punit) = 0;
-	};
 protected:
-	BODY* const body;
-private:
+	MAP(munit size) : pages(size / PAGESIZE){};
+	virtual ~MAP() = 0;
+	punit pages;
+public:
+	virtual runit GetPage(punit) = 0;
 };
 
 
-class FIXMAP : public MAP::BODY{
+class FIXMAP : public MAP{
 public:
 	FIXMAP(runit r, munit size) :
-		MAP::BODY(size),
+		MAP(size),
 		start(r / PAGESIZE){};
 	~FIXMAP(){};
 	runit GetPage(punit);
@@ -50,10 +36,10 @@ private:
 
 
 class TASK;
-class COMMONMAP : public MAP::BODY{
+class COMMONMAP : public MAP{
 public:
 	COMMONMAP(munit size) :
-		MAP::BODY(size){};
+		MAP(size){};
 	runit GetPage(punit);
 	~COMMONMAP(){};
 private:

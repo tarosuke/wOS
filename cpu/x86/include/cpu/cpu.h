@@ -22,11 +22,11 @@ public:
 	static inline void DisableInterrupt(){
 		asm volatile("cli");
 	};
-	//暇なのでhltして待つ
+	//暇なので割り込みを許可してhltで待つ。割り込みから戻ったらまた割り込み禁止
 	static void Idle(){
-		asm volatile("sti; hlt");
+		asm volatile("sti; hlt; cli");
 	};
-	static void ReleaseBootlock();
+	static void ReleaseBootLock();
 protected:
 	CPU();
 	const uint cpuid;
@@ -38,9 +38,15 @@ protected:
 		#endif
 	};
 	inline void IssueIPI(){
+		IKEY key();
+#if CF_SMP
 		while(apic.body[0xc0] & 0x1000);
 		apic.body[0xc1] = cpuid << 24;
 		apic.body[0xc0] = 0x4000; //TODO:ベクタを設定
+#else
+		//TODO:IPI用と同じベクタを使う
+		asm volatile("int %0" : "=i"(vector));
+#endif
 	};
 private:
 	#if CF_IA32

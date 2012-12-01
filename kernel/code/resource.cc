@@ -13,10 +13,6 @@ void RESOURCE::IlligalOperation(){
 	Panic("Illigal rosource operation.");
 }
 
-void RESOURCE::SystemRequest(void* message){
-	IlligalOperation();
-}
-
 runit RESOURCE::GetPage(punit){
 	IlligalOperation();
 	return 0;
@@ -24,18 +20,18 @@ runit RESOURCE::GetPage(punit){
 
 
 // マップリソース
-MAPRESOURCE::MAPRESOURCE(void* start, munit size) :
-	map(new COMMONMAP(size)),
-	start((munit)start / PAGESIZE){}
-MAPRESOURCE::MAPRESOURCE(void* start, runit pa, munit size) :
-	map(new FIXMAP(pa, size)),
-	start((munit)start / PAGESIZE){}
-MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
-	map(map),
-	start((munit)start / PAGESIZE){}
-
-MAPRESOURCE::~MAPRESOURCE(){};
-runit MAPRESOURCE::GetPage(punit target){
-	return map.GetPage(target - start);
-}
-
+// MAPRESOURCE::MAPRESOURCE(void* start, munit size) :
+// 	map(new COMMONMAP(size)),
+// 	start((munit)start / PAGESIZE){}
+// MAPRESOURCE::MAPRESOURCE(void* start, runit pa, munit size) :
+// 	map(new FIXMAP(pa, size)),
+// 	start((munit)start / PAGESIZE){}
+// MAPRESOURCE::MAPRESOURCE(void* start, MAP& map) :
+// 	map(map),
+// 	start((munit)start / PAGESIZE){}
+//
+// MAPRESOURCE::~MAPRESOURCE(){};
+// runit MAPRESOURCE::GetPage(punit target){
+// 	return map.GetPage(target - start);
+// }
+//

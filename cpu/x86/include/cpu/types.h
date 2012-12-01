@@ -51,9 +51,6 @@ typedef u64 punit;
 
 #define PAGESIZE (4096)
 
-/// UUID
-typedef u128 uuid;
-
 
 /// endian-aware types
 typedef u16 be16;
@@ -64,7 +61,6 @@ typedef u32 le32;
 #define LE16(org) (org)
 #define BE32(org) ((BE16((org) & 0xffff) << 16) | BE16(((org) >> 16) & 0xffff))
 #define LE32(org) (org)
-
 
 
 /// biggest n of v < 2^n

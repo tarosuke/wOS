@@ -8,37 +8,27 @@
 
 #include <types.h>
 #include <lock.h>
-#include <reference.h>
 #include <map.h>
+#include <servers.h>
 
 
-/// MAPやソケットなどの抽象リソース
+/// 通信路とMAPの複合体
+///TODO:通信路をMAPに統合。つまりただのMAPにする。あとMAPは複数参照を可能にしとく。
 class RESOURCE{
 	friend class HANDLER;
 public:
-	RESOURCE(){};
+	RESOURCE(TASK* current, SERVER_DESCRIPTOR* target, MAP* map = 0)
+		: map(map){
+		terminals[0] = current;
+	};
 	virtual ~RESOURCE(){};
-	virtual void SystemRequest(void* message);
+	virtual void Send(void* message);
 	virtual runit GetPage(punit);
 protected:
 private:
+	MAP* const map;
+	TASK* terminals[2];
 	static void IlligalOperation();
-};
-
-
-class MAPRESOURCE : public RESOURCE{
-public:
-	//COMMONMAP用
-	MAPRESOURCE(void* start, munit size);
-	//実アドレス指定マップ用
-	MAPRESOURCE(void* start, runit pa, munit size);
-	//マップ利用者用
-	MAPRESOURCE(void* start, MAP& map);
-	~MAPRESOURCE();
-	runit GetPage(punit);
-protected:
-	MAP map;
-	punit start;
 };
 
 

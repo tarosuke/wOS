@@ -91,10 +91,13 @@ CPU::CPU() :
 	asm volatile("ltr %%ax" :: "a"(TSSSel + cpuid * 16));
 #endif
 
+	// IDTの設定
+	EXCEPTION::LoadIDT();
+
 	dputs(UNINDENT"OK.\n");
 }
 
-void CPU::ReleaseBootlock(){
+void CPU::ReleaseBootLock(){
 	//ロック解除
 	__BOOTLOCK = 0;
 }

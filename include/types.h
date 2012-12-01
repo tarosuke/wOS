@@ -33,4 +33,19 @@ namespace TIME{
 typedef u32 tchar;
 
 
+/// UUID
+typedef u128 UUID;
+
+/// VERSION
+typedef struct{
+	u32 major;
+	u32 minor;
+	u32 release;
+}VERSION;
+
+
+/// elementof
+#define elementof(a) (sizeof(a) / sizeof(*a))
+
+
 #endif

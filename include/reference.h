@@ -12,14 +12,14 @@
  * 参照カウンタ付き参照を実現する。
  * 具体的な使い方はkernel/include/map.hを参照のこと。
  * ・インターフェイスはREFERENCEの一種
- * ・抽象クラスはREFERENCE::BODYの一種
- * ・具象クラスは抽象クラスの一種
+ * ・実体はREFERENCE::BODYの一種
  * ...として作ると機能するように作ってある。
  * NOTE:循環参照には対応していない。
+ * NOTE:SMPに完全には対応していない。プロセス内で使うこと。
  */
 class REFERENCE{
-	REFERENCE();
 public:
+	REFERENCE() : body(0){};
 	class BODY{
 		friend class REFERENCE;
 	public:
@@ -27,17 +27,24 @@ public:
 	protected:
 		BODY() : users(1){};
 	private:
+		void Discard(){
+			if(!--users){
+				delete this;
+			}
+		};
 		ATOMIC users;
 	};
 	REFERENCE(BODY* body) : body(body){};
 	REFERENCE(REFERENCE& ref) : body(ref.body){
-		(*body).users++;
+		if(body){
+			(*body).users++;
+		}
 	};
 	virtual ~REFERENCE(){
-		if(!--(*body).users){
-			delete body;
-		}
-	}
+		BODY const* b(body);
+		body = 0;
+		(*b).Discard();
+	};
 	bool IsValid(){ return !!body; };
 private:
 	BODY* body;
