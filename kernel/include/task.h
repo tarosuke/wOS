@@ -84,6 +84,11 @@ public:
 	/// タスクを待ち状態にする
 	void Wait(TASKQUEUE* const wait = 0, tunit uptime = TIME::INFINITE);
 
+	/// マップ取得
+	MAP* GetMap(uint resNum){
+		return 0;
+	};
+
 private:
 	TASK();			//現在のコンテキストをこのタスクとする
 	~TASK();			//タスクの完全解放。graveKeeperからしか呼べない

@@ -159,6 +159,10 @@
 	pop	%rdi
 	iretq
 
+/***** システムコールハンドラ */
+.L_SYSTEMCALL:
+	call	__SYSTEMCALL_HANDLER
+	iretq
 
 /***** 割り込みハンドラ(個別部) */
 	.align	16, 0x90
@@ -167,11 +171,10 @@ __ExceptionTable:
 	.align	16, 0x90
 	push	%rdi
 	mov	$\f, %rdi
-	.if	(CF_ARCH_BASE_VECTOR <= \f)
 	.if	(CF_ARCH_SYSTEMCALL_VECTOR == \f)
 	/***** SYSTEMCALL */
-	call	__SYSTEMCALL_HANDLER
-	iretq
+	jmp	.L_SYSTEMCALL
+	.elseif	(CF_ARCH_BASE_VECTOR <= \f)
 	/***** NORMAL HANDLER */
 	jmp	.L_jumpPad
 	.else

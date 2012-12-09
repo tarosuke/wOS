@@ -40,8 +40,7 @@ TASK::TASK(MAP& map) :
 	irq(-1),
 	reason(RS_FINE),
 	newbie(true){
-	// コードのための領域をマップとして用意する
-	RESOURCE const* code(new MAPRESOURCE(0, map));
+	RESOURCE code(map);
 }
 
 

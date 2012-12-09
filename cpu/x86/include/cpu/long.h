@@ -11,6 +11,10 @@
 #ifdef __cplusplus
 class u128{
 public:
+	u128(uint iv){
+		v32[0] = iv;
+		v32[1] = v32[2] = v32[3] = 0;
+	};
 	operator u64(){ return v64[0]; };
 	operator u32(){ return v32[0]; };
 	u64 Hi64(){ return v64[1]; };

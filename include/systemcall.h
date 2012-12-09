@@ -52,14 +52,14 @@ typedef struct{
 		struct{
 			u32 from;	/* notifyしてきた相手(戻値) */
 		}waitNotify;
-		struct{
-			u32 target;	/* 発見できたサーバ(戻値) */
-			UUID protocol;	/* 探すプロトコル */
-			VERSION protocolVersion;	/* 探すプロトコルの版 */
-			UUID vender;	/* ベンダ(ヒント) */
-			UUID product;	/* 製品(ヒント) */
-			VERSION productVersion; /* 製品の版(ヒント) */
-		}getServer;
+//		struct{
+//			u32 target;	/* 発見できたサーバ(戻値) */
+//			UUID protocol;	/* 探すプロトコル */
+//			VERSION protocolVersion;	/* 探すプロトコルの版 */
+//			UUID vender;	/* ベンダ(ヒント) */
+//			UUID product;	/* 製品(ヒント) */
+//			VERSION productVersion; /* 製品の版(ヒント) */
+//		}getServer;
 	};
 }SYSTEMCALL_PARAMS;
 

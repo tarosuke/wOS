@@ -198,7 +198,7 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 
 	if(pte & mapped){
 		//マップから実ページを取得
-		RESOURCE* const map(PU::GetCurrentTask().resources[pte >> 12]);
+		MAP* const map(PU::GetCurrentTask().GetMap(pte >> 12));
 		if(!map){
 			//TODO:本来は異常動作としてプロセス再起動
 			Panic("No map found.");

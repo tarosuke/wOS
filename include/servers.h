@@ -38,6 +38,8 @@ typedef struct{
 }SERVER_DEF;
 
 
+#if 0
+
 /** wOS開発チームのvenderID
  * ベンダもUUIDで識別される
  * 文字列だと処理が面倒なのでUUIDを使う
@@ -78,7 +80,7 @@ static const char* SERVER_Desktop = "507cdc22-d3b8-4231-ad70-9016ac6e9344";
 static const char* SERVER_PCI_Device = "fba50c55-c731-4908-a98b-65956f8abeb4";
 
 
-
+#endif
 
 #endif
 

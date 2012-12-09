@@ -77,6 +77,13 @@
 	popal
 	iret
 
+/***** システムコールハンドラ */
+.L_SYSTEMCALL:
+	push	%edi
+	call	__SYSTEMCALL_HANDLER
+	pop	%edi
+	iret
+
 /***** 割り込みハンドラ(個別部) */
 	.align	16
 __ExceptionTable:
@@ -84,17 +91,12 @@ __ExceptionTable:
 	.align	16, 0x90
 	pushal
 	mov	$\f, %eax
-	.if	(CF_ARCH_BASE_VECTOR <= \f)
 	.if	(CF_ARCH_SYSTEMCALL_VECTOR == \f)
 	/***** SYSTEMCALL */
-	push	%edi
-	call __SYSTEMCALL_HANDLER
-	pop	$edi
-	iret
-	.else
+	jmp	.L_SYSTEMCALL
+	.elseif	(CF_ARCH_BASE_VECTOR <= \f)
 	/***** NORMAL HANDLER */
 	jmp	.L_jumpPad
-	.endif
 	.else
 	/***** FAULT HANDLER */
 	.if	(8 <= \f && \f <= 14) || (17 == \f)

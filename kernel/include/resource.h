@@ -10,25 +10,34 @@
 #include <lock.h>
 #include <map.h>
 #include <servers.h>
+#include <reference.h>
 
 
-/// 通信路とMAPの複合体
-///TODO:通信路をMAPに統合。つまりただのMAPにする。あとMAPは複数参照を可能にしとく。
-class RESOURCE{
-	friend class HANDLER;
+/// 通信路とMAPの複合体...の参照
+class RESOURCE : public REFERENCE{
 public:
-	RESOURCE(TASK* current, SERVER_DESCRIPTOR* target, MAP* map = 0)
-		: map(map){
-		terminals[0] = current;
-	};
-	virtual ~RESOURCE(){};
-	virtual void Send(void* message);
-	virtual runit GetPage(punit);
-protected:
+	RESOURCE(const SERVER_DESCRIPTOR& target, MAP* map);
+	RESOURCE(MAP& map);
 private:
-	MAP* const map;
-	TASK* terminals[2];
-	static void IlligalOperation();
+	static const SERVER_DESCRIPTOR nullServer;
+	/// 通信路とMAPの複合体
+	class BODY : public REFERENCE::BODY{
+	public:
+		BODY(const SERVER_DESCRIPTOR& target, MAP* map) :
+			map(map),
+			target(target){
+
+
+		};
+		runit GetPage(punit);
+		void Signal(TASK& task, u32 value);
+	protected:
+	private:
+		MAP* const map;
+		const SERVER_DESCRIPTOR target;
+		static void IlligalOperation();
+	};
+	BODY* GetBody(){ return (BODY*)body; };
 };
 
 
