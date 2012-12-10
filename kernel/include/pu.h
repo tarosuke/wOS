@@ -69,7 +69,6 @@ private:
 	TASK* current;			//このプロセッサで実行中のタスク
 	TASK* next;
 	TASK idle;
-	bool inIdle;
 };
 
 
