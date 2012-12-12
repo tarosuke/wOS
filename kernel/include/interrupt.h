@@ -27,10 +27,11 @@ public:
 			return;
 		}
 		HANDLER& h(handlers[irq]);
+		PIC::Start(irq); //エッジトリガなら前EOIを出す
 		if(h.handler){
-			h.handler(); //この場合EOIはハンドラが出す
+			h.handler();
+			PIC::Finish(irq); //レベルトリガなら後EOIを出す
 		}else{
-			PIC::Start(irq);
 			h.rc = 0;
 			TASK* t;
 			for(QUEUE<TASK>::ITOR i(h.tasks); (t = i++); h.rc++){
@@ -47,7 +48,7 @@ public:
 		}
 	};
 	static void RegisterHandler(uint irq, void (*handler)()){
-		// ハンドラの登録(タイマとシステムコールしか使わないけどなw)
+		// ハンドラの登録(タイマしか使わないけどなw)
 		handlers[irq].handler = handler;
 		PIC::Unmask(irq);
 	};
@@ -61,6 +62,7 @@ private:
 		void (*handler)();
 		QUEUE<TASK> tasks;
 		uint rc; //現在実行中のハンドラタスクの数
+		//TODO:EOI情報を覚えておく
 	}handlers[];
 };
 
