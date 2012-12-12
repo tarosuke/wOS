@@ -8,37 +8,36 @@
 
 #include <types.h>
 #include <lock.h>
-#include <reference.h>
 #include <map.h>
+#include <servers.h>
+#include <reference.h>
 
 
-/// MAPやソケットなどの抽象リソース
-class RESOURCE{
-	friend class HANDLER;
+/// 通信路とMAPの複合体...の参照
+class RESOURCE : public REFERENCE{
 public:
-	RESOURCE(){};
-	virtual ~RESOURCE(){};
-	virtual void SystemRequest(void* message);
-	virtual runit GetPage(punit);
-protected:
+	RESOURCE(const SERVER_DESCRIPTOR& target, MAP* map);
+	RESOURCE(MAP& map);
 private:
-	static void IlligalOperation();
-};
+	static const SERVER_DESCRIPTOR nullServer;
+	/// 通信路とMAPの複合体
+	class BODY : public REFERENCE::BODY{
+	public:
+		BODY(const SERVER_DESCRIPTOR& target, MAP* map) :
+			map(map),
+			target(target){
 
 
-class MAPRESOURCE : public RESOURCE{
-public:
-	//COMMONMAP用
-	MAPRESOURCE(void* start, munit size);
-	//実アドレス指定マップ用
-	MAPRESOURCE(void* start, runit pa, munit size);
-	//マップ利用者用
-	MAPRESOURCE(void* start, MAP& map);
-	~MAPRESOURCE();
-	runit GetPage(punit);
-protected:
-	MAP map;
-	punit start;
+		};
+		runit GetPage(punit);
+		void Signal(TASK& task, u32 value);
+	protected:
+	private:
+		MAP* const map;
+		const SERVER_DESCRIPTOR target;
+		static void IlligalOperation();
+	};
+	BODY* GetBody(){ return (BODY*)body; };
 };
 
 

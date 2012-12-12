@@ -11,7 +11,7 @@
 #include <lock.h>
 
 /** VECTOR：ポインタのベクタテンプレート
- * ベクタのサイズは事実上無制限
+ * ベクタのサイズはメモリサイズを上限とする
  */
 
 template<class T, typename INDEX = u32> class VECTOR{

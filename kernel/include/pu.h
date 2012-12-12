@@ -18,7 +18,7 @@ class PU : public CPU{
 	PU(PU&);
 	void operator=(PU&);
 public:
-	PU() : current(&idle){};
+	PU();
 	void* operator new(munit){
 		const uint id(GetID());
 		assert(id < CF_MAX_PROCESSORs);
@@ -32,7 +32,7 @@ public:
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 	/// タスク終了
 	static void Kill(){
-		//タスク終了時にいきなりdeleteするとその時点で使っているスタックまで開放してしまうことになって都合が悪いため、delete待ち行列(grave)に投入し、墓守がdeleteするまでゾンビとする。
+		//タスク終了時にいきなりdeleteするとその時点で使っているスタックまで開放してしまうことになって都合が悪いため、delete待ち行列(grave)に投入し、墓守がdeleteするまでゾンビとする。また次のタスクでdeleteすると優先度を無視してdeleteが走るためこうしている。
 		PU& pu(GetPU());
 		IKEY key;
 		grave.Add((*pu.current).qNode);
@@ -41,14 +41,9 @@ public:
 	/// タスクの起床
 	void WakeUp(TASK& task){
 		ready.Add(task);
-		if(cpuid != GetID()){
-			//IPIを発行するのは対象が自分以外の場合だけ
-			IssueIPI();
-		}
-	};
-	/// アイドルスタックの設定
-	void SetupIdle(){
-		idle.StoreStack();
+
+//TODO:IPIはDispatchToで発行される
+		IssueIPI();
 	};
 private:
 	static inline void RequestDispatch(PU& pu){

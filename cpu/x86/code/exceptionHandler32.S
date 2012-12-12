@@ -10,9 +10,8 @@
 #include <arch/segments.h>
 
 .global __ExceptionTable
-.extern __INTERRUPT_Handler, __FAULT_Handler
+.extern __INTERRUPT_Handler, __FAULT_Handler, __SYSTEMCALL_HANDLER
 
-#define ARCH_BASE_VECTOR 32
 
 .code32
 
@@ -66,7 +65,7 @@
 	mov	$KDSel, %dx
 	mov	%dx, %ds
 	mov	%dx, %es
-	sub	$ARCH_BASE_VECTOR, %eax
+	sub	$CF_ARCH_BASE_VECTOR, %eax
 	push	%eax
 	/***** ハンドラ実行 */
 	call	__INTERRUPT_Handler
@@ -77,7 +76,13 @@
 	pop	%ds
 	popal
 	iret
-//TODO:システムコールトラップ用のレジスタを保存しないハンドラを作る
+
+/***** システムコールハンドラ */
+.L_SYSTEMCALL:
+	push	%edi
+	call	__SYSTEMCALL_HANDLER
+	pop	%edi
+	iret
 
 /***** 割り込みハンドラ(個別部) */
 	.align	16
@@ -86,7 +91,10 @@ __ExceptionTable:
 	.align	16, 0x90
 	pushal
 	mov	$\f, %eax
-	.if	(ARCH_BASE_VECTOR <= \f)
+	.if	(CF_ARCH_SYSTEMCALL_VECTOR == \f)
+	/***** SYSTEMCALL */
+	jmp	.L_SYSTEMCALL
+	.elseif	(CF_ARCH_BASE_VECTOR <= \f)
 	/***** NORMAL HANDLER */
 	jmp	.L_jumpPad
 	.else
@@ -102,5 +110,5 @@ __ExceptionTable:
 	.endif
 	.endm
 
-	jumpers	0, (ARCH_BASE_VECTOR + CF_MAX_IRQs)
+	jumpers	0, (CF_ARCH_BASE_VECTOR + CF_ARCH_MAX_INTERRUPTs)
 #endif

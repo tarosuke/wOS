@@ -9,12 +9,6 @@
 
 #include <types.h>
 
-struct VERSION{
-	u32 major;
-	u32 minor;
-	u32 release;
-};
-
 extern const char __version[];
 extern const char __copyright[];
 extern const char __thanks[];

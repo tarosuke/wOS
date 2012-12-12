@@ -92,22 +92,22 @@ extern "C"{
 			assert(false);
 		}
 	}
-	extern u32 __ExceptionTable[CF_MAX_IRQs][4];
+	extern u32 __ExceptionTable[CF_ARCH_MAX_INTERRUPTs][4];
 }
 
 #if CF_IA32
-u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs]__attribute__((aligned(8)));
-const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 8, (void*)vector };
+u64 EXCEPTION::vector[systemExceptions + CF_ARCH_MAX_INTERRUPTs]__attribute__((aligned(8)));
+const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_ARCH_MAX_INTERRUPTs) * 8, (void*)vector };
 #endif
 #if CF_AMD64
-u64 EXCEPTION::vector[systemExceptions + CF_MAX_IRQs][2]__attribute__((aligned(8)));
-const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_MAX_IRQs) * 16, (void*)vector };
+u64 EXCEPTION::vector[systemExceptions + CF_ARCH_MAX_INTERRUPTs][2]__attribute__((aligned(8)));
+const EXCEPTION::IDTP EXCEPTION::idtp = { (systemExceptions + CF_ARCH_MAX_INTERRUPTs) * 16, (void*)vector };
 #endif
 static EXCEPTION exeptionHandler;
 
 EXCEPTION::EXCEPTION(){
 	dputs("exception..." INDENT);
-	for(uint n(0); n < systemExceptions + CF_MAX_IRQs; n++){
+	for(uint n(0); n < systemExceptions + CF_ARCH_MAX_INTERRUPTs; n++){
 		u64 p((munit)__ExceptionTable[n]);
 #if CF_IA32
 		vector[n] = 0x00008e0000000000ULL | (KCSel << 16) | ((p & 0xffff0000ULL) << 32) | (p & 0xffffULL);
@@ -119,7 +119,6 @@ EXCEPTION::EXCEPTION(){
 		vector[n][1] = p >> 32;
 #endif
 	}
-	asm volatile("lidt %0" :: "m"(idtp));
 	dputs(UNINDENT "OK.\n");
 }
 
@@ -130,6 +129,8 @@ void EXCEPTION::RegisterHandler(uint num, HANDLER handler){
 }
 
 void EXCEPTION::LoadIDT(){
+	hputs("prepareing IDT...");
 	asm volatile("lidt %0" :: "m"(exeptionHandler.idtp));
+	hputs("OK.\n");
 }
 

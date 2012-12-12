@@ -89,6 +89,9 @@ public:
 			//ITORが何も指していなければ0を返す
 			return 0;
 		};
+		operator bool(){
+			return !!(*n).owner;
+		};
 	private:
 		const NODE<T>* const q;
 		NODE<T>* n;
