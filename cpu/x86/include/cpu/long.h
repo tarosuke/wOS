@@ -11,6 +11,10 @@
 #ifdef __cplusplus
 class u128{
 public:
+	u128(){
+		v64[0] =
+		v64[1] = 0ULL;
+	};
 	u128(uint iv){
 		v32[0] = iv;
 		v32[1] = v32[2] = v32[3] = 0;
@@ -25,6 +29,12 @@ public:
 		v64[0] &= v.v64[0];
 		v64[1] &= v.v64[1];
 		return *this;
+	};
+	u128 operator&(const u128& v){
+		u128 r;
+		r.v64[0] = v64[0] & v.v64[0];
+		r.v64[1] = v64[1] & v.v64[1];
+		return r;
 	};
 	const u128& operator|=(const u128& v){
 		v64[0] |= v.v64[0];
@@ -114,6 +124,12 @@ public:
 		}
 		return *this;
 	};
+	u128 operator~(){
+		u128 r;
+		r.v64[0] = ~v64[0];
+		r.v64[1] = ~v64[1];
+		return r;
+	};
 	//算術演算
 	const u128& operator+=(const u128& v){
 #if CF_IA32
@@ -155,6 +171,29 @@ public:
 			: "=Q"(v64[0]), "=Q"(v64[1])
 			: "g"(v.v64[0]), "g"(v.v64[1]));
 #endif
+		return *this;
+	};
+	u128 operator+(const u128& v){
+		u128 r(v);
+		r += *this;
+		return r;
+	};
+	u128 operator-(const u128& v){
+		u128 r(v);
+		r -= *this;
+		return r;
+	};
+	u128 operator*(u128 v){
+		u128 r;
+		for(u128 m(1); m; v <<= 1, m <<= 1){
+			if(m & *this){
+				r += v;
+			}
+		}
+		return r;
+	};
+	const u128& operator*=(const u128& v){
+		*this = *this * v;
 		return *this;
 	};
 protected:
