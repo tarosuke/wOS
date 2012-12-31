@@ -71,7 +71,7 @@ LOCK VIRTUALPAGE::lock;
 static VIRTUALPAGE vpage __attribute__((init_priority(6000)));
 
 
-VIRTUALPAGE::VIRTUALPAGE(){
+VIRTUALPAGE::VIRTUALPAGE() : pageRoot(GetPageRoot()){
 	dputs("virtual pages..." INDENT);
 #if CF_IA32
 	dprintf("pageTableArray: %p.\n", heapTop);
@@ -214,10 +214,10 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 	}else{
 		if((munit)&pageTableArray[kernelStartPage] <= addr){
 			//カーネル領域のページテーブル要求なのでmasterを参照
-			runit here(CPUTASK::GetPageRoot());
-			CPUTASK::SetPageRoot((runit)__pageRoot);
+			runit here(GetPageRoot());
+			SetPageRoot((runit)__pageRoot);
 			const runit thePage(pageTableArray[addr]);
-			CPUTASK::SetPageRoot(here);
+			SetPageRoot(here);
 			pte = thePage;
 			return;
 		}

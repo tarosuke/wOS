@@ -8,24 +8,16 @@
 
 #include <config.h>
 #include <types.h>
+#include <cpu/virtualPage.h>
 
 
-class CPUTASK {
-	friend class VIRTUALPAGE;
+class CPUTASK : public VIRTUALPAGE {
 	friend class PU;
-	CPUTASK(CPUTASK&);
 	void operator=(CPUTASK&);
 public:
 protected:
-	CPUTASK();
-	static inline runit GetPageRoot(){
-		runit r;
-		asm volatile("mov %%cr3, %0" : "=r"(r));
-		return r;
-	};
-	static inline void SetPageRoot(runit root){
-		asm volatile("mov %0, %%cr3" :: "r"(root));
-	};
+	CPUTASK();		//アイドルタスクのコンストラクタ
+	CPUTASK(const CPUTASK&);	//他のタスクはアイドルタスクのコピーベース
 	inline void SaveStack(){
 		#if CF_IA32
 		asm volatile("mov %%esp, %0" : "=r"(stack));
@@ -34,7 +26,7 @@ protected:
 		asm volatile("mov %%rsp, %0" : "=r"(stack));
 		#endif
 	};
-	inline void StoreStack(){
+	inline void RestoreStack(){
 		#if CF_IA32
 		asm volatile("mov %0, %%esp" :: "r"(stack));
 		#endif
@@ -45,15 +37,15 @@ protected:
 	inline void DiveInto(){
 		//TODO:TSSをスタックの初期値に設定してユーザ空間へ降りる
 	};
-	inline void DispatchTo(){
-		//このインスタンスが指しているタスクへ切り替える
-		SetPageRoot(pageRoot);
+	inline void DispatchTo(/*CPUTASK& from*/){
+// 		from.SaveStack();
+		RestoreStack();
+		VIRTUALPAGE::DispatchTo();
 	};
 private:
 	void* stack;
 	munit userStack;
 	munit userIP;
-	const runit pageRoot;
 	u32 kernelStack[CF_KERNELSTACK_ENTRIES];
 };
 

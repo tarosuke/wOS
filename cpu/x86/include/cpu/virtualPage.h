@@ -41,7 +41,8 @@ public:
 	static void Disable(void*, munit pages);
 	// ページフォルトハンドラ
 	static void Fault(u32 code, EXCEPTION::FRAME&);
-	VIRTUALPAGE();
+	VIRTUALPAGE();			//アイドルタスク用
+	VIRTUALPAGE(const VIRTUALPAGE&);	//アイドルタスクからの派生
 #if CF_IA32
 #if CF_PAE
 	static const munit heapTop = 0xff800000;
@@ -52,10 +53,15 @@ public:
 #if CF_AMD64
 	static const munit heapTop = -2ULL;
 #endif
+protected:
+	inline void DispatchTo(){
+		SetPageRoot(pageRoot);
+	};
 private:
 	static const punit kernelStartPage;
 	static LOCK lock;
 	static bool InKernel(munit pageNum);
+	const runit pageRoot;
 #if CF_IA32
 	static class PTA{
 	public:
@@ -94,6 +100,14 @@ private:
 		asm volatile(
 			"xor %%eax, %%eax;"
 			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+	};
+	static inline runit GetPageRoot(){
+		runit r;
+		asm volatile("mov %%cr3, %0" : "=r"(r));
+		return r;
+	};
+	static inline void SetPageRoot(runit root){
+		asm volatile("mov %0, %%cr3" :: "r"(root));
 	};
 };
 
