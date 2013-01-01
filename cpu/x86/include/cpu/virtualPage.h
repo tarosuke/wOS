@@ -76,7 +76,7 @@ private:
 #if CF_AMD64
 	static class PTA{
 	public:
-		PTA(runit*);
+		PTA(munit);
 		runit& operator[](punit);
 	private:
 		inline runit GetCR3(){

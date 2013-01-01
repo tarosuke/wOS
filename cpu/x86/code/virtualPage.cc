@@ -19,15 +19,11 @@ extern "C"{
 }
 
 // ページテーブルが丸見えという便利な配列。
-#if CF_IA32
 VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(heapTop);
-#endif
-#if CF_AMD64
-VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(
-	(runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE)));
 
-VIRTUALPAGE::PTA::PTA(runit* pw) :
-	pw(pw),
+#if CF_AMD64
+VIRTUALPAGE::PTA::PTA(munit) :
+	pw((runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE))),
 	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]),
 	lcr3(0), lwcp(0){
 	dputs("pageTableArray..."INDENT);
