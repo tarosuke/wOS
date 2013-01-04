@@ -11,7 +11,7 @@
 #include <cpu/virtualPage.h>
 
 
-class CPUTASK : public VIRTUALPAGE {
+class CPUTASK : public TASKVIRTUALPAGE {
 	friend class PU;
 	void operator=(CPUTASK&);
 public:
@@ -40,7 +40,7 @@ protected:
 	inline void DispatchTo(/*CPUTASK& from*/){
 // 		from.SaveStack();
 		RestoreStack();
-		VIRTUALPAGE::DispatchTo();
+		TASKVIRTUALPAGE::DispatchTo();
 	};
 private:
 	void* stack;

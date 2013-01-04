@@ -8,6 +8,7 @@
 
 
 CPUTASK::CPUTASK() :
+	TASKVIRTUALPAGE(0),
 	stack((void*)&kernelStack[CF_KERNELSTACK_ENTRIES]){
 	//現在のページ構成をそのまま使う
 };
