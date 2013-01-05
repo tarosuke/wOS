@@ -8,7 +8,12 @@
 
 
 CPUTASK::CPUTASK() :
-	stack((void*)&kernelStack[CF_KERNELSTACK_ENTRIES]),
-	pageRoot(REALPAGE::GetPages(1) * PAGESIZE){
+	TASKVIRTUALPAGE(0),
+	stack((void*)&kernelStack[CF_KERNELSTACK_ENTRIES]){
+	//現在のページ構成をそのまま使う
+};
+
+CPUTASK::CPUTASK(const CPUTASK& org) :
+	stack((void*)&kernelStack[CF_KERNELSTACK_ENTRIES]){
 	//TODO:pageRootに仮想ページを割り当てて初期化
 };

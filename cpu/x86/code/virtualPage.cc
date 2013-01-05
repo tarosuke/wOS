@@ -19,23 +19,33 @@ extern "C"{
 }
 
 // ページテーブルが丸見えという便利な配列。
-#if CF_IA32
 VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(heapTop);
+
+
+VIRTUALPAGE::PTA::PTA(munit a) :
+#if CF_IA32
+	array((runit*)a)
 #endif
 #if CF_AMD64
-VIRTUALPAGE::PTA VIRTUALPAGE::pageTableArray(
-	(runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE)));
-
-VIRTUALPAGE::PTA::PTA(runit* pw) :
-	pw(pw),
+	pw((runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE))),
 	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]),
 	lcr3(0), lwcp(0){
 	dputs("pageTableArray..."INDENT);
 	dprintf("pw:%p.\n", pw);
 	dprintf("wcp:%p.\n", &wcp);
 	dputs(UNINDENT "OK.\n");
-};
+#else
+	{
+#endif
+	dputs("virtual pages..." INDENT);
+#if CF_IA32
+	dprintf("pageTableArray: %p.\n", heapTop);
+#endif
+	dprintf("kernelPageDir: %p.\n", __pageRoot);
+	dputs(UNINDENT "OK.\n");
+}
 
+#if CF_AMD64
 runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	const runit page(pageNum);
 
@@ -65,18 +75,11 @@ runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 // カーネル領域とユーザ領域を分ける値
 const punit VIRTUALPAGE::kernelStartPage((munit)__kernel_base / PAGESIZE);
 
-// ページテーブルのためのロック(他のプロセッサがページを埋めるのを阻止するため)
-LOCK VIRTUALPAGE::lock;
-
+// システムページテーブル
 static VIRTUALPAGE vpage __attribute__((init_priority(6000)));
 
 
 VIRTUALPAGE::VIRTUALPAGE(){
-	dputs("virtual pages..." INDENT);
-#if CF_IA32
-	dprintf("pageTableArray: %p.\n", heapTop);
-#endif
-	dprintf("kernelPageDir: %p.\n", __pageRoot);
 #if CF_AMD64 && 6 <= CF_DEBUG_LEVEL
 	dputs("checking pageTableArray..."INDENT);
 	for(uint i(0); i < 513; i++){
@@ -86,7 +89,6 @@ VIRTUALPAGE::VIRTUALPAGE(){
 	}
 	dputs(UNINDENT "OK.\n");
 #endif
-	dputs(UNINDENT "OK.\n");
 }
 
 bool VIRTUALPAGE::InKernel(munit pageNum){
@@ -94,9 +96,8 @@ bool VIRTUALPAGE::InKernel(munit pageNum){
 }
 
 
-void VIRTUALPAGE::Enable(void* start, munit pages){
+void VIRTUALPAGE::_Enable(void* start, munit pages){
 	const punit p((munit)start / PAGESIZE);
-	KEY key(lock);
 
 	// ページイネーブル(普通)
 	for(munit v(p); v < p + pages; v++){
@@ -122,10 +123,9 @@ void VIRTUALPAGE::Enable(void* start, munit pages){
 // 	}
 // }
 
-void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
+void VIRTUALPAGE::_Enable(void* start, runit pa, punit pages){
 	const munit p((munit)start / PAGESIZE);
 	const runit pageMask(~(runit)(PAGESIZE - 1));
-	KEY key(lock);
 
 	// 実メモリ割り当て
 	for(munit v(p); v < p + pages; v++, pa += PAGESIZE){
@@ -136,9 +136,8 @@ void VIRTUALPAGE::Enable(void* start, runit pa, punit pages){
 	}
 }
 
-void VIRTUALPAGE::Disable(void* start, munit pages){
+void VIRTUALPAGE::_Disable(void* start, munit pages){
 	const munit p((munit)start / PAGESIZE);
-	KEY key(lock);
 
 	// ページ無効化(割り当てられていれば返却)
 	for(munit v(p); v < p + pages; v++){
@@ -159,7 +158,7 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 	asm volatile("mov %%cr2, %0" : "=r"(addr));
 
 	// マルチプロセサ時に処理中に値が変わると困るのでロック
-	KEY key(lock);
+	KEY key(pageTableArray);
 
 	///// ページエントリ取得
 	const punit page(addr / PAGESIZE);
@@ -214,10 +213,10 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 	}else{
 		if((munit)&pageTableArray[kernelStartPage] <= addr){
 			//カーネル領域のページテーブル要求なのでmasterを参照
-			runit here(CPUTASK::GetPageRoot());
-			CPUTASK::SetPageRoot((runit)__pageRoot);
+			runit here(GetPageRoot());
+			SetPageRoot((runit)__pageRoot);
 			const runit thePage(pageTableArray[addr]);
-			CPUTASK::SetPageRoot(here);
+			SetPageRoot(here);
 			pte = thePage;
 			return;
 		}
@@ -232,3 +231,6 @@ void VIRTUALPAGE::Fault(u32 code, EXCEPTION::FRAME&){
 		Assign(pte, addr, newPage);
 	}
 }
+
+
+TASKVIRTUALPAGE::TASKVIRTUALPAGE() : rootPage(REALPAGE::GetPages()){}

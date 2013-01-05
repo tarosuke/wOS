@@ -34,14 +34,26 @@ public:
 	static const runit noExec = 0x8000000000000000ULL;
 #endif
 	// ページ有効化(あるいは実ページ／マップ割り当て)
-	static void Enable(void*, munit pages = 1);
+	static inline void Enable(void* start, munit pages = 1){
+		KEY key(pageTableArray);
+		_Enable(start, pages);
+	};
 //	static void Enable(void*, uint mapID, munit pages, runit attr = 0);
-	static void Enable(void*, runit pa, punit pages);
+	static inline void Enable(void* start, runit pa, punit pages){
+		KEY key(pageTableArray);
+		_Enable(start, pa, pages);
+	};
+
 	// ページ無効化・返却
-	static void Disable(void*, munit pages);
+	static inline void Disable(void* start, munit pages){
+		KEY key(pageTableArray);
+		_Disable(start, pages);
+	};
+
 	// ページフォルトハンドラ
 	static void Fault(u32 code, EXCEPTION::FRAME&);
-	VIRTUALPAGE();
+	VIRTUALPAGE();			//アイドルタスク用
+	VIRTUALPAGE(const VIRTUALPAGE&);	//アイドルタスクからの派生
 #if CF_IA32
 #if CF_PAE
 	static const munit heapTop = 0xff800000;
@@ -52,25 +64,19 @@ public:
 #if CF_AMD64
 	static const munit heapTop = -2ULL;
 #endif
-private:
-	static const punit kernelStartPage;
-	static LOCK lock;
-	static bool InKernel(munit pageNum);
-#if CF_IA32
-	static class PTA{
+protected:
+	static void _Enable(void*, munit pages);
+	static void _Enable(void*, runit pa, punit pages);
+	static void _Disable(void*, munit pages);
+	static class PTA : public LOCK{
 	public:
-		PTA(munit a) : array((runit*)a){};
+		PTA(munit);
+	#if CF_IA32
 		inline runit& operator[](punit p){
 			return array[p];
 		};
-	private:
-		runit* const array;
-	}pageTableArray;
-#endif
-#if CF_AMD64
-	static class PTA{
-	public:
-		PTA(runit*);
+	#endif
+	#if CF_AMD64
 		runit& operator[](punit);
 	private:
 		inline runit GetCR3(){
@@ -87,13 +93,58 @@ private:
 		runit& wcp; //窓のアドレスを書く場所
 		runit lcr3; // 最後に設定したCR3
 		runit lwcp; // 最後に設定したwcp
+	#endif
+	#if CF_IA32
+		runit* const array;
+	#endif
 	}pageTableArray;
-#endif
+	static const punit kernelStartPage;
+	static bool InKernel(munit pageNum);
 	static void Assign(runit& pte, munit addr, punit newPage){
 		pte = (newPage << 12) | InKernel(addr) ? 0x103 : 7;
 		asm volatile(
 			"xor %%eax, %%eax;"
 			"rep stosl" :: "D"(addr), "c"(PAGESIZE / 4));
+	};
+	static inline runit GetPageRoot(){
+		runit r;
+		asm volatile("mov %%cr3, %0" : "=r"(r));
+		return r;
+	};
+	static inline void SetPageRoot(const runit root){
+		asm volatile("mov %0, %%cr3" :: "r"(root));
+	};
+private:
+};
+
+
+class TASKVIRTUALPAGE : public VIRTUALPAGE{
+public:
+	TASKVIRTUALPAGE();
+	TASKVIRTUALPAGE(int) : rootPage(GetPageRoot()){}; //アイドルタスク用
+	runit GetPage(munit va, bool autoAssign = true){
+		ROOTSWITCHER rs(pageTableArray, rootPage);
+		return pageTableArray[va / PAGESIZE];
+	};
+	void FlushUserSpace();	//ユーザ空間を完全解放
+protected:
+	inline void DispatchTo(){
+		SetPageRoot(rootPage);
+	};
+private:
+	const runit rootPage;
+	class ROOTSWITCHER{
+	public:
+		inline ROOTSWITCHER(PTA& pta, const runit& to) :
+			key(pta), origin(GetPageRoot()){
+			SetPageRoot(to);
+		};
+		inline ~ROOTSWITCHER(){
+			SetPageRoot(origin);
+		};
+	private:
+		KEY key;
+		const runit origin;
 	};
 };
 

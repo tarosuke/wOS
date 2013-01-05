@@ -17,7 +17,7 @@ QUEUE<TASK> PU::grave;
 
 PU::PU() : current(&idle){
 	/// アイドルスタックの設定
-	idle.StoreStack();
+	idle.RestoreStack();
 
 	/// 初期化ロックを解除 TODO:CPUのコンストラクタに移動
 	CPU::ReleaseBootLock();
