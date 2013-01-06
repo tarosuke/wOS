@@ -1,5 +1,5 @@
 /**************************************************** VIRTUALPAGE MANIPULATION
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, contact us.
  */
 
@@ -28,14 +28,14 @@ VIRTUALPAGE::PTA::PTA(munit a) :
 #endif
 #if CF_AMD64
 	pw((runit*)HEAP::GetByIndex(HEAP::GetBlockIndex(PAGESIZE))),
-	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]),
-	lcr3(0), lwcp(0){
+	wcp(__hiPageTable_VMA[((munit)pw / PAGESIZE) & 511]), lcr3(0), lwcp(0)
+#endif
+	{
+#if CF_AMD64
 	dputs("pageTableArray..."INDENT);
 	dprintf("pw:%p.\n", pw);
 	dprintf("wcp:%p.\n", &wcp);
 	dputs(UNINDENT "OK.\n");
-#else
-	{
 #endif
 	dputs("virtual pages..." INDENT);
 #if CF_IA32
@@ -50,7 +50,7 @@ runit& VIRTUALPAGE::PTA::operator[](punit pageNum){
 	const runit page(pageNum);
 
 	//rootを取得
-	const runit cr3(GetCR3());
+	const runit cr3(GetPageRoot());
 	if(cr3 != lcr3 || ((lwcp ^ page) & ~511ULL)){
 		Assign(cr3);
 

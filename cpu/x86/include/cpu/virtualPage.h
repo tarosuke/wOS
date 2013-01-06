@@ -1,5 +1,5 @@
 /**************************************************** VIRTUALPAGE MANIPULATION
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, contact us.
  */
 
@@ -79,11 +79,6 @@ protected:
 	#if CF_AMD64
 		runit& operator[](punit);
 	private:
-		inline runit GetCR3(){
-			runit r;
-			asm volatile("mov %%cr3, %0" : "=r"(r));
-			return r;
-		};
 		//ページの変更をプロセッサに教える
 		inline void Assign(runit r){
 			wcp = (r & ~(PAGESIZE - 1)) | present;
