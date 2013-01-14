@@ -1,5 +1,5 @@
 /*********************************************************************** CLOCK
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
@@ -8,7 +8,7 @@
 
 #include <types.h>
 #include <config.h>
-#include <lock.h>
+#include <task.h>
 
 
 class CLOCK{
@@ -80,10 +80,9 @@ private:
 	static DOW baseDoW;		//時刻を設定した時の曜日
 	static i64 timezone;		//この機械のタイムゾーン
 	static bool RTCinLocal;		//RTCはローカルタイム
-	static LOCK lock;
 	static void Tick(){
 		systemUptime += tickTime;
-//		PU::Cron(systemUptime);
+		TASK::CRONQUEUE::Tick(systemUptime);
 	};
 };
 

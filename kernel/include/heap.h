@@ -8,7 +8,7 @@
 
 #include <config.h>
 #include <types.h>
-#include <lock.h>
+#include <cpu/lock.h>
 #include <cpu/virtualPage.h>
 #include <debug.h>
 
@@ -49,12 +49,12 @@ private:
 	public:
 		STACK() : top(0){};
 		inline void Push(void* mem){
-			KEY key(lock);
+			KEY<LOCK> key(lock);
 			*(void**)mem = top;
 			top = mem;
 		}
 		inline void* Pop(){
-			KEY key(lock);
+			KEY<LOCK> key(lock);
 			void* r(top);
 			if(top){ top = *(void**)top; }
 			return r;

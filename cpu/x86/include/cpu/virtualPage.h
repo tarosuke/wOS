@@ -8,7 +8,7 @@
 
 #include <config.h>
 #include <types.h>
-#include <lock.h>
+#include <cpu/lock.h>
 #include <debug.h>
 #include <cpu/exception.h>
 
@@ -35,18 +35,18 @@ public:
 #endif
 	// ページ有効化(あるいは実ページ／マップ割り当て)
 	static inline void Enable(void* start, munit pages = 1){
-		KEY key(pageTableArray);
+		KEY<LOCK> key(pageTableArray);
 		_Enable(start, pages);
 	};
 //	static void Enable(void*, uint mapID, munit pages, runit attr = 0);
 	static inline void Enable(void* start, runit pa, punit pages){
-		KEY key(pageTableArray);
+		KEY<LOCK> key(pageTableArray);
 		_Enable(start, pa, pages);
 	};
 
 	// ページ無効化・返却
 	static inline void Disable(void* start, munit pages){
-		KEY key(pageTableArray);
+		KEY<LOCK> key(pageTableArray);
 		_Disable(start, pages);
 	};
 
@@ -138,7 +138,7 @@ private:
 			SetPageRoot(origin);
 		};
 	private:
-		KEY key;
+		KEY<LOCK> key;
 		const runit origin;
 	};
 };

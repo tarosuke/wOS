@@ -1,5 +1,5 @@
 /*********************************************************************** QUEUE
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
@@ -9,8 +9,9 @@
 #include <types.h>
 #include <config.h>
 #include <types.h>
-#include <lock.h>
+#include <cpu/lock.h>
 #include <debug.h>
+#include <key.h>
 
 
 template<class T> class NODE{
@@ -73,11 +74,19 @@ public:
 		}
 		void Insert(NODE<T>& node){
 			//ITORが指すノードの前にnodeを追加する
-			(*n).Insert(node);
+			if(!n){
+				(*q).Insert(node);
+			}else{
+				(*n).Insert(node);
+			}
 		};
 		void Add(NODE<T>& node){
 			//ITORが指すノードの後にnodeを追加する
-			(*n).Attach(node);
+			if(!n){
+				(*q).Add(node);
+			}else{
+				(*n).Attach(node);
+			}
 		};
 		T* Detach(){
 			//ITORが指すノードを除去し、次の要素を指す
@@ -93,20 +102,20 @@ public:
 			return !!(*n).owner;
 		};
 	private:
-		const NODE<T>* const q;
+		NODE<T>* const q;
 		NODE<T>* n;
-		KEY key;
+		KEY<LOCK> key;
 	};
-	bool IsThere(){ KEY key(lock); return IsThere(key); };
-	T* Get(){ KEY key(lock); return Get(key); };
-	void Add(NODE<T>& n){ KEY key(lock); Add(key, n); };
-	void Insert(NODE<T>& n){ KEY key(lock); Insert(key, n); };
+	bool IsThere(){ KEY<LOCK> key(lock); return IsThere(key); };
+	T* Get(){ KEY<LOCK> key(lock); return Get(key); };
+	void Add(NODE<T>& n){ KEY<LOCK> key(lock); Add(key, n); };
+	void Insert(NODE<T>& n){ KEY<LOCK> key(lock); Insert(key, n); };
 private:
 	LOCK lock;
-	inline bool IsThere(KEY&){
+	inline bool IsThere(KEY<LOCK>&){
 		return (*this).next != this;
 	};
-	T* Get(KEY& key){
+	T* Get(KEY<LOCK>& key){
 		if(IsThere(key)){
 			T* o((*this).owner);
 			(*(*this).next).Detach();
@@ -114,11 +123,11 @@ private:
 		}
 		return 0;
 	};
-	inline void Add(KEY&, NODE<T>& n){
+	inline void Add(KEY<LOCK>&, NODE<T>& n){
 		//リンクは輪になっているのでアンカーであるキューの前は最後
 		NODE<T>::Insert(n);
 	};
-	inline void Insert(KEY&, NODE<T>& n){
+	inline void Insert(KEY<LOCK>&, NODE<T>& n){
 		//リンクは輪になっているのでアンカーであるキューの後は最初
 		NODE<T>::Attach(n);
 	};
@@ -129,7 +138,7 @@ template<typename T, uint max> class MULTIQUEUE{
 public:
 	T* Get(uint e = max){
 		assert(e <= max);
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		for(uint i(0); i < e; i++){
 			if(q[i].IsThere()){
 				return q[i].Get();
@@ -138,17 +147,17 @@ public:
 		return 0;
 	};
 	void Add(uint index, NODE<T>& node){
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		assert(index < max);
 		q[index].Add(node);
 	};
 	void Insert(uint index, NODE<T>& node){
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		assert(index < max);
 		q[index].Insert(node);
 	};
 	uint GetMax(){
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		for(uint i(0); i < max; i++){
 			if(q[i].IsThere()){
 				return i;

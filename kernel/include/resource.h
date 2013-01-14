@@ -7,7 +7,7 @@
 #define _RESOURCE_
 
 #include <types.h>
-#include <lock.h>
+#include <cpu/lock.h>
 #include <map.h>
 #include <servers.h>
 #include <reference.h>

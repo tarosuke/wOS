@@ -8,7 +8,7 @@
 
 #include <types.h>
 #include <heap.h>
-#include <lock.h>
+#include <cpu/lock.h>
 
 /** VECTOR：ポインタのベクタテンプレート
  * ベクタのサイズはメモリサイズを上限とする
@@ -24,7 +24,7 @@ public:
 		Free(entry, depth);
 	};
 	T* operator[](INDEX index){
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		if(!!(index >> (depth * 8))){
 			//indexがディレクトリツリーより大きい
 			return 0;
@@ -36,7 +36,7 @@ public:
 		return (T*)p;
 	};
 	bool Set(INDEX index, T* value){
-		KEY key(lock);
+		KEY<LOCK> key(lock);
 		//indexがディレクトリツリーに収まるまでディレクトリツリーを拡大
 		void* p(entry);
 		while(!!(index >> (depth * 8))){
