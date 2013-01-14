@@ -27,14 +27,14 @@ public:
 		 * 新規タスク生成時には現在の優先度を限度として継承される */
 		PRIORITY();
 	public:
-		typedef enum{
+		enum VALUE{
 			REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
 			INTERRUPT,	//割り込みハンドラ
 			UI,		//ユーザインターフェイス
 			NORMAL,		//通常優先度
 			BACKGROUND,	//バックグラウンド処理用
 			__pri_max
-		}VALUE;
+		};
 		PRIORITY(VALUE v) : value(v){};
 		PRIORITY(const PRIORITY& o) : value(o.value){};
 		void operator=(VALUE v){
