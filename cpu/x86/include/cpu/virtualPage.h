@@ -8,7 +8,7 @@
 
 #include <config.h>
 #include <types.h>
-#include <cpu/lock.h>
+#include <lock.h>
 #include <debug.h>
 #include <cpu/exception.h>
 

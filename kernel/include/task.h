@@ -21,34 +21,16 @@ class TASK : private CPUTASK{
 	void operator delete(void*);
 public:
 	/** 常数などの定義 */
-	class PRIORITY{
+	enum PRIORITY{
 		/** 優先度
-		 * 値が小さいほうが優先度が高い
-		 * 新規タスク生成時には現在の優先度を限度として継承される */
-		PRIORITY();
-	public:
-		enum VALUE{
-			REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
-			INTERRUPT,	//割り込みハンドラ
-			UI,		//ユーザインターフェイス
-			NORMAL,		//通常優先度
-			BACKGROUND,	//バックグラウンド処理用
-			__pri_max
-		};
-		PRIORITY(VALUE v) : value(v){};
-		PRIORITY(const PRIORITY& o) : value(o.value){};
-		void operator=(VALUE v){
-			value = v;
-		};
-		const PRIORITY& operator=(const PRIORITY& o){
-			value = o.value;
-			return *this;
-		};
-		operator VALUE(){
-			return value;
-		};
-	private:
-		VALUE value;
+			* 値が小さいほうが優先度が高い
+			* 新規タスク生成時には現在の優先度を限度として継承される */
+		PRI_REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
+		PRI_INTERRUPT,	//割り込みハンドラ
+		PRI_UI,		//ユーザインターフェイス
+		PRI_NORMAL,	//通常優先度
+		PRI_BACKGROUND,	//バックグラウンド処理用
+		__pri_max
 	};
 	enum WAKECODE{
 		/** 待ち終了理由 */
@@ -71,7 +53,7 @@ public:
 	};
 
 	/** タスクのキュー */
-	class TASKQUEUE : public MULTIQUEUE<TASK, PRIORITY::__pri_max>{
+	class TASKQUEUE : public MULTIQUEUE<TASK, __pri_max>{
 	public:
 		~TASKQUEUE();
 		void Add(TASK&);

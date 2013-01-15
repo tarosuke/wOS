@@ -8,7 +8,7 @@
 
 #include <types.h>
 #include <heap.h>
-#include <cpu/lock.h>
+#include <lock.h>
 
 /** VECTOR：ポインタのベクタテンプレート
  * ベクタのサイズはメモリサイズを上限とする

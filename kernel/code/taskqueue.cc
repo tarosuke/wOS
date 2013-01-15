@@ -14,13 +14,13 @@ TASK::TASKQUEUE::~TASKQUEUE(){
 	}
 };
 void TASK::TASKQUEUE::Add(TASK& task){
-	if(task.priority < PRIORITY::__pri_max){
-		MULTIQUEUE<TASK, PRIORITY::__pri_max>::Add(task.priority, task.qNode);
+	if(task.priority < __pri_max){
+		MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
 	}
 };
 void TASK::TASKQUEUE::Insert(TASK& task){
-	if(task.priority < PRIORITY::__pri_max){
-		MULTIQUEUE<TASK, PRIORITY::__pri_max>::Insert(task.priority, task.qNode);
+	if(task.priority < __pri_max){
+		MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
 	}
 };
 
