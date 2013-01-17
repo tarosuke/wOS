@@ -12,7 +12,6 @@
 
 
 class ILOCK{
-	friend class KEY;
 	friend class IKEY;
 	ILOCK(ILOCK&);
 	void operator=(ILOCK&);
@@ -36,8 +35,7 @@ private:
 
 
 class LOCK : public ILOCK{
-	friend class KEY;
-	friend class IKEY;
+	template<class L> friend class KEY;
 	LOCK(ILOCK&);
 	void operator=(ILOCK&);
 public:

@@ -1,5 +1,5 @@
 /**************************************** GENERIC PROCESSING UNIT MANIPULATION
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
@@ -32,9 +32,9 @@ public:
 	static TASK& GetCurrentTask(){ return *GetPU().current; };
 	/// タスク終了
 	static void Kill(){
-		//タスク終了時にいきなりdeleteするとその時点で使っているスタックまで開放してしまうことになって都合が悪いため、delete待ち行列(grave)に投入し、墓守がdeleteするまでゾンビとする。また次のタスクでdeleteすると優先度を無視してdeleteが走るためこうしている。
+		///カーネルスタックは解放しない！というよりTASKは基本的に解放しないしカーネル空間はタスク終了後も放置して再利用する。解放するのはユーザ空間だけなので普通にカーネルモードで終了処理できる。終了したらタスクプールに対して「待ち」
 		PU& pu(GetPU());
-		IKEY key;
+		KEY<ILOCK> key;
 		grave.Add((*pu.current).qNode);
 		(*pu.current).priority = TASK::__pri_max;
 	};

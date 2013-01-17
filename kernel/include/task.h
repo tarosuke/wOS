@@ -1,5 +1,5 @@
 /************************************************************************ TASK
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
@@ -9,25 +9,34 @@
 #include <types.h>
 #include <config.h>
 #include <queue.h>
-#include <map.h>
 #include <cpu/task.h>
 #include <vector.h>
 #include <resource.h>
 
 
-class TASK : public CPUTASK{
+class TASK : private CPUTASK{
 	friend class PU;
+	// 再利用するためnew/deleteは使わない
+	void* operator new(munit);
+	void operator delete(void*);
 public:
+	/** 常数などの定義 */
 	enum PRIORITY{
 		/** 優先度
-		 * 値が小さいほうが優先度が高い
-		 * 新規タスク生成時には現在の優先度を限度として継承される */
+			* 値が小さいほうが優先度が高い
+			* 新規タスク生成時には現在の優先度を限度として継承される */
 		PRI_REALTIME,	//リアルタイム(ソフト／ハードは別に設定)
 		PRI_INTERRUPT,	//割り込みハンドラ
-		PRI_UI,		//ユーザインターフェイス(ボタンに反応するとか)
+		PRI_UI,		//ユーザインターフェイス
 		PRI_NORMAL,	//通常優先度
 		PRI_BACKGROUND,	//バックグラウンド処理用
 		__pri_max
+	};
+	enum WAKECODE{
+		/** 待ち終了理由 */
+		WC_FINE,			//正常終了
+		WC_TIMEUP,		//時間切れ
+		WC_QUEUE_DISCARDED,	//対象が消滅
 	};
 	union CAPABILITIES{
 		/** いわゆるCapability
@@ -42,27 +51,121 @@ public:
 		};
 		u32 raw;
 	};
-	enum REASON{
-		/** 処理終了理由 */
-		RS_FINE,	//正常終了
-		RS_PARAM,	//パラメタに問題がある
-		RS_CAPABILITY,	//タスクに権限がない
-		RS_PERMITION,	//ユーザに権限がない
-		RS_TIMEUP,	//時間切れ
-	};
+
+	/** タスクのキュー */
 	class TASKQUEUE : public MULTIQUEUE<TASK, __pri_max>{
 	public:
-		inline void Add(TASK& task){
-			if(task.priority < __pri_max){
-				MULTIQUEUE<TASK, __pri_max>::Add(task.priority, task.qNode);
-			}
-		};
-		inline void Insert(TASK& task){
-			if(task.priority < __pri_max){
-				MULTIQUEUE<TASK, __pri_max>::Insert(task.priority, task.qNode);
-			}
-		};
+		~TASKQUEUE();
+		void Add(TASK&);
+		void Insert(TASK&);
+		void Wakeup(WAKECODE wc = WC_FINE);	//TODO:先頭タスクを起床
 	};
+
+	/** 待ちにタスク切り替えを使うロック */
+	class LOCK{
+		template<class LOCK> friend class KEY;
+	public:
+		LOCK() : inUse(false){};
+	private:
+		typedef ::LOCK HARDLOCK;
+		TASK::TASKQUEUE q;
+		HARDLOCK lock;
+		bool inUse;
+		void Lock();
+		void Unlock();
+	};
+	typedef KEY<LOCK> key;
+
+	/** 待ちにタスク切り替えを使うロック(reader-writer) */
+	class RWLOCK{
+	public:
+		class READKEY{
+		public:
+			READKEY(RWLOCK& lock) : lock(lock){
+				lock.ReaderLock();
+			};
+			~READKEY(){
+				lock.ReaderUnlock();
+			};
+		private:
+			RWLOCK& lock;
+		};
+		class WRITEKEY{
+		public:
+			WRITEKEY(RWLOCK& lock) : lock(lock){
+				lock.WriterLock();
+			};
+			~WRITEKEY(){
+				lock.WriterUnlock();
+			};
+		private:
+			RWLOCK& lock;
+		};
+		RWLOCK() : readers(0), writing(false){};
+	private:
+		typedef ::LOCK HARDLOCK;
+		TASK::TASKQUEUE rq;
+		TASK::TASKQUEUE wq;
+		int readers;
+		bool writing;
+		HARDLOCK lock;
+		void ReaderLock();
+		void ReaderUnlock();
+		void WriterLock();
+		void WriterUnlock();
+	};
+
+	/// タスクの起動、終了(new/deleteではない)
+	static QUEUE<TASK> pool;	//再利用のためのプール
+	static bool Create(class MAP&);	//TODO:poolから取り出してみて、なければ新規作成
+	static void Dispose();		//TODO:優先度を下げ、ユーザ空間を開放してpoolに入る
+
+	/// 待ち
+	static WAKECODE Sleep(TASKQUEUE* target = 0, tunit uptime = TIME::INFINITE); //TODO:TUNITもUNITの子にする
+
+	/// TICK
+	static void Tick(tunit now){
+		cronQueue.Tick(now);
+	};
+private:
+	/// アイドルタスク生成(現在のコンテキストをこのタスクとする)
+	TASK(); //TODO:PUからしか呼ばれない
+
+	/** 時間待ちキュー */
+	static class CRONQUEUE : private QUEUE<TASK>{
+	public:
+		void Register(TASK&, tunit);
+		void Tick(tunit);
+	}cronQueue;
+
+	/// 起床
+	void Wakeup(WAKECODE wc = WC_FINE);	//TODO:WAKECODEを設定して起床(外からは呼べず、CRONQUEUEやTASKQUEUEなどのサブクラスから呼ばれる)。その際時間待ち、QUEUE待ちの両方が解除される
+
+
+
+
+
+	PRIORITY priority;	//優先度
+	NODE<TASK> qNode;		//待ちやレディキューのためのノード
+	NODE<TASK> cronNode;	//時間管理のためのキューノード
+	tunit uptime;		//時間切れ時刻
+
+
+
+	static const uint thisSizeIndex;
+};
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 
 	TASK(MAP&);		//マップを0から配置してタスクとする
 	void* operator new(munit);
@@ -111,9 +214,10 @@ private:
 	bool newbie;		//新規作成タスク(カーネルスタックが無効)
 
 	///// 以下はシステム全体の話
-	static const uint thisSizeIndex;
 };
 
 //TODO:SwitchSpace,RestoreSpaceなどの一時的メモリ空間切り替えなど。
+#endif
+
 #endif
 

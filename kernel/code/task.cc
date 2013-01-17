@@ -1,5 +1,5 @@
 /************************************************************************ TASK
- *	Copyright (C) 2011- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2011- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
@@ -12,6 +12,38 @@
 
 
 const uint TASK::thisSizeIndex(HEAP::GetBlockIndex(PAGESIZE));
+TASK::CRONQUEUE TASK::cronQueue;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
 
 
 /// 現在のコンテキストをタスクにする。アイドルタスクのためのタスク。
@@ -77,4 +109,4 @@ void TASK::WakeupByMessage(MESSAGE& m){
 TASK::~TASK(){
 	///TODO:ユーザライブラリ内でユーザ空間とリソース類を解放
 }
-
+#endif
