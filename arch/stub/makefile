@@ -6,4 +6,3 @@ gnuArch = stub
 base_ccopts =
 
 include ../../makefile.in
-include ../../arch/stub/loader/makefile.in

@@ -152,7 +152,11 @@ gccOptions = --target=$(gnuArch)-wOS-elf --prefix=$(toolPath)\
 binutilsName = binutils-$(binutilsVer)
 gccName = gcc-$(gccVer)
 
+ifeq ($(gnuArch),stub)
+prefix =
+else
 prefix = $(toolPath)/bin/$(gnuArch)-wOS-elf-
+endif
 
 gnutools: $(prefix)as $(prefix)gcc
 
