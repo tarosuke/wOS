@@ -34,7 +34,7 @@ public:
 	static void Kill(){
 		///カーネルスタックは解放しない！というよりTASKは基本的に解放しないしカーネル空間はタスク終了後も放置して再利用する。解放するのはユーザ空間だけなので普通にカーネルモードで終了処理できる。終了したらタスクプールに対して「待ち」
 		PU& pu(GetPU());
-		IKEY key;
+		KEY<ILOCK> key;
 		grave.Add((*pu.current).qNode);
 		(*pu.current).priority = TASK::__pri_max;
 	};

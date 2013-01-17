@@ -38,7 +38,7 @@ protected:
 		#endif
 	};
 	inline void IssueIPI(){
-		IKEY key();
+		KEY<ILOCK> key();
 #if CF_SMP
 		while(apic.body[0xc0] & 0x1000);
 		apic.body[0xc1] = cpuid << 24;
