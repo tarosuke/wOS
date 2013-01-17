@@ -6,5 +6,6 @@
 	configure: ARCHなアーキテクチャのターゲットをTARGETの名前で作成
 	confall: arch以下のディレクトリをターゲット名にしてでconfigureと同等の動作
 	todo: "TODO:"をソースツリーから探して表示
+	stub: stubターゲットをビルド(MI開発用)
 
 	基本的にはツリーを用意したら「make confall」、「make tools」でビルド準備が整う。
