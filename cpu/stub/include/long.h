@@ -1,10 +1,13 @@
 /*********************************************************** VERY LONG INTEGERs
- *	Copyright (C) 2012- project talos (http://talos-kernel.sf.net/)
+ *	Copyright (C) 2012- project wOS (https://github.com/tarosuke/wOS)
  *	check LICENSE.txt. If you don't have the file, mail us.
  */
 
 #ifndef _LONG_
 #define _LONG_
+
+
+#include <types.h>
 
 
 ///128bits整数
@@ -66,22 +69,7 @@ public:
 			v -= 8;
 		}
 		while(v--){
-			//1bitづつシフト
-#if CF_IA32
-			asm volatile(
-				"shr $1, %3;"
-				"rcr $1, %2;"
-				"rcr $1, %1;"
-				"rcr $1, %0;"
-				: "=Q"(v32[0]), "=Q"(v32[1]),
-					"=Q"(v32[2]), "=Q"(v32[3]));
-#endif
-#if CF_AMD64
-			asm volatile(
-				"shr $1, %1;"
-				"rcr $1, %0"
-				: "=Q"(v64[0]), "=Q"(v64[1]));
-#endif
+			//TODO:1bitづつシフト
 		}
 		return *this;
 	};
@@ -105,22 +93,7 @@ public:
 			v -= 8;
 		}
 		while(v--){
-			//1bitづつシフト
-#if CF_IA32
-			asm volatile(
-				"shl $1, %0;"
-				"rcl $1, %1;"
-				"rcl $1, %2;"
-				"rcl $1, %3;"
-				: "=Q"(v32[0]), "=Q"(v32[1]),
-				"=Q"(v32[2]), "=Q"(v32[3]));
-#endif
-#if CF_AMD64
-			asm volatile(
-				"shl $1, %0;"
-				"rcl $1, %1"
-				: "=Q"(v64[0]), "=Q"(v64[1]));
-#endif
+			//TODO:1bitづつシフト
 		}
 		return *this;
 	};
@@ -132,55 +105,15 @@ public:
 	};
 	//算術演算
 	const u128& operator+=(const u128& v){
-#if CF_IA32
-		asm volatile(
-			"add %4, %0;"
-			"adc %5, %1;"
-			"adc %6, %2;"
-			"adc %7, %3;"
-			: "=Q"(v32[0]), "=Q"(v32[1]),
-				"=Q"(v32[2]), "=Q"(v32[3])
-			: "g"(v.v32[0]), "g"(v.v32[1]),
-				"g"(v.v32[2]), "g"(v.v32[3]));
-#endif
-#if CF_AMD64
-		asm volatile(
-			"add %2, %0;"
-			"adc %3, %1"
-			: "=Q"(v64[0]), "=Q"(v64[1])
-			: "g"(v.v64[0]), "g"(v.v64[1]));
-#endif
 		return *this;
 	};
 	const u128& operator-=(const u128& v){
-#if CF_IA32
-		asm volatile(
-			"sub %4, %0;"
-			"sbb %5, %1;"
-			"sbb %6, %2;"
-			"sbb %7, %3;"
-			: "=Q"(v32[0]), "=Q"(v32[1]),
-				"=Q"(v32[2]), "=Q"(v32[3])
-			: "g"(v.v32[0]), "g"(v.v32[1]),
-				"g"(v.v32[2]), "g"(v.v32[3]));
-#endif
-#if CF_AMD64
-		asm volatile(
-			"sub %2, %0;"
-			"sbb %3, %1"
-			: "=Q"(v64[0]), "=Q"(v64[1])
-			: "g"(v.v64[0]), "g"(v.v64[1]));
-#endif
 		return *this;
 	};
 	u128 operator+(const u128& v){
-		u128 r(v);
-		r += *this;
 		return r;
 	};
 	u128 operator-(const u128& v){
-		u128 r(v);
-		r -= *this;
 		return r;
 	};
 	u128 operator*(u128 v){
@@ -211,22 +144,7 @@ public:
 	operator i32(){ return (i32)v32[0]; };
 	const i128& operator>>=(uint v){
 		while(v--){
-			//1bitづつシフト
-			#if CF_IA32
-			asm volatile(
-				"sar $1, %3;"
-				"rcr $1, %2;"
-				"rcr $1, %1;"
-				"rcr $1, %0;"
-				: "=Q"(v32[0]), "=Q"(v32[1]),
-					"=Q"(v32[2]), "=Q"(v32[3]));
-#endif
-#if CF_AMD64
-			asm volatile(
-				"sar $1, %1;"
-				"rcr $1, %0"
-				: "=Q"(v64[0]), "=Q"(v64[1]));
-#endif
+			//TODO:1bitづつシフト
 		}
 		return *this;
 	};

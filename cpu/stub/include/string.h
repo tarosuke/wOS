@@ -36,22 +36,11 @@ static __inline void* _memmove(void* d, void* s, unsigned long len){
 }
 
 static __inline void* _memset(void* d, uchar v, munit len){
-#if 1
 	uchar* dp = (uchar*)d;
 	while(len--){
 		*dp++ = v;
 	}
 	return dp;
-#else
-	asm volatile(
-		"mov %0, %%edi;"
-		"mov %1, %%al;"
-		"mov %2, %%ecx;"
-		"1: rep stosb;"
-		"test %%ecx, %%ecx; jnz 1b"
-		:: "m"(d), "g"(v), "g"(len) : "eax", "edi", "ecx");
-#endif
-	return (void*)((munit)d + len);
 }
 
 static __inline int _strcmp(const char* s0, const char* s1){

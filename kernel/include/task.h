@@ -9,12 +9,12 @@
 #include <types.h>
 #include <config.h>
 #include <queue.h>
-#include <cpu/task.h>
+#include <cpu.h>
 #include <vector.h>
 #include <resource.h>
 
 
-class TASK : private CPUTASK{
+class TASK : private CPU::TASK{
 	friend class PU;
 	// 再利用するためnew/deleteは使わない
 	void* operator new(munit);

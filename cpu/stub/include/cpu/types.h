@@ -1,5 +1,5 @@
 /********************************************************* IA32 DEPENDED TYPES
-	Copyright (C) 2006- project talos (http://talos-kernel.sf.net/)
+ C opyright (C) 2006- project wOS (https://github.com/tarosuke/wOS)*
 	check LICENSE.txt. If you don't have the file, mail us.
 */
 
@@ -14,40 +14,20 @@ typedef short i16;
 typedef unsigned short u16;
 typedef int i32;
 typedef unsigned int u32;
-#if CF_IA32
 typedef long long i64;
 typedef unsigned long long u64;
-#endif
-#if CF_AMD64
-typedef long i64;
-typedef unsigned long u64;
-#endif
 
 /// 128bits整数とか
 #include <cpu/long.h>
 
 /// position & size of virtual memory
-#if CF_IA32
-typedef long unsigned int munit;
-#endif
-#if CF_AMD64
 typedef u64 munit;
-#endif
 
 /// position & size of real memory
-#if CF_PAE || CF_AMD64
-typedef u64 runit;
-#else
-typedef u32 runit;
-#endif
+typedef munit punit;
 
 /// position & numbers of page
-#if CF_IA32
-typedef u32 punit;
-#endif
-#if CF_AMD64
-typedef u64 punit;
-#endif
+typedef munit runit;
 
 #define PAGESIZE (4096)
 

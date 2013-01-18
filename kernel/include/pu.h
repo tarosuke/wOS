@@ -8,7 +8,7 @@
 
 #include <config.h>
 #include <types.h>
-#include <cpu/cpu.h>
+#include <cpu.h>
 #include <task.h>
 #include <heap.h>
 #include <atomic.h>
